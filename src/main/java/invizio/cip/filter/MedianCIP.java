@@ -240,8 +240,8 @@ import net.imglib2.view.Views;
 			
 			
 			Img<FloatType> img = ImageJFunctions.wrap(imp);
-			List<Double> pixelSize = CIP.aslist( 0.2, 1 );
-			List<Double> radius = CIP.aslist( 2 , 2 );
+			List<Double> pixelSize = CIP.list( 0.2, 1 );
+			List<Double> radius = CIP.list( 2 , 2 );
 			String boundary = "min";
 			String shape = "rectangle";
 			

@@ -116,8 +116,8 @@ import net.imglib2.view.Views;
 			
 			
 			Img<FloatType> img = ImageJFunctions.wrap(imp);
-			List<Double> pixelSize = CIP.aslist( 1, 1 );
-			List<Double> radius = CIP.aslist( 3 , 3 );
+			List<Double> pixelSize = CIP.list( 1, 1 );
+			List<Double> radius = CIP.list( 3 , 3 );
 			String boundary = "same";
 			String shape = "rectangle";
 			String outputType = "same";

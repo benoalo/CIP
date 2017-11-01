@@ -156,7 +156,7 @@ import net.imglib2.view.Views;
 			float threshold = 100;
 			//Float[] pixelSize = new Float[] { 1f , 0.1f};
 			//Float pixelSize = 0.5f;
-			List<Double> pixelSize = CIP.aslist( 1, 0.5 );
+			List<Double> pixelSize = CIP.list( 1, 0.5 );
 			
 			CIP cip = new CIP();
 			cip.setContext( ij.getContext() );

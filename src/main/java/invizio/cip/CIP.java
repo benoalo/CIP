@@ -1015,7 +1015,7 @@ public class CIP extends AbstractNamespace{
     /////////////////////////////////////////////////////////
     
     // this way I only need to add list support in the input parsing
-    public static List<Double> aslist( double ... ds ) {
+    public static List<Double> list( double ... ds ) {
 		List<Double> list = new ArrayList<Double>();
 		for ( double value : ds ) {
 			list.add( value );

@@ -139,7 +139,7 @@ import net.imglib2.view.Views;
 			
 			@SuppressWarnings("unchecked")
 			RandomAccessibleInterval<UnsignedByteType> output = (RandomAccessibleInterval<UnsignedByteType>)
-									cip.slice( img , cip.aslist(2,3) , cip.aslist(1,2)  );
+									cip.slice( img , cip.list(2,3) , cip.list(1,2)  );
 					
 			//cip.create( cip.aslist(100, 50, 2) , 10, "double"  );
 			

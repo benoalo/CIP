@@ -173,8 +173,8 @@ import net.imglib2.util.Util;
 			float threshold = 100;
 			//Float[] pixelSize = new Float[] { 1f , 0.1f};
 			//Float pixelSize = 0.5f;
-			List<Double> pixelSize = CIP.aslist( 1, 1 );
-			List<Double> radius = CIP.aslist( 10 , 10 );
+			List<Double> pixelSize = CIP.list( 1, 1 );
+			List<Double> radius = CIP.list( 10 , 10 );
 			String boundary = "mirror";
 			
 			CIP cip = new CIP();
