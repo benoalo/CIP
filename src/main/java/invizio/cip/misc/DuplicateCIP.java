@@ -73,6 +73,8 @@ import net.imglib2.view.Views;
 
 			if ( origin == null ) {
 				origin = new Long[nDim];
+				for (int d=0; d<nDim; d++)
+					origin[d] = new Long(0) ;
 			}
 			
 			long[] min = new long[nDim];
@@ -155,8 +157,8 @@ import net.imglib2.view.Views;
 			ImageJ ij = new ImageJ();
 			ij.ui().showUI();
 			
-			//ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
-			ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs.tif");
+			ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
+			//ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs.tif");
 			Img<UnsignedByteType> img = ImageJFunctions.wrap(imp);
 			
 			//Dataset dataset = (Dataset) ij.io().open("C:/Users/Ben/workspace/testImages/blobs.tif");
@@ -169,7 +171,7 @@ import net.imglib2.view.Views;
 			
 			@SuppressWarnings("unchecked")
 			RandomAccessibleInterval<UnsignedByteType> output = (RandomAccessibleInterval<UnsignedByteType>)
-									cip.duplicate( img, cip.aslist(50,50), cip.aslist(150,150));
+									cip.duplicate( img);//, cip.aslist(50,50), cip.aslist(150,150));
 					
 			
 			String str = output==null ? "null" : output.toString();
