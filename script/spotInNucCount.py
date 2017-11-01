@@ -1,4 +1,4 @@
-#@Img img0
+#@Dataset img0
 
 #@CIP cip
 #@UIService ui
@@ -17,7 +17,7 @@ imgSpot = cip.tophat( img, 5 )
 imgSpot = cip.gauss( img, 1 )
 imgSpot = cip.maxima( imgSpot, 'h', 200 )
 
-# spot in nucleus
+# count spot in nucleus
 imgNucSpot = cip.mul(imgNuc, imgSpot)
 imgNucSpot = cip.label(imgNucSpot, 0.5 )
 
