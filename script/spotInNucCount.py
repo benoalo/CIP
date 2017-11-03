@@ -1,4 +1,4 @@
-#@Dataset img0
+#@Img img0
 
 #@CIP cip
 #@UIService ui
