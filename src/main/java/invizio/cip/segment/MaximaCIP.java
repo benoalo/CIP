@@ -11,12 +11,16 @@ import invizio.imgalgo.label.HMaxima;
 import invizio.imgalgo.label.Maxima;
 import invizio.imgalgo.label.MultiScaleMaxima;
 import invizio.imgalgo.label.WindowMaxima;
+
 import ij.IJ;
 import ij.ImagePlus;
+
 import invizio.cip.CIP;
+
 import net.imagej.ImageJ;
 import net.imagej.ops.AbstractOp;
 import net.imagej.ops.OpService;
+import net.imagej.ops.Op;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.stats.ComputeMinMax;
 import net.imglib2.img.Img;
@@ -39,8 +43,9 @@ import net.imglib2.type.numeric.real.FloatType;
 //  [x] integrate max search with anisotropic window when it is available
 
 
-@Plugin(type = CIP.MAXIMA.class, name=CIP.MAXIMA.NAME, headless = true)
-public class MaximaCIP  < T extends RealType<T> & NativeType< T > > extends AbstractOp implements CIP.MAXIMA{
+@Plugin(type = Op.class, name="MaximaCIP", headless = true)
+public class MaximaCIP  < T extends RealType<T> & NativeType< T > > extends AbstractOp
+{
 
 	
 	@Parameter (type = ItemIO.INPUT)

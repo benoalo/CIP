@@ -173,14 +173,9 @@ public class CIP extends AbstractNamespace{
 	 * 	Distance map construction interface											*
 	 ********************************************************************************/
 	
-	public interface DISTANCE extends Op {
-		// Note that the name and aliases are prepended with Namespace.getName
-		String NAME = "distance";
-		String ALIASES = "dist";
-	}
-
+	
 	// distance method
-	@OpMethod(op = invizio.cip.CIP.DISTANCE.class)
+	@OpMethod(op = invizio.cip.filter.DistanceCIP.class)
 	public Object distance(final Object... args) {
 		
 		
@@ -213,14 +208,9 @@ public class CIP extends AbstractNamespace{
 	 * 	Maxima detection interface													*
 	 ********************************************************************************/
 	
-	public interface MAXIMA extends Op {
-		// Note that the name and aliases are prepended with Namespace.getName
-		String NAME = "maxima";
-		String ALIASES = "max";
-	}
 	
 	// distance method
-	@OpMethod(op = invizio.cip.CIP.MAXIMA.class)
+	@OpMethod(op = invizio.cip.segment.MaximaCIP.class)
 	public Object maxima( final Object... args ) {
 		
 		Object results = null;
@@ -243,19 +233,12 @@ public class CIP extends AbstractNamespace{
 		
 		if ( params.parseInput( args ) )
 		{
-			results = ops().run( invizio.cip.CIP.MAXIMA.class, params.getParsedInput() );
+			results = ops().run( invizio.cip.segment.MaximaCIP.class, params.getParsedInput() );
 		}
 		return results; 
 	}
 	
-	
-    public void test( Object... args ){
-    
-    	for(Object object : args)
-            System.out.println( object.toString() );
-    
-    }
-	
+		
 
     
     

@@ -9,10 +9,13 @@ import org.scijava.plugin.Plugin;
 import invizio.imgalgo.util.RAI;
 import ij.IJ;
 import ij.ImagePlus;
+
 import invizio.cip.CIP;
+
 import net.imagej.ImageJ;
 import net.imagej.ops.AbstractOp;
 import net.imagej.ops.OpService;
+import net.imagej.ops.Op;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
@@ -32,7 +35,7 @@ import net.imglib2.view.Views;
  */
 
 	
-	@Plugin(type = CIP.DISTANCE.class, name=CIP.DISTANCE.NAME, headless = true)
+	@Plugin(type = Op.class, name="DistanceCIP", headless = true)
 	public class DistanceCIP  < T extends RealType<T> & NativeType< T > > extends AbstractOp 
 	{
 		@Parameter (type = ItemIO.INPUT)
