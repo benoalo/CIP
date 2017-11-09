@@ -124,10 +124,12 @@ import net.imglib2.view.Views;
 				
 				mask = (RandomAccessibleInterval<BitType>) op.threshold().apply(Views.iterable(inputCopy), T_threshold);
 			}
-			else
+			else if(inputImage.randomAccess().get() instanceof BitType)
 			{
-				mask = (RandomAccessibleInterval<BitType>) inputImage;
-			}
+				mask = (RandomAccessibleInterval) inputImage;
+			}else{
+                throw new IllegalArgumentException("unsupported image type" + inputImage.randomAccess().get());
+            }
 			
 			// build a distance map
 			if( nDim==1)
