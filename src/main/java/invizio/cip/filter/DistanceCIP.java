@@ -22,6 +22,7 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BitType;
+import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -36,7 +37,7 @@ import net.imglib2.view.Views;
 
 	
 	@Plugin(type = Op.class, name="DistanceCIP", headless = true)
-	public class DistanceCIP  < T extends RealType<T> & NativeType< T > > extends AbstractOp 
+	public class DistanceCIP  < T extends RealType<T> & NativeType< T >, B extends BooleanType<B> > extends AbstractOp 
 	{
 		@Parameter (type = ItemIO.INPUT)
 		private RandomAccessibleInterval<T> inputImage;
@@ -110,7 +111,7 @@ import net.imglib2.view.Views;
 				//TODO: Warning! to many elements in pixelSize, only the nDim first will be used 
 			}
 			
-			RandomAccessibleInterval<BitType> mask;
+			RandomAccessibleInterval<B> mask;
 			
 			if( imageType.equals("numeric") )
 			{
@@ -122,11 +123,11 @@ import net.imglib2.view.Views;
 				T_threshold.setReal( threshold );
 				
 				
-				mask = (RandomAccessibleInterval<BitType>) op.threshold().apply(Views.iterable(inputCopy), T_threshold);
+				mask = (RandomAccessibleInterval<B>) op.threshold().apply(Views.iterable(inputCopy), T_threshold);
 			}
 			else
 			{
-				mask = (RandomAccessibleInterval<BitType>) inputImage;
+				mask = (RandomAccessibleInterval<B>) inputImage;
 			}
 			
 			// build a distance map
