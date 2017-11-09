@@ -1,9 +1,12 @@
 package invizio.cip;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.ojalgo.array.ArrayUtils;
 
 import net.imglib2.Interval;
 import net.imglib2.Positionable;
@@ -59,10 +62,25 @@ public class RAI_CIP<T> implements RandomAccessibleInterval<T> {
 		return axesDim.get(name);
 	}
 	
+	
+	public List<String> axes(){
+		List<String> axes2 = new ArrayList<String>();
+		axes2.addAll( axes );
+		return axes2;
+	}
+	
+	
 	public String axes(int d) {
 		return axes.get(d);
 	}
 
+	
+	public double[] spacing() {
+		double[] spacing2 = ArrayUtils.copyOf( spacing );
+		return spacing2;
+	}
+	
+	
 	public double spacing(int d) {
 		return spacing[d];
 	}

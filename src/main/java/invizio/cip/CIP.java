@@ -181,14 +181,21 @@ public class CIP extends AbstractNamespace{
 		
 		Object results = null;
 		
-		FunctionParameters2 paramsDist = new FunctionParameters2("Distance");
-		paramsDist.addRequired("inputImage", 	Type.image 	);
-		paramsDist.addOptional("threshold", 	Type.scalar , 		null	);
-		paramsDist.addOptional("pixelSize", 	Type.numeric , 		1f		);
+		FunctionParameters2 params = new FunctionParameters2("Distance");
+		params.addRequired("inputImage", 	Type.image 	);
+		params.addOptional("threshold", 	Type.scalar , 		null	);
+		params.addOptional("pixelSize", 	Type.numeric , 		1f		);
 		
-		if ( paramsDist.parseInput( args ) )
+		if ( params.parseInput( args ) )
 		{
-			results = ops().run(invizio.cip.filter.DistanceCIP.class, paramsDist.getParsedInput() );
+			// convert image to RAI_CIP 
+			cipService.toRAI_CIP( params.get("inputImage") ); // similar as toImglib2Image but also collect spacing, axes name
+			
+			results = ops().run(invizio.cip.filter.DistanceCIP.class, params.getParsedInput() );
+			
+			// convert result to RAI_CIP, with the spacing and Axes of inputImage;
+			if( results != null )
+				results = cipService.toRAI_CIP(results, params.get("inputImage") );
 		}
 		return results; 
 	}
@@ -988,8 +995,8 @@ public class CIP extends AbstractNamespace{
     }
 
     
- 
-
+    // functions to collect luts, spacing, axes names
+    
     
     
     

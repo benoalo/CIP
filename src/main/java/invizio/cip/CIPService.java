@@ -1,8 +1,10 @@
 package invizio.cip;
 
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -486,4 +488,90 @@ public class CIPService extends AbstractService implements ImageJService {
   
   
   
+	
+	
+	public <T extends RealType<T> > void toRAI_CIP(DefaultParameter2 parameter)
+	{
+		Object input = parameter.value;
+		
+		if (	input instanceof RAI_CIP)
+		{ 
+			// do nothing;
+		}
+		
+		else if (	input instanceof RandomAccessibleInterval )
+		{ 
+			parameter.value = new RAI_CIP<T>( (RandomAccessibleInterval<T>) input );
+		}
+		
+		else if (	input instanceof Dataset )
+		{
+			Dataset dataset = (Dataset) input;
+			
+			int nDim = dataset.numDimensions();
+			double[] spacing = new double[nDim];
+			List<String> axes = new ArrayList<String>();
+			for(int d=0; d<nDim; d++){
+				axes.add( dataset.axis(d).type().getLabel() );
+				spacing[d] = dataset.axis(d).calibratedValue(1) - dataset.axis(d).calibratedValue(0); 
+			}
+			
+			Img<T> img = (Img<T>) convertService.convert( dataset , Img.class );
+			parameter.value = new RAI_CIP<T>( img , spacing , axes );
+			
+		}
+		
+		else if (	input instanceof ImagePlus )
+		{
+			ImagePlus imp = (ImagePlus) input;
+			Img<T> img = (Img<T>) convertService.convert( imp , Img.class );
+			
+			int[] dims = imp.getDimensions();
+			int currDim=-1;
+			String[] impAxes = new String[] {"X","Y","C","Z","T"}; 
+			double[] impSpacing = new double[5];
+			impSpacing[0] = imp.getCalibration().pixelWidth;
+			impSpacing[1] = imp.getCalibration().pixelHeight;
+			impSpacing[2] = 1;
+			impSpacing[3] = imp.getCalibration().pixelDepth;
+			impSpacing[4] = imp.getCalibration().frameInterval;
+			
+			double[] spacing = new double[img.numDimensions()];
+			List<String> axes = new ArrayList<String>();
+
+			for( int d=0; d<5; d++ ) {
+				int val = dims[d];
+				if( val > 1 ) {
+					currDim++;
+					axes.add( impAxes[d]);
+					spacing[currDim] = impSpacing[d];
+				}
+			}
+			parameter.value = new RAI_CIP<T>( img , spacing , axes );
+		
+		}
+		
+		else {
+			System.err.println("Unknown image type:" + input.getClass().getName() );
+		}
+		
+		return;
+	}
+	
+	
+	
+	public <T extends RealType<T> > Object toRAI_CIP( Object result, DefaultParameter2 parameter)
+	{
+		RAI_CIP<T> outputCIP = null;
+		
+		if (	result instanceof RandomAccessibleInterval )
+		{
+			RAI_CIP<?> input = (RAI_CIP<?>) parameter.value;
+			RandomAccessibleInterval<T> output = (RandomAccessibleInterval<T>) result;
+			outputCIP = new RAI_CIP<T>( output , input.spacing() , input.axes() );  
+		}
+		
+		return outputCIP;
+	}
+	
 }
