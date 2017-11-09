@@ -23,6 +23,7 @@ import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 
 
@@ -157,9 +158,8 @@ import net.imglib2.view.Views;
 			ImageJ ij = new ImageJ();
 			ij.ui().showUI();
 			
-			ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
-			//ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs.tif");
-			Img<UnsignedByteType> img = ImageJFunctions.wrap(imp);
+			ImagePlus imp = IJ.openImage(	CIP.class.getResource( "/blobs32.tif" ).getFile()	);
+			Img<FloatType> img = ImageJFunctions.wrap(imp);
 			
 			//Dataset dataset = (Dataset) ij.io().open("C:/Users/Ben/workspace/testImages/blobs.tif");
 			//Img<?> img2 = dataset.getImgPlus().getImg(); 
@@ -170,7 +170,7 @@ import net.imglib2.view.Views;
 			cip.setEnvironment( ij.op() );
 			
 			@SuppressWarnings("unchecked")
-			RandomAccessibleInterval<UnsignedByteType> output = (RandomAccessibleInterval<UnsignedByteType>)
+			RandomAccessibleInterval<FloatType> output = (RandomAccessibleInterval<FloatType>)
 									cip.duplicate( img);//, cip.aslist(50,50), cip.aslist(150,150));
 					
 			

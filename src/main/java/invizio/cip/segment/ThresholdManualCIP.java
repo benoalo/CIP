@@ -79,8 +79,7 @@ public class ThresholdManualCIP < T extends RealType<T> & NativeType<T>> extends
 		ImageJ ij = new ImageJ();
 		ij.ui().showUI();
 		
-		//ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
-		ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs32.tif");
+		ImagePlus imp = IJ.openImage(	CIP.class.getResource( "/blobs32.tif" ).getFile()	);
 		Img<FloatType> img = ImageJFunctions.wrap(imp);
 		float threshold = 150;
 		

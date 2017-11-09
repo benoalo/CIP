@@ -102,8 +102,7 @@ import net.imglib2.type.numeric.real.FloatType;
 			ImageJ ij = new ImageJ();
 			ij.ui().showUI();
 			
-			ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
-			//ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs32.tif");
+			ImagePlus imp = IJ.openImage(	CIP.class.getResource( "/blobs32.tif" ).getFile()	);
 			ij.ui().show(imp);
 			
 			
@@ -118,7 +117,7 @@ import net.imglib2.type.numeric.real.FloatType;
 			cip.setEnvironment( ij.op() );
 			@SuppressWarnings("unchecked")
 			RandomAccessibleInterval<IntType> distMap = (RandomAccessibleInterval<IntType>)
-						cip.distance(img, threshold, CIP.asimg( 1, 0.5)  );
+						cip.distance(img, threshold, CIP.list( 1, 0.5)  );
 			
 			String str = distMap==null ? "null" : distMap.toString();
 			

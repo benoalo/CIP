@@ -262,8 +262,7 @@ import net.imglib2.view.Views;
 			ImageJ ij = new ImageJ();
 			ij.ui().showUI();
 			
-			//ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
-			ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/mitosis_t1.tif");
+			ImagePlus imp = IJ.openImage(	CIP.class.getResource( "/mitosis_t1.tif" ).getFile()	);
 			ij.ui().show(imp);
 			
 			

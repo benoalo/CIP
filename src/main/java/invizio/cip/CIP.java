@@ -854,7 +854,7 @@ public class CIP extends AbstractNamespace{
     
     
     
-    @OpMethod(op = invizio.cip.misc.ProjectCIP.class)
+    @OpMethod(op = invizio.cip.misc.SliceCIP.class)
     public Object slice( final Object... args ) {
    		
    		Object results = null;
@@ -867,7 +867,7 @@ public class CIP extends AbstractNamespace{
 		
 		if ( params.parseInput( args ) )
 		{
-			results = ops().run( invizio.cip.misc.ProjectCIP.class , params.getParsedInput() );
+			results = ops().run( invizio.cip.misc.SliceCIP.class , params.getParsedInput() );
 		}
 		else 
 		{

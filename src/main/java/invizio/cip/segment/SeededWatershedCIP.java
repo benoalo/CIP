@@ -104,7 +104,7 @@ public class SeededWatershedCIP < T extends RealType<T> & NativeType<T>, U exten
 		ImageJ ij = new ImageJ();
 		ij.ui().showUI();
 		
-		ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
+		ImagePlus imp = IJ.openImage(	CIP.class.getResource( "/blobs32.tif" ).getFile()	);
 		ij.ui().show(imp);
 		
 		Img<FloatType> img = ImageJFunctions.wrap(imp);

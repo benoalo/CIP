@@ -168,8 +168,7 @@ public class ThresholdAutoCIP < T extends RealType<T> & NativeType<T>> extends A
 		ImageJ ij = new ImageJ();
 		ij.ui().showUI();
 		
-		//ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
-		ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs32.tif");
+		ImagePlus imp = IJ.openImage(	CIP.class.getResource( "/blobs32.tif" ).getFile()	);
 		Img<FloatType> img = ImageJFunctions.wrap(imp);
 		
 		CIP cip = new CIP();
@@ -177,7 +176,7 @@ public class ThresholdAutoCIP < T extends RealType<T> & NativeType<T>> extends A
 		cip.setEnvironment( ij.op() );
 		
 		
-		RandomAccessibleInterval<BoolType> labelMap = (RandomAccessibleInterval<BoolType>) cip.threshold( img , "Otsuzxcvz" );
+		RandomAccessibleInterval<BoolType> labelMap = (RandomAccessibleInterval<BoolType>) cip.threshold( img , "Otsu" );
 		System.out.println( "mask : " + labelMap );
 
 //		RandomAccessibleInterval<BoolType> labelMap2 = (RandomAccessibleInterval<BoolType>) cip.threshold( img , "huang", "image" );
