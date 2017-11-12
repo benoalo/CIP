@@ -1,42 +1,24 @@
 package invizio.cip.misc;
 
 
+import java.io.IOException;
+
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-import ij.IJ;
-import ij.ImagePlus;
 import invizio.cip.CIP;
 import invizio.cip.MetadataCIP;
 import invizio.cip.RAI_CIP;
+import net.imagej.Dataset;
 import net.imagej.ImageJ;
 
 import net.imagej.ops.AbstractOp;
 import net.imagej.ops.OpService;
 import net.imagej.ops.Op;
-import net.imglib2.Dimensions;
-import net.imglib2.FinalDimensions;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.Img;
-import net.imglib2.img.ImgFactory;
-import net.imglib2.img.ImgView;
-import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.ByteType;
-import net.imglib2.type.numeric.integer.IntType;
-import net.imglib2.type.numeric.integer.LongType;
-import net.imglib2.type.numeric.integer.ShortType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.type.numeric.integer.UnsignedIntType;
-import net.imglib2.type.numeric.integer.UnsignedLongType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.numeric.real.DoubleType;
-import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
 
@@ -142,26 +124,28 @@ import net.imglib2.view.Views;
 
 		
 		
-		public static void main(final String... args)
+		public static void main(final String... args) throws IOException
 		{
 			
 			ImageJ ij = new ImageJ();
 			ij.ui().showUI();
 			
 			//ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
-			ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/mitosis_t1.tif");
+			//ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/mitosis_t1.tif");
+			Dataset imp = (Dataset) ij.io().open("C:/Users/Ben/workspace/testImages/mitosis_t1.tif");
+			
 			ij.ui().show(imp);
 			
 			
-			Img<UnsignedByteType> img = ImageJFunctions.wrap(imp);
+			//Img<UnsignedByteType> img = ImageJFunctions.wrap(imp);
 			
 			CIP cip = new CIP();
 			cip.setContext( ij.getContext() );
 			cip.setEnvironment( ij.op() );
 			
 			@SuppressWarnings("unchecked")
-			RandomAccessibleInterval<UnsignedByteType> output = (RandomAccessibleInterval<UnsignedByteType>)
-									cip.slice( img , cip.list(2,3) , cip.list(1,2)  );
+			RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>)
+									cip.slice( imp , cip.list(2,3) , cip.list(1,2)  );
 					
 			//cip.create( cip.aslist(100, 50, 2) , 10, "double"  );
 			

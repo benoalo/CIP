@@ -523,7 +523,8 @@ public class CIPService extends AbstractService implements ImageJService {
 		else if (	input instanceof ImagePlus )
 		{
 			ImagePlus imp = (ImagePlus) input;
-			rai = (Img<T>) convertService.convert( imp , Img.class );
+			Dataset dataset = (Dataset) convertService.convert( imp , Dataset.class );
+			rai = (Img<T>) dataset.getImgPlus().getImg();
 		}
 		else
 		{
