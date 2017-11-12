@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.ojalgo.array.ArrayUtils;
 
+import ij.process.LUT;
 import net.imglib2.Interval;
 import net.imglib2.Positionable;
 import net.imglib2.RandomAccess;
@@ -20,6 +21,9 @@ public class RAI_CIP<T> implements RandomAccessibleInterval<T> {
 	double[] spacing;
 	List<String> axes;
 	Map<String, Integer> axesDim;
+	List<LUT> luts;
+	List<String> axesUnit;
+	
 	
 	//String[] defaultAxesName = new String[] {"D0","D1","D2","D3","D4","D5","D6","D7","D8","D9"};
 	
@@ -31,6 +35,8 @@ public class RAI_CIP<T> implements RandomAccessibleInterval<T> {
 		this.spacing = new double[nDim];
 		this.axes = new ArrayList<String>();
 		axesDim = new HashMap<String,Integer>();
+		axesUnit = new ArrayList<String>();
+		luts = null;
 		
 		for(int d=0; d<nDim; d++ )
 		{
@@ -38,16 +44,19 @@ public class RAI_CIP<T> implements RandomAccessibleInterval<T> {
 			spacing[d] = 1;
 			axes.add(axisName);
 			axesDim.put(axisName, d);
+			axesUnit.add(null);
 		}
 			
 	}
 	
 	
-	RAI_CIP( RandomAccessibleInterval<T> rai, double[] spacing, List<String> axes )
+	RAI_CIP( RandomAccessibleInterval<T> rai, double[] spacing, List<String> axesName, List<String> axesUnit, List<LUT> luts)
 	{
 		this.rai = rai;
 		this.spacing = spacing;
-		this.axes = axes;
+		this.axes = axesName;
+		this.axesUnit = axesUnit;
+		this.luts = luts;
 		
 		axesDim = new HashMap<String,Integer>();
 		int count = 0;
@@ -58,20 +67,20 @@ public class RAI_CIP<T> implements RandomAccessibleInterval<T> {
 			
 	}
 	
+		
+	
 	public int axesDim(String name) {
 		return axesDim.get(name);
 	}
 	
 	
 	public List<String> axes(){
-		List<String> axes2 = new ArrayList<String>();
-		axes2.addAll( axes );
-		return axes2;
+		return copy( axes );
 	}
 	
 	
 	public String axes(int d) {
-		return axes.get(d);
+		return new String( axes.get(d) );
 	}
 
 	
@@ -87,6 +96,37 @@ public class RAI_CIP<T> implements RandomAccessibleInterval<T> {
 
 	public double spacing(String axisName) {
 		return spacing[axesDim.get(axisName)];
+	}
+	
+
+	public String unit(int d){
+		return new String( axesUnit.get(d) );
+	}
+
+	public List<String> unit(){
+		return copy( axesUnit );
+	}
+	
+
+	public LUT lut(int d){
+		return luts.get(d); // TODO: clone before return
+	}
+
+	public List<LUT> lut(){
+		return luts; // todo: clone
+	}
+
+	
+	
+	public static List<String> copy( List<String> in){
+		
+		if ( in==null )
+			return null;
+		
+		List<String> out = new ArrayList<String>();
+		for(String str: in )
+			out.add( str==null ? null : new String( str ) );
+		return out;
 	}
 	
 	

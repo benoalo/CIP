@@ -149,10 +149,12 @@ public class CIP extends AbstractNamespace{
 		
 		if ( paramsHWS.parseInput( args ) )
 		{
+			cipService.toRaiCIP( paramsHWS.get("inputImage") );
 			results = ops().run(invizio.cip.segment.HWatershedCIP.class, paramsHWS.getParsedInput() );
 		}
 		else if ( paramsSeededWS.parseInput( args ) )
 		{
+			cipService.toRaiCIP( paramsSeededWS.get("inputImage") );
 			results = ops().run(invizio.cip.segment.SeededWatershedCIP.class, paramsSeededWS.getParsedInput() );
 		}
 		else
@@ -189,13 +191,13 @@ public class CIP extends AbstractNamespace{
 		if ( params.parseInput( args ) )
 		{
 			// convert image to RAI_CIP 
-			cipService.toRAI_CIP( params.get("inputImage") ); // similar as toImglib2Image but also collect spacing, axes name
+			cipService.toRaiCIP( params.get("inputImage") ); // similar as toImglib2Image but also collect spacing, axes name
 			
 			results = ops().run(invizio.cip.filter.DistanceCIP.class, params.getParsedInput() );
 			
 			// convert result to RAI_CIP, with the spacing and Axes of inputImage;
 			if( results != null )
-				results = cipService.toRAI_CIP(results, params.get("inputImage") );
+				results = cipService.toRaiCIP(results, params.get("inputImage") );
 		}
 		return results; 
 	}
@@ -240,6 +242,7 @@ public class CIP extends AbstractNamespace{
 		
 		if ( params.parseInput( args ) )
 		{
+			cipService.toRaiCIP( params.get("inputImage") );
 			results = ops().run( invizio.cip.segment.MaximaCIP.class, params.getParsedInput() );
 		}
 		return results; 
@@ -271,6 +274,7 @@ public class CIP extends AbstractNamespace{
 		
 		if ( params.parseInput( args ) )
 		{
+			cipService.toRaiCIP( params.get("inputImage") );
 			results = ops().run( invizio.cip.segment.LabelCIP.class, params.getParsedInput() );
 		}
 		return results; 
@@ -310,10 +314,12 @@ public class CIP extends AbstractNamespace{
 		
 		if ( params1.parseInput( args ) )
 		{
+			cipService.toRaiCIP( params1.get("inputImage") );
 			results = ops().run( invizio.cip.segment.ThresholdManualCIP.class, params1.getParsedInput() );
 		}
 		else if ( params2.parseInput( args ) )
 		{
+			cipService.toRaiCIP( params2.get("inputImage") );
 			List<Object> resultsTemp = (List<Object>) ops().run( invizio.cip.segment.ThresholdAutoCIP.class, params2.getParsedInput() );
 			
 			
@@ -362,6 +368,7 @@ public class CIP extends AbstractNamespace{
    		
    		if ( params.parseInput( args ) )
    		{
+   			cipService.toRaiCIP( params.get("inputImage") );
    			results = ops().run( invizio.cip.filter.GaussCIP.class, params.getParsedInput() );
    		}
    		return results; 
@@ -384,6 +391,7 @@ public class CIP extends AbstractNamespace{
  		
  		if ( params.parseInput( args ) )
  		{
+ 			cipService.toRaiCIP( params.get("inputImage") );
  			results = ops().run( invizio.cip.filter.MedianCIP.class, params.getParsedInput() );
  		}
  		return results; 
@@ -402,6 +410,7 @@ public class CIP extends AbstractNamespace{
  		
  		if ( params.parseInput( args ) )
  		{
+ 			cipService.toRaiCIP( params.get("inputImage") );
  			results = ops().run( invizio.cip.filter.InvertCIP.class, params.getParsedInput() );
  		}
  		return results; 
@@ -434,6 +443,7 @@ public class CIP extends AbstractNamespace{
   		
   		if ( params.parseInput( args ) )
   		{
+  			cipService.toRaiCIP( params.get("inputImage") );
   			results = ops().run( invizio.cip.filter.DilationCIP.class, params.getParsedInput() );
   		}
   		return results; 
@@ -458,6 +468,7 @@ public class CIP extends AbstractNamespace{
   		
   		if ( params.parseInput( args ) )
   		{
+  			cipService.toRaiCIP( params.get("inputImage") );
   			results = ops().run( invizio.cip.filter.ErosionCIP.class, params.getParsedInput() );
   		}
   		return results; 
@@ -481,6 +492,7 @@ public class CIP extends AbstractNamespace{
   		
   		if ( params.parseInput( args ) )
   		{
+  			cipService.toRaiCIP( params.get("inputImage") );
   			results = ops().run( invizio.cip.filter.OpeningCIP.class, params.getParsedInput() );
   		}
   		return results; 
@@ -506,6 +518,7 @@ public class CIP extends AbstractNamespace{
   		
   		if ( params.parseInput( args ) )
   		{
+  			cipService.toRaiCIP( params.get("inputImage") );
   			results = ops().run( invizio.cip.filter.ClosingCIP.class, params.getParsedInput() );
   		}
   		return results; 
@@ -530,6 +543,7 @@ public class CIP extends AbstractNamespace{
   		
   		if ( params.parseInput( args ) )
   		{
+  			cipService.toRaiCIP( params.get("inputImage") );
   			results = ops().run( invizio.cip.filter.TophatCIP.class, params.getParsedInput() );
   		}
   		return results; 
@@ -792,7 +806,8 @@ public class CIP extends AbstractNamespace{
 		String opBaseName = "Math1OperationCIP";
   		if ( paramsImage.parseInput( args ) )
   		{
-  			parametersFinal[1] = paramsImage.get("param1").value;
+  			cipService.toRaiCIP( paramsImage.get("param1") );
+  			parametersFinal[1] = paramsImage.get("param1").value ;
   			opName = "Image_"+opBaseName;
   		}
   		else if (  paramsNumber.parseInput( args )   )
@@ -832,7 +847,7 @@ public class CIP extends AbstractNamespace{
    		Object[] paramsFinal=null;
   		if ( params1.parseInput( args ) )
   		{
-  			cipService.toImglib2Image( params1.get("inputImage") );
+  			cipService.toRaiCIP( params1.get("inputImage") );
   			
   			if ( params1.get("type").value == null ){
   				// set the type to same type as the image
@@ -874,6 +889,7 @@ public class CIP extends AbstractNamespace{
 		
 		if ( params.parseInput( args ) )
 		{
+			cipService.toRaiCIP( params.get("inputImage") );
 			results = ops().run( invizio.cip.misc.ProjectCIP.class , params.getParsedInput() );
 		}
 		else 
@@ -898,6 +914,7 @@ public class CIP extends AbstractNamespace{
 
 		if ( params.parseInput( args ) )
 		{
+			cipService.toRaiCIP( params.get("inputImage") );
 			results = ops().run( invizio.cip.misc.DuplicateCIP.class , params.getParsedInput() );
 		}
 		else 
@@ -924,6 +941,7 @@ public class CIP extends AbstractNamespace{
 		
 		if ( params.parseInput( args ) )
 		{
+			cipService.toRaiCIP( params.get("inputImage") );
 			List<Object> resultsTemp = (List<Object>) ops().run( invizio.cip.misc.Project2CIP.class , params.getParsedInput() );
 			
 			///////////////////////////////////////////////////////////////////////////////
@@ -965,8 +983,8 @@ public class CIP extends AbstractNamespace{
 		Long[] origin = null;
 		if ( params.parseInput( args ) )
 		{	
-			DefaultParameter2 image = params.get("InputImage");
-			cipService.toImglib2Image( image );
+			DefaultParameter2 image = params.get("inputImage");
+			cipService.toRaiCIP( image );
 			Interval interval = (Interval) image;
 			origin = new Long[interval.numDimensions()];
 			for(int d=0; d< interval.numDimensions(); d++)
@@ -984,8 +1002,8 @@ public class CIP extends AbstractNamespace{
 		Long[] size = null;
 		if ( params.parseInput( args ) )
 		{	
-			DefaultParameter2 image = params.get("InputImage");
-			cipService.toImglib2Image( image );
+			DefaultParameter2 image = params.get("inputImage");
+			cipService.toRaiCIP( image );
 			Interval interval = (Interval) image;
 			size = new Long[interval.numDimensions()];
 			for(int d=0; d< interval.numDimensions(); d++)
@@ -996,8 +1014,17 @@ public class CIP extends AbstractNamespace{
 
     
     // functions to collect luts, spacing, axes names
+    public double[] spacing( Object input ) {
+    	return cipService.spacing( input );
+    }
     
-    
+    public List<String> unit( Object input ) {
+    	return cipService.unit( input );
+    }
+
+    public List<String> axes( Object input ) {
+    	return cipService.axes( input );
+    }
     
     
     /////////////////////////////////////////////////////////

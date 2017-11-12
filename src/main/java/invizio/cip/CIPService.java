@@ -16,6 +16,8 @@ import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 
 import ij.ImagePlus;
+import ij.measure.Calibration;
+import ij.process.LUT;
 import invizio.cip.parameters.DefaultParameter2;
 import net.imagej.Dataset;
 import net.imagej.ImageJService;
@@ -158,7 +160,10 @@ public class CIPService extends AbstractService implements ImageJService {
 	public void toImglib2Object( DefaultParameter2 parameter )
 	{
 		if(parameter.type == DefaultParameter2.Type.image )
-			toImglib2Image( parameter );
+		{
+			//toImglib2Image( parameter );
+			toRaiCIP( parameter );
+		}
 		else if(parameter.type == DefaultParameter2.Type.scalar )
 			toImglib2Scalar( parameter );
 		
@@ -288,21 +293,23 @@ public class CIPService extends AbstractService implements ImageJService {
 	
 	
 	@SuppressWarnings("unchecked")
-	public <T extends RealType<T>> void updateImgType( DefaultParameter2 parameter , String type)
+	private <T extends RealType<T>, U extends RealType<U>> void updateImgType( DefaultParameter2 parameter , String type)
 	{
+		RAI_CIP<T> input0 = (RAI_CIP<T>) parameter.value;
+		
 		IterableInterval<T> input = null;
-		if( parameter.value instanceof RandomAccessibleInterval )
-		{
-			input = Views.iterable(  (RandomAccessibleInterval<T>) parameter.value  ) ;
-		}
-		else if( parameter.value instanceof IterableInterval )
-		{
-			input = (IterableInterval<T>) parameter.value;
-		}
-		else
-		{
-			System.err.println("CIP: " + parameter.value.getClass().getSimpleName() + " is not convertible, Img, IterableInterval or RandomAccessibleInterval.");
-		}
+		//if( parameter.value instanceof RandomAccessibleInterval )
+		//{
+		input = Views.iterable(  input0  ) ;
+		//}
+		//else if( parameter.value instanceof IterableInterval )
+		//{
+		//	input = (IterableInterval<T>) parameter.value;
+		//}
+		//else
+		//{
+		//	System.err.println("CIP: " + parameter.value.getClass().getSimpleName() + " is not convertible, use Img, IterableInterval or RandomAccessibleInterval.");
+		//}
 		
 		switch( type ) {
 		case "BitType":
@@ -353,6 +360,10 @@ public class CIPService extends AbstractService implements ImageJService {
 			parameter.value = op.convert().float64( input );
 			break;			
 		}
+		
+		RandomAccessibleInterval<U> rai = (RandomAccessibleInterval<U>) parameter.value;
+		parameter.value = new RAI_CIP<U>( rai, input0.spacing(), input0.axes(), input0.unit(), input0.lut()  );
+		
 	}
 	
 	
@@ -487,80 +498,42 @@ public class CIPService extends AbstractService implements ImageJService {
 	}
   
   
-  
 	
-	
-	public <T extends RealType<T> > void toRAI_CIP(DefaultParameter2 parameter)
+	public <T extends RealType<T> > void toRaiCIP(DefaultParameter2 parameter)
 	{
 		Object input = parameter.value;
-		
+		RandomAccessibleInterval<T> rai = null;
 		if (	input instanceof RAI_CIP)
 		{ 
-			// do nothing;
+			return;
 		}
-		
 		else if (	input instanceof RandomAccessibleInterval )
 		{ 
-			parameter.value = new RAI_CIP<T>( (RandomAccessibleInterval<T>) input );
+			rai = (RandomAccessibleInterval<T>) input;
 		}
-		
 		else if (	input instanceof Dataset )
 		{
 			Dataset dataset = (Dataset) input;
-			
-			int nDim = dataset.numDimensions();
-			double[] spacing = new double[nDim];
-			List<String> axes = new ArrayList<String>();
-			for(int d=0; d<nDim; d++){
-				axes.add( dataset.axis(d).type().getLabel() );
-				spacing[d] = dataset.axis(d).calibratedValue(1) - dataset.axis(d).calibratedValue(0); 
-			}
-			
-			Img<T> img = (Img<T>) convertService.convert( dataset , Img.class );
-			parameter.value = new RAI_CIP<T>( img , spacing , axes );
-			
+			rai = (Img<T>) convertService.convert( dataset , Img.class );
 		}
-		
 		else if (	input instanceof ImagePlus )
 		{
 			ImagePlus imp = (ImagePlus) input;
-			Img<T> img = (Img<T>) convertService.convert( imp , Img.class );
-			
-			int[] dims = imp.getDimensions();
-			int currDim=-1;
-			String[] impAxes = new String[] {"X","Y","C","Z","T"}; 
-			double[] impSpacing = new double[5];
-			impSpacing[0] = imp.getCalibration().pixelWidth;
-			impSpacing[1] = imp.getCalibration().pixelHeight;
-			impSpacing[2] = 1;
-			impSpacing[3] = imp.getCalibration().pixelDepth;
-			impSpacing[4] = imp.getCalibration().frameInterval;
-			
-			double[] spacing = new double[img.numDimensions()];
-			List<String> axes = new ArrayList<String>();
-
-			for( int d=0; d<5; d++ ) {
-				int val = dims[d];
-				if( val > 1 ) {
-					currDim++;
-					axes.add( impAxes[d]);
-					spacing[currDim] = impSpacing[d];
-				}
-			}
-			parameter.value = new RAI_CIP<T>( img , spacing , axes );
-		
+			rai = (Img<T>) convertService.convert( imp , Img.class );
 		}
-		
-		else {
+		else
+		{
 			System.err.println("Unknown image type:" + input.getClass().getName() );
+			return;
 		}
+		
+		parameter.value = new RAI_CIP<T>( rai , spacing(input) , axes(input), unit(input), lut(input) );
 		
 		return;
 	}
+
 	
-	
-	
-	public <T extends RealType<T> > Object toRAI_CIP( Object result, DefaultParameter2 parameter)
+	public <T extends RealType<T> > Object toRaiCIP( Object result, DefaultParameter2 parameter)
 	{
 		RAI_CIP<T> outputCIP = null;
 		
@@ -568,10 +541,201 @@ public class CIPService extends AbstractService implements ImageJService {
 		{
 			RAI_CIP<?> input = (RAI_CIP<?>) parameter.value;
 			RandomAccessibleInterval<T> output = (RandomAccessibleInterval<T>) result;
-			outputCIP = new RAI_CIP<T>( output , input.spacing() , input.axes() );  
+			outputCIP = new RAI_CIP<T>( output , input.spacing() , input.axes(), input.unit(), input.lut() );  
 		}
 		
 		return outputCIP;
+	}
+	
+	
+	public double[] spacing( Object input ) {
+		
+		double[] spacing = null;
+		
+		if (	input instanceof RAI_CIP)
+		{ 
+			spacing = ((RAI_CIP<?>) input).spacing();
+		}
+		else if (	input instanceof RandomAccessibleInterval )
+		{ 
+			RandomAccessibleInterval<?> rai = (RandomAccessibleInterval<?>) input;
+			int nDim = rai.numDimensions();
+			spacing = new double[nDim];
+			for(int d=0; d<nDim; d++) {
+				spacing[d] = 1 ;
+			}
+		}
+		else if (	input instanceof Dataset )
+		{
+			Dataset dataset = (Dataset) input;
+			int nDim = dataset.numDimensions();
+			spacing = new double[nDim];
+			for(int d=0; d<nDim; d++){
+				spacing[d] = dataset.axis(d).calibratedValue(1) - dataset.axis(d).calibratedValue(0); 
+			}
+		}
+		else if (	input instanceof ImagePlus )
+		{
+			ImagePlus imp = (ImagePlus) input;
+			int[] dims = imp.getDimensions();
+			int nDim=0;
+			for( int extent : dims )
+				if( extent > 1 )
+					nDim++;
+			spacing = new double[nDim];
+			
+			double[] impSpacing = new double[5];
+			impSpacing[0] = imp.getCalibration().pixelWidth;
+			impSpacing[1] = imp.getCalibration().pixelHeight;
+			impSpacing[2] = 1;
+			impSpacing[3] = imp.getCalibration().pixelDepth;
+			impSpacing[4] = imp.getCalibration().frameInterval;
+			
+			int currDim=0;
+			for( int d=0; d<5; d++ ) {
+				if( dims[d] > 1 ) {
+					spacing[currDim] = impSpacing[d];
+					currDim++;
+				}
+			}
+		}
+		else {
+			System.err.println("Unknown image type:" + input.getClass().getName() );
+		}
+		
+		return spacing;
+	}
+	
+	
+	
+	public List<String> unit( Object input ) {
+		List<String> axesUnit = new ArrayList<String>();
+		
+		if (	input instanceof RAI_CIP)
+		{ 
+			axesUnit =  ((RAI_CIP<?>) input).unit();
+		}
+		else if (	input instanceof RandomAccessibleInterval )
+		{ 
+			RandomAccessibleInterval<?> rai = (RandomAccessibleInterval<?>) input;
+			int nDim = rai.numDimensions();
+			for(int d=0; d<nDim; d++) {
+				axesUnit.add( null );
+			}
+		}
+		else if (	input instanceof Dataset )
+		{
+			Dataset dataset = (Dataset) input;
+			int nDim = dataset.numDimensions();
+			for(int d=0; d<nDim; d++){
+				axesUnit.add( dataset.axis(d).unit() );
+			}
+		}
+		else if (	input instanceof ImagePlus )
+		{
+			ImagePlus imp = (ImagePlus) input;
+
+			int[] dims = imp.getDimensions();
+
+			List<String> impUnit = new ArrayList<String>();
+			Calibration cal = imp.getCalibration();
+			impUnit.add( cal.getXUnit().equals("pixel")? "" : cal.getXUnit() );
+			impUnit.add( cal.getYUnit().equals("pixel")? "" : cal.getYUnit() );
+			impUnit.add( "" ); // channel
+			impUnit.add( cal.getZUnit().equals("pixel")? "" : cal.getZUnit() );
+			impUnit.add( cal.getTimeUnit() );
+			
+			for( int d=0; d<5; d++ )
+				if( dims[d] > 1 )
+					axesUnit.add( impUnit.get(d) );
+		}
+		else
+		{
+			System.err.println("Unknown image type:" + input.getClass().getName() );
+		}
+		
+		return axesUnit;
+	}
+	
+	
+	public List<String> axes( Object input )
+	{
+		List<String> axesName = new ArrayList<String>();
+		
+		if (	input instanceof RAI_CIP)
+		{ 
+			axesName =  ((RAI_CIP<?>) input).axes();
+		}
+		else if (	input instanceof RandomAccessibleInterval )
+		{ 
+			RandomAccessibleInterval<?> rai = (RandomAccessibleInterval<?>) input;
+			int nDim = rai.numDimensions();
+			for(int d=0; d<nDim; d++) {
+				axesName.add( "D"+d );
+			}
+		}
+		else if (	input instanceof Dataset )
+		{
+			Dataset dataset = (Dataset) input;
+			int nDim = dataset.numDimensions();
+			for(int d=0; d<nDim; d++){
+				axesName.add( dataset.axis(d).type().getLabel() );
+			}
+		}
+		else if (	input instanceof ImagePlus )
+		{
+			ImagePlus imp = (ImagePlus) input;
+
+			int[] dims = imp.getDimensions();
+
+			String[] impAxes = new String[] {"X","Y","C","Z","T"}; 
+			
+			for( int d=0; d<5; d++ )
+				if( dims[d] > 1 )
+					axesName.add( impAxes[d] );
+		}
+		else
+		{
+			System.err.println("Unknown image type:" + input.getClass().getName() );
+		}
+		
+		return axesName;
+	}
+
+	
+	public List<LUT> lut(Object input)
+	{
+		List<LUT> luts = new ArrayList<LUT>();
+			
+		if (	input instanceof RAI_CIP)
+		{ 
+			luts = ((RAI_CIP<?>) input).lut();
+		}
+		else if (	input instanceof RandomAccessibleInterval )
+		{ 
+			luts.add( null ); 
+		}
+		else if (	input instanceof Dataset )
+		{
+			Dataset dataset = (Dataset) input;
+			for( int ch=0; ch<dataset.getChannels(); ch++ ) {
+				luts.add( null );
+			}
+		}
+		else if (	input instanceof ImagePlus )
+		{
+			ImagePlus imp = (ImagePlus) input;
+			int nCh = imp.getNChannels();
+			for( int ch=0; ch<nCh; ch++) {
+				luts.add( imp.getLuts()[ch] );
+			}
+		}
+		else
+		{
+			System.err.println("Unknown image type:" + input.getClass().getName() );
+		}
+		
+		return luts;
 	}
 	
 }
