@@ -8,6 +8,8 @@ import org.scijava.plugin.Plugin;
 import ij.IJ;
 import ij.ImagePlus;
 import invizio.cip.CIP;
+import invizio.cip.MetadataCIP;
+import invizio.cip.RAI_CIP;
 import net.imagej.ImageJ;
 
 import net.imagej.ops.AbstractOp;
@@ -51,7 +53,7 @@ import net.imglib2.view.Views;
 		
 		
 		@Parameter (type = ItemIO.INPUT)
-		private RandomAccessibleInterval<T> inputImage;
+		private RAI_CIP<T> inputImage;
 		
 		@Parameter( label="dimensions", persist=false ) 
 		private Integer[] dimensions;
@@ -63,7 +65,7 @@ import net.imglib2.view.Views;
 		private String method = "shallow";
 
 		@Parameter (type = ItemIO.OUTPUT)
-		private	RandomAccessibleInterval<T> outputImage;
+		private	RAI_CIP<T> outputImage;
 		
 		
 		@Parameter
@@ -103,15 +105,35 @@ import net.imglib2.view.Views;
 			
 			
 			RandomAccessibleInterval<T> temp = Views.offsetInterval( inputImage, new FinalInterval( min , max ) );
-			temp = Views.dropSingletonDimensions( temp);
+			temp = Views.dropSingletonDimensions( temp );
 			
+			RandomAccessibleInterval<T> raiTmp;
 			if( method.toLowerCase().equals("deep") )
 			{
-				outputImage = op.copy().rai( temp);
+				raiTmp= op.copy().rai( temp);
 			}
 			else {
-				outputImage = temp;
+				raiTmp = temp;
 			}
+			
+			
+			// adapt input metadata for the output
+			MetadataCIP metadata = new MetadataCIP( inputImage );
+			if ( dimensions != null && position != null )
+			{
+				// remove unecessary dimensions information
+				metadata.dropDimensions( dimensions );
+				
+				// remove unecessary lut if slicing is channel dim
+				for(int i=0; i<dimensions.length; i++ ) {
+					int d = dimensions[i];
+					long pos = position[i];
+					if( d == metadata.channelDim )
+						metadata.dropLutsOutOfRange((int)pos, (int)pos);
+				}
+			}
+			
+			outputImage = new RAI_CIP<T>(raiTmp , metadata );
 			
 			
 		}

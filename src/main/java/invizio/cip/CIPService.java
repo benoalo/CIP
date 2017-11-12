@@ -17,6 +17,7 @@ import org.scijava.service.Service;
 
 import ij.ImagePlus;
 import ij.measure.Calibration;
+import ij.plugin.LutLoader;
 import ij.process.LUT;
 import invizio.cip.parameters.DefaultParameter2;
 import net.imagej.Dataset;
@@ -497,15 +498,18 @@ public class CIPService extends AbstractService implements ImageJService {
 		return majorType;
 	}
   
-  
 	
-	public <T extends RealType<T> > void toRaiCIP(DefaultParameter2 parameter)
+	public void toRaiCIP(DefaultParameter2 parameter)
 	{
-		Object input = parameter.value;
+		parameter.value = toRaiCIP( parameter.value ); 
+	}
+	
+	public <T extends RealType<T> > Object toRaiCIP(Object input)
+	{
 		RandomAccessibleInterval<T> rai = null;
 		if (	input instanceof RAI_CIP)
 		{ 
-			return;
+			return input;
 		}
 		else if (	input instanceof RandomAccessibleInterval )
 		{ 
@@ -524,12 +528,10 @@ public class CIPService extends AbstractService implements ImageJService {
 		else
 		{
 			System.err.println("Unknown image type:" + input.getClass().getName() );
-			return;
+			return input;
 		}
 		
-		parameter.value = new RAI_CIP<T>( rai , spacing(input) , axes(input), unit(input), lut(input) );
-		
-		return;
+		return new RAI_CIP<T>( rai , spacing(input) , axes(input), unit(input), lut(input) );
 	}
 
 	
@@ -737,5 +739,62 @@ public class CIPService extends AbstractService implements ImageJService {
 		
 		return luts;
 	}
+	
+	
+	
+	public Object setMetadata( Object outputImage )
+	{	
+		return setMetadata(outputImage, null );
+	}
+	
+	
+	public Object setMetadata( Object outputImage, DefaultParameter2 inputImage )
+	{	
+		return setMetadata(outputImage, inputImage, "default" );
+	}
+	
+	
+	public Object setMetadata( Object outputImage, DefaultParameter2 inputImage, String outputType )
+	{
+		if( outputImage == null ) {
+			return null;
+		}
+		else if ( outputImage instanceof RandomAccessibleInterval )
+		{
+			if( inputImage==null )
+				outputImage = toRaiCIP( outputImage );
+			else
+				outputImage = toRaiCIP( outputImage, inputImage );
+			
+			if ( outputType.toLowerCase().equals("segmentation") )
+			{
+				LUT lut = LutLoader.openLut( CIP.class.getResource("/glasbey_inverted.lut").getPath() );
+				( (RAI_CIP<?>) outputImage ).lut( lut );
+			}
+			
+		}
+		return outputImage;
+	}
+	
+	
+	
+	public Object discardNullValue( List<Object> resultsTemp )
+	{
+		Object results = new ArrayList<Object>();
+		int count = 0;
+		for(Object obj : resultsTemp ) {
+			if ( obj != null ) {
+				count++;
+				( (List<Object>) results ).add( obj );
+			}
+		}
+		if( count==1 )
+			results = ((List<Object>)results).get(0) ;
+		if ( count == 0 )
+			results = null;
+		
+		return results;
+	}
+
 	
 }
