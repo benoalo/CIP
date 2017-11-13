@@ -1,12 +1,15 @@
 package invizio.cip.misc;
 
 
+import java.util.ArrayList;
+
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.process.LUT;
 import invizio.cip.CIP;
 import invizio.cip.MetadataCIP;
 import invizio.cip.RAI_CIP;
@@ -207,7 +210,21 @@ import net.imglib2.view.Views;
 			MetadataCIP metadata = new MetadataCIP( inputImage );
 			if ( dimension != null )
 				metadata.dropDimension( dimension );	
-						
+			
+			// 
+			if( metadata.lut().size() != 1 )
+			{
+				byte[] red = new byte[256];
+				byte[] green = new byte[256];
+				byte[] blue = new byte[256];
+				
+				for (int i=0 ; i<red.length ; i++) {
+					red[i]   = (byte)i;
+					green[i] = (byte)i;
+					blue[i]  = (byte)i;
+				}
+				metadata.lut( new LUT(red, green, blue) );
+			}
 			return new RAI_CIP<V>(rai , metadata );
 		}
 		

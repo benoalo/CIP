@@ -152,10 +152,10 @@ public class MetadataCIP {
 	
 	
 	
+	
 	public void dropDimensions( Integer[] dimensions ) {
 		
-		Integer[] dims = dimensions.clone();
-		Arrays.sort(dims);
+		Integer[] dims = Arrays.copyOf(dimensions, dimensions.length);
 		for(int i=dims.length-1 ; i>=0 ; i-- )
 			dropDimension( dims[i] );
 	}
@@ -170,21 +170,6 @@ public class MetadataCIP {
 		if ( channelDim==dim )
 		{	
 			channelDim=-1;
-			// if one lut only keep it otherwise set a default gray level lut
-			if( luts.size() != 1 )
-			{
-				luts = new ArrayList<LUT>();
-				byte[] red = new byte[256];
-				byte[] green = new byte[256];
-				byte[] blue = new byte[256];
-				
-				for (int i=0 ; i<red.length ; i++) {
-					red[i]   = (byte)i;
-					green[i] = (byte)i;
-					blue[i]  = (byte)i;
-				}
-				luts.add( new LUT( red, green, blue) );
-			}
 		}
 		
 
@@ -215,6 +200,7 @@ public class MetadataCIP {
 		for( int pos=start ; pos<stop; pos++ )
 			luts.add( lutsTmp.get(pos) );
 	}
+	
 	
 	
 	private static List<String> copy( List<String> in){
