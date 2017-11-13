@@ -166,6 +166,29 @@ public class MetadataCIP {
 		axes.remove( dim );
 		axesUnit.remove( dim );
 
+		
+		if ( channelDim==dim )
+		{	
+			channelDim=-1;
+			// if one lut only keep it otherwise set a default gray level lut
+			if( luts.size() != 1 )
+			{
+				luts = new ArrayList<LUT>();
+				byte[] red = new byte[256];
+				byte[] green = new byte[256];
+				byte[] blue = new byte[256];
+				
+				for (int i=0 ; i<red.length ; i++) {
+					red[i]   = (byte)i;
+					green[i] = (byte)i;
+					blue[i]  = (byte)i;
+				}
+				luts.add( new LUT( red, green, blue) );
+			}
+		}
+		
+
+		
 		double[] spacingTmp = spacing;
 		
 		spacing  = new double[spacingTmp.length-1];
@@ -179,8 +202,6 @@ public class MetadataCIP {
 				count++;
 			}
 		}
-		if ( channelDim==dim )
-			channelDim=-1;
 		
 		
 	}

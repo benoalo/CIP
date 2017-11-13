@@ -8,6 +8,8 @@ import org.scijava.plugin.Plugin;
 import ij.IJ;
 import ij.ImagePlus;
 import invizio.cip.CIP;
+import invizio.cip.MetadataCIP;
+import invizio.cip.RAI_CIP;
 import net.imagej.ImageJ;
 import net.imagej.ops.AbstractOp;
 import net.imagej.ops.OpService;
@@ -40,7 +42,7 @@ import net.imglib2.view.Views;
 		
 		
 		@Parameter (type = ItemIO.INPUT)
-		private RandomAccessibleInterval<T> inputImage;
+		private RAI_CIP<T> inputImage;
 		
 		@Parameter( label="dimension", persist=false ) 
 		private Integer dimension;
@@ -53,10 +55,10 @@ import net.imglib2.view.Views;
 		
 		
 		@Parameter (type = ItemIO.OUTPUT)
-		private	RandomAccessibleInterval<U> projImage;
+		private	RAI_CIP<U> projImageCIP;
 		
 		@Parameter (type = ItemIO.OUTPUT)
-		private	RandomAccessibleInterval<IntType> argProjImage;
+		private	RAI_CIP<IntType> argProjImageCIP;
 		
 		
 		@Parameter
@@ -83,7 +85,7 @@ import net.imglib2.view.Views;
 			for( int d=0; d<nDim ; d++)
 			{
 				if( d != dimension ) {
-					projSize[d] = inputImage.dimension(d);
+					projSize[count] = inputImage.dimension(d);
 					projDimIndex[count] = d;
 					count++;
 				}
@@ -93,40 +95,44 @@ import net.imglib2.view.Views;
 			
 			Tester<T,U> projector = null;
 			method = method.toLowerCase();
-			
+			RandomAccessibleInterval<U> projImageRAI;
 			if ( method.equals("max") ) {
 				projector = new MaxTester<T,U>();
 				U valU =  (U)inputImage.randomAccess().get();
-				projImage = op.create().img( FinalDimensions.wrap(projSize) , valU );
+				projImageRAI = op.create().img( FinalDimensions.wrap(projSize) , valU );
 
 			}
 			else if ( method.equals("min") ) {
 				projector = new MinTester<T,U>();
 				U valU =  (U)inputImage.randomAccess().get();
-				projImage = op.create().img( FinalDimensions.wrap(projSize) , valU );
+				projImageRAI = op.create().img( FinalDimensions.wrap(projSize) , valU );
 
 			}
 			else if ( method.equals("add") || method.equals("sum") ) {
 				projector = new SumTester<T,U>();
 				U valU =  (U)new FloatType();
-				projImage = op.create().img( FinalDimensions.wrap(projSize) , valU );
+				projImageRAI = op.create().img( FinalDimensions.wrap(projSize) , valU );
 
 				outputType = "projection";
 			}
-			
+			else {
+				return;
+			}
 			
 			
 			long[] pos = new long[nDim];
 			long[] pos2 = new long[nDim-1];
 			count=0;
-			RandomAccess<U> projImageRA = projImage.randomAccess();
+			RandomAccess<U> projImageRA = projImageRAI.randomAccess();
 			Cursor<T> cIn = Views.flatIterable( inputImage ).cursor();
+			
+			RandomAccessibleInterval<IntType> argProjImageRAI;
 			
 			outputType = outputType.toLowerCase();
 			if( outputType.equals("argument") || outputType.equals("both") )
 			{
-				argProjImage = op.create().img( FinalDimensions.wrap(projSize) , new IntType() );
-				RandomAccess<IntType> argProjImageRA = argProjImage.randomAccess();
+				argProjImageRAI = op.create().img( FinalDimensions.wrap(projSize) , new IntType() );
+				RandomAccess<IntType> argProjImageRA = argProjImageRAI.randomAccess();
 	
 				while( cIn.hasNext() )
 				{
@@ -153,6 +159,13 @@ import net.imglib2.view.Views;
 					}	
 				}
 				
+				
+				// add metadata to argprojImage and projImage
+				argProjImageCIP = toRaiCIP( argProjImageRAI );
+				if ( outputType.toLowerCase().equals("argument") )
+					projImageCIP = null;
+				else
+					projImageCIP = toRaiCIP( projImageRAI );
 			}
 			else
 			{
@@ -175,14 +188,29 @@ import net.imglib2.view.Views;
 						projector.update(in, proj);
 
 				}
+				
+				// add metadata to projImage
+				projImageCIP = toRaiCIP( projImageRAI );
+				argProjImageCIP = null;
 			}
 			
-			if ( outputType.toLowerCase().equals("argument") )
-				projImage = null;
+			
+			
+			
 			
 		}
 
-
+		
+		private <V extends RealType<V>> RAI_CIP<V> toRaiCIP( RandomAccessibleInterval<V> rai ){
+			
+			// adapt input metadata for the output
+			MetadataCIP metadata = new MetadataCIP( inputImage );
+			if ( dimension != null )
+				metadata.dropDimension( dimension );	
+						
+			return new RAI_CIP<V>(rai , metadata );
+		}
+		
 		
 		
 		interface Tester<W extends RealType<W> , V extends RealType<V> >
@@ -254,10 +282,9 @@ import net.imglib2.view.Views;
 			cip.setEnvironment( ij.op() );
 			
 			@SuppressWarnings("unchecked")
-			RandomAccessibleInterval<IntType> output = (RandomAccessibleInterval<IntType>)
-									cip.project( img , 3 , "add", "projection"  );
+			RandomAccessibleInterval<?> img1 = (RandomAccessibleInterval<?>) cip.project( img , 3 , "max", "projection"  );
+			RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( img1 , 2 , "max", "projection"  );
 					
-			//cip.create( cip.aslist(100, 50, 2) , 10, "double"  );
 			
 			String str = output==null ? "null" : output.toString();
 			
