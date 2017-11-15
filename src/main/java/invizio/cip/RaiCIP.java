@@ -10,28 +10,28 @@ import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPositionable;
 
-public class RAI_CIP<T> extends MetadataCIP implements RandomAccessibleInterval<T> {
+public class RaiCIP<T> extends MetadataCIP implements RandomAccessibleInterval<T> {
 
 	RandomAccessibleInterval<T> rai;
 	
 	
 	//String[] defaultAxesName = new String[] {"D0","D1","D2","D3","D4","D5","D6","D7","D8","D9"};
 	
-	public RAI_CIP( RandomAccessibleInterval<T> rai)
+	public RaiCIP( RandomAccessibleInterval<T> rai)
 	{
 		super( rai.numDimensions() );
 		this.rai = rai;		
 	}
 	
 	
-	public RAI_CIP( RandomAccessibleInterval<T> rai, double[] spacing, List<String> axesName, List<String> axesUnit, List<LUT> luts)
+	public RaiCIP( RandomAccessibleInterval<T> rai, double[] spacing, List<String> axesName, List<String> axesUnit, List<LUT> luts)
 	{
 		super( spacing , axesName, axesUnit, luts);
 		this.rai = rai;
 	}
 		
 	
-	public RAI_CIP( RandomAccessibleInterval<T> rai, MetadataCIP metadata )
+	public RaiCIP( RandomAccessibleInterval<T> rai, MetadataCIP metadata )
 	{
 		super( metadata );
 		this.rai = rai;
