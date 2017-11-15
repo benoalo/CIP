@@ -14,7 +14,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import invizio.cip.CIP;
 import invizio.cip.MetadataCIP;
-import invizio.cip.RAI_CIP;
+import invizio.cip.RaiCIP;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 
@@ -45,7 +45,7 @@ import net.imglib2.view.Views;
 		
 		
 		@Parameter (type = ItemIO.INPUT)
-		private RAI_CIP<T> inputImage;
+		private RaiCIP<T> inputImage;
 		
 		@Parameter( label="origin", persist=false, required=false  ) 
 		private Long[] origin;
@@ -57,7 +57,7 @@ import net.imglib2.view.Views;
 		private String method = "shallow";
 
 		@Parameter (type = ItemIO.OUTPUT)
-		private	RAI_CIP<T> outputImage;
+		private	RaiCIP<T> outputImage;
 		
 		
 		@Parameter
@@ -142,7 +142,7 @@ import net.imglib2.view.Views;
 				metadata.dropLutsOutOfRange((int)(long)origin[chDim], (int)(long)(origin[chDim] + Math.max(1, size[chDim]) - 1) );
 				// TODO: can crash fail if inputImage origin is not zero, lut and metadata would need some rework
 			
-			outputImage = new RAI_CIP<T>(outputRAI , metadata );
+			outputImage = new RaiCIP<T>(outputRAI , metadata );
 			
 			
 //			long[] min4 = new long[nDim];

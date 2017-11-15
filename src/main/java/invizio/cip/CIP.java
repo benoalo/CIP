@@ -6,6 +6,7 @@ import java.util.List;
 import org.scijava.convert.ConvertService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.ui.UIService;
 
 import ij.plugin.LutLoader;
 import ij.process.LUT;
@@ -96,6 +97,8 @@ public class CIP extends AbstractNamespace{
 	@Parameter
 	private CIPService cipService;
 	
+	@Parameter
+	private UIService uiService;
 	
 	
 	public CIP() {
@@ -196,7 +199,7 @@ public class CIP extends AbstractNamespace{
 		
 		if ( params.parseInput( args ) )
 		{
-			// convert image to RAI_CIP 
+			// convert image to RaiCIP 
 			cipService.toRaiCIP( params.get("inputImage") ); // similar as toImglib2Image but also collect spacing, axes name
 			results = ops().run(invizio.cip.filter.DistanceCIP.class, params.getParsedInput() );
 			results = cipService.setMetadata( results, params.get("inputImage"));
@@ -1052,6 +1055,21 @@ public class CIP extends AbstractNamespace{
     }
     
     
+    
+    public void show( Object ... args) {
+    	
+    	FunctionParameters2 params = new FunctionParameters2("show");
+    	params.addRequired("inputImage", 	Type.image				);
+    	params.addOptional("lut", 			Type.string, 	"grays"	);
+		
+    	if ( params.parseInput( args ) )
+		{
+    		// convert to a dataset with the proper lut associated
+    		uiService.show( params.get("inputImage").value );
+		}
+    }
+    
+    
     /////////////////////////////////////////////////////////
     // helper to pass a list from jython             //
     /////////////////////////////////////////////////////////
@@ -1067,7 +1085,8 @@ public class CIP extends AbstractNamespace{
 	
     
     // would be awesome if all arrays and scalar would represented by RAIs (i.e. and not only images)
-	public static Img<DoubleType> asimg( double ... ds )
+	@Deprecated
+    public static Img<DoubleType> asimg( double ... ds )
 	{
 		Img<DoubleType> array = ArrayImgs.doubles(ds.length,1);
 		Cursor<DoubleType> c = array.cursor();

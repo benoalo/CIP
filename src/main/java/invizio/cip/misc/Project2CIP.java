@@ -1,6 +1,7 @@
 package invizio.cip.misc;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.scijava.ItemIO;
@@ -12,7 +13,8 @@ import ij.ImagePlus;
 import ij.process.LUT;
 import invizio.cip.CIP;
 import invizio.cip.MetadataCIP;
-import invizio.cip.RAI_CIP;
+import invizio.cip.RaiCIP;
+import net.imagej.Dataset;
 import net.imagej.ImageJ;
 import net.imagej.ops.AbstractOp;
 import net.imagej.ops.OpService;
@@ -45,7 +47,7 @@ import net.imglib2.view.Views;
 		
 		
 		@Parameter (type = ItemIO.INPUT)
-		private RAI_CIP<T> inputImage;
+		private RaiCIP<T> inputImage;
 		
 		@Parameter( label="dimension", persist=false ) 
 		private Integer dimension;
@@ -58,10 +60,10 @@ import net.imglib2.view.Views;
 		
 		
 		@Parameter (type = ItemIO.OUTPUT)
-		private	RAI_CIP<U> projImageCIP;
+		private	RaiCIP<U> projImageCIP;
 		
 		@Parameter (type = ItemIO.OUTPUT)
-		private	RAI_CIP<IntType> argProjImageCIP;
+		private	RaiCIP<IntType> argProjImageCIP;
 		
 		
 		@Parameter
@@ -204,7 +206,7 @@ import net.imglib2.view.Views;
 		}
 
 		
-		private <V extends RealType<V>> RAI_CIP<V> toRaiCIP( RandomAccessibleInterval<V> rai ){
+		private <V extends RealType<V>> RaiCIP<V> toRaiCIP( RandomAccessibleInterval<V> rai ){
 			
 			// adapt input metadata for the output
 			MetadataCIP metadata = new MetadataCIP( inputImage );
@@ -225,7 +227,7 @@ import net.imglib2.view.Views;
 				}
 				metadata.lut( new LUT(red, green, blue) );
 			}
-			return new RAI_CIP<V>(rai , metadata );
+			return new RaiCIP<V>(rai , metadata );
 		}
 		
 		
@@ -281,7 +283,7 @@ import net.imglib2.view.Views;
 		
 		
 		
-		public static void main(final String... args)
+		public static void main(final String... args) throws IOException
 		{
 			
 			ImageJ ij = new ImageJ();
@@ -289,7 +291,7 @@ import net.imglib2.view.Views;
 			
 			//ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
 			ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/mitosis_t1.tif");
-			ij.ui().show(imp);
+			//ij.ui().show(imp);
 			
 			
 			Img<UnsignedByteType> img = ImageJFunctions.wrap(imp);
@@ -299,14 +301,19 @@ import net.imglib2.view.Views;
 			cip.setEnvironment( ij.op() );
 			
 			@SuppressWarnings("unchecked")
-			RandomAccessibleInterval<?> img1 = (RandomAccessibleInterval<?>) cip.project( img , 3 , "max", "projection"  );
-			RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( img1 , 2 , "max", "projection"  );
+			RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( img , 3 , "max", "projection"  );
+			//RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( img1 , 2 , "max", "projection"  );
 					
 			
 			String str = output==null ? "null" : output.toString();
 			
 			System.out.println("hello projection:" + str );
-			ij.ui().show(output);
+			//ij.ui().show(output);
+			
+			Dataset dataset = (Dataset) ij.io().open("C:/Users/Ben/workspace/testImages/mitosis_t1.tif");
+			
+			
+			cip.show(output );
 			
 			System.out.println("done!");
 		}

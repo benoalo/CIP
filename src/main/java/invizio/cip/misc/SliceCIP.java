@@ -9,7 +9,7 @@ import org.scijava.plugin.Plugin;
 
 import invizio.cip.CIP;
 import invizio.cip.MetadataCIP;
-import invizio.cip.RAI_CIP;
+import invizio.cip.RaiCIP;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 
@@ -35,7 +35,7 @@ import net.imglib2.view.Views;
 		
 		
 		@Parameter (type = ItemIO.INPUT)
-		private RAI_CIP<T> inputImage;
+		private RaiCIP<T> inputImage;
 		
 		@Parameter( label="dimensions", persist=false ) 
 		private Integer[] dimensions;
@@ -47,7 +47,7 @@ import net.imglib2.view.Views;
 		private String method = "shallow";
 
 		@Parameter (type = ItemIO.OUTPUT)
-		private	RAI_CIP<T> outputImage;
+		private	RaiCIP<T> outputImage;
 		
 		
 		@Parameter
@@ -115,7 +115,7 @@ import net.imglib2.view.Views;
 				}
 			}
 			
-			outputImage = new RAI_CIP<T>(raiTmp , metadata );
+			outputImage = new RaiCIP<T>(raiTmp , metadata );
 			
 			
 		}

@@ -296,7 +296,7 @@ public class CIPService extends AbstractService implements ImageJService {
 	@SuppressWarnings("unchecked")
 	private <T extends RealType<T>, U extends RealType<U>> void updateImgType( DefaultParameter2 parameter , String type)
 	{
-		RAI_CIP<T> input0 = (RAI_CIP<T>) parameter.value;
+		RaiCIP<T> input0 = (RaiCIP<T>) parameter.value;
 		
 		IterableInterval<T> input = null;
 		//if( parameter.value instanceof RandomAccessibleInterval )
@@ -363,7 +363,7 @@ public class CIPService extends AbstractService implements ImageJService {
 		}
 		
 		RandomAccessibleInterval<U> rai = (RandomAccessibleInterval<U>) parameter.value;
-		parameter.value = new RAI_CIP<U>( rai, input0.spacing(), input0.axes(), input0.unit(), input0.lut()  );
+		parameter.value = new RaiCIP<U>( rai, input0.spacing(), input0.axes(), input0.unit(), input0.lut()  );
 		
 	}
 	
@@ -507,7 +507,7 @@ public class CIPService extends AbstractService implements ImageJService {
 	public <T extends RealType<T> > Object toRaiCIP(Object input)
 	{
 		RandomAccessibleInterval<T> rai = null;
-		if (	input instanceof RAI_CIP)
+		if (	input instanceof RaiCIP)
 		{ 
 			return input;
 		}
@@ -532,19 +532,19 @@ public class CIPService extends AbstractService implements ImageJService {
 			return input;
 		}
 		
-		return new RAI_CIP<T>( rai , spacing(input) , axes(input), unit(input), lut(input) );
+		return new RaiCIP<T>( rai , spacing(input) , axes(input), unit(input), lut(input) );
 	}
 
 	
 	public <T extends RealType<T> > Object toRaiCIP( Object result, DefaultParameter2 parameter)
 	{
-		RAI_CIP<T> outputCIP = null;
+		RaiCIP<T> outputCIP = null;
 		
 		if (	result instanceof RandomAccessibleInterval )
 		{
-			RAI_CIP<?> input = (RAI_CIP<?>) parameter.value;
+			RaiCIP<?> input = (RaiCIP<?>) parameter.value;
 			RandomAccessibleInterval<T> output = (RandomAccessibleInterval<T>) result;
-			outputCIP = new RAI_CIP<T>( output , input.spacing() , input.axes(), input.unit(), input.lut() );  
+			outputCIP = new RaiCIP<T>( output , input.spacing() , input.axes(), input.unit(), input.lut() );  
 		}
 		
 		return outputCIP;
@@ -555,9 +555,9 @@ public class CIPService extends AbstractService implements ImageJService {
 		
 		double[] spacing = null;
 		
-		if (	input instanceof RAI_CIP)
+		if (	input instanceof RaiCIP)
 		{ 
-			spacing = ((RAI_CIP<?>) input).spacing();
+			spacing = ((RaiCIP<?>) input).spacing();
 		}
 		else if (	input instanceof RandomAccessibleInterval )
 		{ 
@@ -614,9 +614,9 @@ public class CIPService extends AbstractService implements ImageJService {
 	public List<String> unit( Object input ) {
 		List<String> axesUnit = new ArrayList<String>();
 		
-		if (	input instanceof RAI_CIP)
+		if (	input instanceof RaiCIP)
 		{ 
-			axesUnit =  ((RAI_CIP<?>) input).unit();
+			axesUnit =  ((RaiCIP<?>) input).unit();
 		}
 		else if (	input instanceof RandomAccessibleInterval )
 		{ 
@@ -665,9 +665,9 @@ public class CIPService extends AbstractService implements ImageJService {
 	{
 		List<String> axesName = new ArrayList<String>();
 		
-		if (	input instanceof RAI_CIP)
+		if (	input instanceof RaiCIP)
 		{ 
-			axesName =  ((RAI_CIP<?>) input).axes();
+			axesName =  ((RaiCIP<?>) input).axes();
 		}
 		else if (	input instanceof RandomAccessibleInterval )
 		{ 
@@ -710,9 +710,9 @@ public class CIPService extends AbstractService implements ImageJService {
 	{
 		List<LUT> luts = new ArrayList<LUT>();
 			
-		if (	input instanceof RAI_CIP)
+		if (	input instanceof RaiCIP)
 		{ 
-			luts = ((RAI_CIP<?>) input).lut();
+			luts = ((RaiCIP<?>) input).lut();
 		}
 		else if (	input instanceof RandomAccessibleInterval )
 		{ 
@@ -770,7 +770,7 @@ public class CIPService extends AbstractService implements ImageJService {
 			if ( outputType.toLowerCase().equals("segmentation") )
 			{
 				LUT lut = LutLoader.openLut( CIP.class.getResource("/glasbey_inverted.lut").getPath() );
-				( (RAI_CIP<?>) outputImage ).lut( lut );
+				( (RaiCIP<?>) outputImage ).lut( lut );
 			}
 			
 		}
