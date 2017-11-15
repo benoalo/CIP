@@ -14,7 +14,9 @@ import ij.IJ;
 import ij.ImagePlus;
 import invizio.cip.CIP;
 import invizio.cip.MetadataCIP;
+import invizio.cip.MetadataCIP2;
 import invizio.cip.RaiCIP;
+import invizio.cip.RaiCIP2;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 
@@ -45,7 +47,7 @@ import net.imglib2.view.Views;
 		
 		
 		@Parameter (type = ItemIO.INPUT)
-		private RaiCIP<T> inputImage;
+		private RaiCIP2<T> inputImage;
 		
 		@Parameter( label="origin", persist=false, required=false  ) 
 		private Long[] origin;
@@ -57,7 +59,7 @@ import net.imglib2.view.Views;
 		private String method = "shallow";
 
 		@Parameter (type = ItemIO.OUTPUT)
-		private	RaiCIP<T> outputImage;
+		private	RaiCIP2<T> outputImage;
 		
 		
 		@Parameter
@@ -127,7 +129,7 @@ import net.imglib2.view.Views;
 			}
 			
 			// adapt metadata for the output image
-			MetadataCIP metadata = new MetadataCIP( inputImage );
+			MetadataCIP2 metadata = new MetadataCIP2( inputImage );
 			//remove the singleton dimensions
 			List<Integer> dimsToDrop = new ArrayList<Integer>();
 			for(int i=0 ; i<size.length ; i++ ) {
@@ -137,12 +139,8 @@ import net.imglib2.view.Views;
 			Integer[] dims = dimsToDrop.toArray(new Integer[0]);
 			metadata.dropDimensions( dims );	
 			
-			int chDim = metadata.channelDim;
-			if( chDim != -1 )
-				metadata.dropLutsOutOfRange((int)(long)origin[chDim], (int)(long)(origin[chDim] + Math.max(1, size[chDim]) - 1) );
-				// TODO: can crash fail if inputImage origin is not zero, lut and metadata would need some rework
 			
-			outputImage = new RaiCIP<T>(outputRAI , metadata );
+			outputImage = new RaiCIP2<T>(outputRAI , metadata );
 			
 			
 //			long[] min4 = new long[nDim];

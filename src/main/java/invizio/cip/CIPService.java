@@ -22,6 +22,7 @@ import ij.process.LUT;
 import invizio.cip.parameters.DefaultParameter2;
 import net.imagej.Dataset;
 import net.imagej.ImageJService;
+import net.imagej.ImgPlus;
 import net.imagej.ops.OpService;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
@@ -504,12 +505,12 @@ public class CIPService extends AbstractService implements ImageJService {
 		parameter.value = toRaiCIP( parameter.value ); 
 	}
 	
-	public <T extends RealType<T> > Object toRaiCIP(Object input)
+	public <T extends RealType<T> > RaiCIP2<T> toRaiCIP(Object input)
 	{
 		RandomAccessibleInterval<T> rai = null;
-		if (	input instanceof RaiCIP)
+		if (	input instanceof RaiCIP2)
 		{ 
-			return input;
+			return (RaiCIP2<T>)input;
 		}
 		else if (	input instanceof RandomAccessibleInterval )
 		{ 
@@ -520,6 +521,11 @@ public class CIPService extends AbstractService implements ImageJService {
 			Dataset dataset = (Dataset) input;
 			rai = (Img<T>) convertService.convert( dataset , Img.class );
 		}
+		else if (	input instanceof ImgPlus )
+		{
+			ImgPlus<T> imgPlus = (ImgPlus<T>) input;
+			rai = (Img<T>) convertService.convert( imgPlus , Img.class );
+		}
 		else if (	input instanceof ImagePlus )
 		{
 			ImagePlus imp = (ImagePlus) input;
@@ -529,52 +535,61 @@ public class CIPService extends AbstractService implements ImageJService {
 		else
 		{
 			System.err.println("Unknown image type:" + input.getClass().getName() );
-			return input;
+			return null;
 		}
 		
-		return new RaiCIP<T>( rai , spacing(input) , axes(input), unit(input), lut(input) );
+		return new RaiCIP2<T>( rai , spacing(input) , axes(input), unit(input));
 	}
 
 	
 	public <T extends RealType<T> > Object toRaiCIP( Object result, DefaultParameter2 parameter)
 	{
-		RaiCIP<T> outputCIP = null;
+		RaiCIP2<T> outputCIP = null;
 		
 		if (	result instanceof RandomAccessibleInterval )
 		{
-			RaiCIP<?> input = (RaiCIP<?>) parameter.value;
+			RaiCIP2<?> input = (RaiCIP2<?>) parameter.value;
 			RandomAccessibleInterval<T> output = (RandomAccessibleInterval<T>) result;
-			outputCIP = new RaiCIP<T>( output , input.spacing() , input.axes(), input.unit(), input.lut() );  
+			outputCIP = new RaiCIP2<T>( output , input.spacing() , input.axes(), input.unit() );  
 		}
 		
 		return outputCIP;
 	}
 	
 	
-	public double[] spacing( Object input ) {
+	public List<Double> spacing( Object input ) {
 		
-		double[] spacing = null;
+		List<Double> spacing = null;
 		
-		if (	input instanceof RaiCIP)
+		if (	input instanceof RaiCIP2)
 		{ 
-			spacing = ((RaiCIP<?>) input).spacing();
+			spacing = ((RaiCIP2<?>) input).spacing();
 		}
 		else if (	input instanceof RandomAccessibleInterval )
 		{ 
 			RandomAccessibleInterval<?> rai = (RandomAccessibleInterval<?>) input;
 			int nDim = rai.numDimensions();
-			spacing = new double[nDim];
+			spacing = new ArrayList<Double>();
 			for(int d=0; d<nDim; d++) {
-				spacing[d] = 1 ;
+				spacing.add( 1d );
 			}
 		}
 		else if (	input instanceof Dataset )
 		{
 			Dataset dataset = (Dataset) input;
 			int nDim = dataset.numDimensions();
-			spacing = new double[nDim];
+			spacing = new ArrayList<Double>();
 			for(int d=0; d<nDim; d++){
-				spacing[d] = dataset.axis(d).calibratedValue(1) - dataset.axis(d).calibratedValue(0); 
+				spacing.add( dataset.axis(d).calibratedValue(1) - dataset.axis(d).calibratedValue(0) ); 
+			}
+		}
+		else if (	input instanceof ImgPlus )
+		{
+			ImgPlus<?> imgPlus = (ImgPlus<?>) input;
+			int nDim = imgPlus.numDimensions();
+			spacing = new ArrayList<Double>();
+			for(int d=0; d<nDim; d++){
+				spacing.add( imgPlus.axis(d).calibratedValue(1) - imgPlus.axis(d).calibratedValue(0) ); 
 			}
 		}
 		else if (	input instanceof ImagePlus )
@@ -585,8 +600,8 @@ public class CIPService extends AbstractService implements ImageJService {
 			for( int extent : dims )
 				if( extent > 1 )
 					nDim++;
-			spacing = new double[nDim];
-			
+			spacing = new ArrayList<Double>();
+
 			double[] impSpacing = new double[5];
 			impSpacing[0] = imp.getCalibration().pixelWidth;
 			impSpacing[1] = imp.getCalibration().pixelHeight;
@@ -594,11 +609,9 @@ public class CIPService extends AbstractService implements ImageJService {
 			impSpacing[3] = imp.getCalibration().pixelDepth;
 			impSpacing[4] = imp.getCalibration().frameInterval;
 			
-			int currDim=0;
 			for( int d=0; d<5; d++ ) {
 				if( dims[d] > 1 ) {
-					spacing[currDim] = impSpacing[d];
-					currDim++;
+					spacing.add( impSpacing[d] );
 				}
 			}
 		}
@@ -614,9 +627,9 @@ public class CIPService extends AbstractService implements ImageJService {
 	public List<String> unit( Object input ) {
 		List<String> axesUnit = new ArrayList<String>();
 		
-		if (	input instanceof RaiCIP)
+		if (	input instanceof RaiCIP2)
 		{ 
-			axesUnit =  ((RaiCIP<?>) input).unit();
+			axesUnit =  ((RaiCIP2<?>) input).unit();
 		}
 		else if (	input instanceof RandomAccessibleInterval )
 		{ 
@@ -632,6 +645,14 @@ public class CIPService extends AbstractService implements ImageJService {
 			int nDim = dataset.numDimensions();
 			for(int d=0; d<nDim; d++){
 				axesUnit.add( dataset.axis(d).unit() );
+			}
+		}
+		else if (	input instanceof ImgPlus )
+		{
+			ImgPlus<?> imgPlus = (ImgPlus<?>) input;
+			int nDim = imgPlus.numDimensions();
+			for(int d=0; d<nDim; d++){
+				axesUnit.add( imgPlus.axis(d).unit() );
 			}
 		}
 		else if (	input instanceof ImagePlus )
@@ -665,9 +686,9 @@ public class CIPService extends AbstractService implements ImageJService {
 	{
 		List<String> axesName = new ArrayList<String>();
 		
-		if (	input instanceof RaiCIP)
+		if (	input instanceof RaiCIP2)
 		{ 
-			axesName =  ((RaiCIP<?>) input).axes();
+			axesName =  ((RaiCIP2<?>) input).axes();
 		}
 		else if (	input instanceof RandomAccessibleInterval )
 		{ 
@@ -683,6 +704,14 @@ public class CIPService extends AbstractService implements ImageJService {
 			int nDim = dataset.numDimensions();
 			for(int d=0; d<nDim; d++){
 				axesName.add( dataset.axis(d).type().getLabel() );
+			}
+		}
+		else if (	input instanceof ImgPlus )
+		{
+			ImgPlus<?> imgPlus = (ImgPlus<?>) input;
+			int nDim = imgPlus.numDimensions();
+			for(int d=0; d<nDim; d++){
+				axesName.add( imgPlus.axis(d).type().getLabel() );
 			}
 		}
 		else if (	input instanceof ImagePlus )
@@ -705,7 +734,7 @@ public class CIPService extends AbstractService implements ImageJService {
 		return axesName;
 	}
 
-	
+	/*
 	public List<LUT> lut(Object input)
 	{
 		List<LUT> luts = new ArrayList<LUT>();
@@ -740,7 +769,7 @@ public class CIPService extends AbstractService implements ImageJService {
 		
 		return luts;
 	}
-	
+	*/
 	
 	
 	public Object setMetadata( Object outputImage )

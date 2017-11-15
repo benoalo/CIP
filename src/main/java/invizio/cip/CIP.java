@@ -974,17 +974,7 @@ public class CIP extends AbstractNamespace{
 			
 			///////////////////////////////////////////////////////////////////////////////
 			// check if one of the output is null and discard it from the results list
-			
-			results = new ArrayList<Object>();
-			int count = 0;
-			for(Object obj : resultsTemp ) {
-				if ( obj != null ) {
-					count++;
-					((ArrayList<Object>)results).add( obj );
-				}
-			}
-			if( count==1 )
-				results = ((ArrayList<Object>)results).get(0) ;
+			cipService.discardNullValue(resultsTemp);
 			
 		}
 		else 
@@ -1024,7 +1014,7 @@ public class CIP extends AbstractNamespace{
     
     public Long[] size( Object... args )
     {
-    	FunctionParameters2 params = new FunctionParameters2("getSize");
+    	FunctionParameters2 params = new FunctionParameters2("size");
 		params.addRequired("inputImage", 	Type.image	);
 		
 		Long[] size = null;
@@ -1042,7 +1032,7 @@ public class CIP extends AbstractNamespace{
 
     
     // functions to collect luts, spacing, axes names
-    public double[] spacing( Object input ) {
+    public List<Double> spacing( Object input ) {
     	return cipService.spacing( input );
     }
     

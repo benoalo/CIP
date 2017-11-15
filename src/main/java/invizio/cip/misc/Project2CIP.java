@@ -13,7 +13,9 @@ import ij.ImagePlus;
 import ij.process.LUT;
 import invizio.cip.CIP;
 import invizio.cip.MetadataCIP;
+import invizio.cip.MetadataCIP2;
 import invizio.cip.RaiCIP;
+import invizio.cip.RaiCIP2;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 import net.imagej.ops.AbstractOp;
@@ -47,7 +49,7 @@ import net.imglib2.view.Views;
 		
 		
 		@Parameter (type = ItemIO.INPUT)
-		private RaiCIP<T> inputImage;
+		private RaiCIP2<T> inputImage;
 		
 		@Parameter( label="dimension", persist=false ) 
 		private Integer dimension;
@@ -60,10 +62,10 @@ import net.imglib2.view.Views;
 		
 		
 		@Parameter (type = ItemIO.OUTPUT)
-		private	RaiCIP<U> projImageCIP;
+		private	RaiCIP2<U> projImageCIP;
 		
 		@Parameter (type = ItemIO.OUTPUT)
-		private	RaiCIP<IntType> argProjImageCIP;
+		private	RaiCIP2<IntType> argProjImageCIP;
 		
 		
 		@Parameter
@@ -206,28 +208,14 @@ import net.imglib2.view.Views;
 		}
 
 		
-		private <V extends RealType<V>> RaiCIP<V> toRaiCIP( RandomAccessibleInterval<V> rai ){
+		private <V extends RealType<V>> RaiCIP2<V> toRaiCIP( RandomAccessibleInterval<V> rai ){
 			
 			// adapt input metadata for the output
-			MetadataCIP metadata = new MetadataCIP( inputImage );
+			MetadataCIP2 metadata = new MetadataCIP2( inputImage );
 			if ( dimension != null )
 				metadata.dropDimension( dimension );	
 			
-			// 
-			if( metadata.lut().size() != 1 )
-			{
-				byte[] red = new byte[256];
-				byte[] green = new byte[256];
-				byte[] blue = new byte[256];
-				
-				for (int i=0 ; i<red.length ; i++) {
-					red[i]   = (byte)i;
-					green[i] = (byte)i;
-					blue[i]  = (byte)i;
-				}
-				metadata.lut( new LUT(red, green, blue) );
-			}
-			return new RaiCIP<V>(rai , metadata );
+			return new RaiCIP2<V>(rai , metadata );
 		}
 		
 		

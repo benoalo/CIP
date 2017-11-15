@@ -9,7 +9,8 @@ import org.scijava.plugin.Plugin;
 
 import invizio.cip.CIP;
 import invizio.cip.MetadataCIP;
-import invizio.cip.RaiCIP;
+import invizio.cip.MetadataCIP2;
+import invizio.cip.RaiCIP2;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 
@@ -35,7 +36,7 @@ import net.imglib2.view.Views;
 		
 		
 		@Parameter (type = ItemIO.INPUT)
-		private RaiCIP<T> inputImage;
+		private RaiCIP2<T> inputImage;
 		
 		@Parameter( label="dimensions", persist=false ) 
 		private Integer[] dimensions;
@@ -47,7 +48,7 @@ import net.imglib2.view.Views;
 		private String method = "shallow";
 
 		@Parameter (type = ItemIO.OUTPUT)
-		private	RaiCIP<T> outputImage;
+		private	RaiCIP2<T> outputImage;
 		
 		
 		@Parameter
@@ -100,22 +101,13 @@ import net.imglib2.view.Views;
 			
 			
 			// adapt input metadata for the output
-			MetadataCIP metadata = new MetadataCIP( inputImage );
+			MetadataCIP2 metadata = new MetadataCIP2( inputImage );
 			if ( dimensions != null && position != null )
 			{
-				// remove unecessary dimensions information
 				metadata.dropDimensions( dimensions );
-				
-				// remove unecessary lut if slicing is channel dim
-				for(int i=0; i<dimensions.length; i++ ) {
-					int d = dimensions[i];
-					long pos = position[i];
-					if( d == metadata.channelDim )
-						metadata.dropLutsOutOfRange((int)pos, (int)pos);
-				}
 			}
 			
-			outputImage = new RaiCIP<T>(raiTmp , metadata );
+			outputImage = new RaiCIP2<T>(raiTmp , metadata );
 			
 			
 		}
