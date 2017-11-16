@@ -16,16 +16,21 @@ public class MetadataCIP2 extends ArrayList<AxisCIP>{
 	
 	int nDim;
 	Map<String, Integer> axesDim;
-	String name;
+	String name="";
+	String[] defaultNames = new String[] {"X", "Y", "Z"};
 	
 	public MetadataCIP2(int nDim)
 	{
 		this.nDim = nDim;
-		
 		axesDim = new HashMap<String,Integer>();
 		for(int d=0; d<nDim; d++ )
 		{
-			String axisName = "D"+d;
+			String axisName;
+			if (d < 3)
+				axisName = defaultNames[d];
+			else
+				axisName = "D"+d;
+			
 			add( new AxisCIP( axisName ) ); 
 			axesDim.put(axisName , d );
 		}	

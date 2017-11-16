@@ -15,6 +15,7 @@ import invizio.cip.parameters.Format;
 import invizio.cip.parameters.FunctionParameters2;
 import invizio.cip.parameters.DefaultParameter2.Type;
 import net.imagej.ImageJ;
+import net.imagej.ImgPlus;
 import net.imagej.ops.AbstractNamespace;
 import net.imagej.ops.Namespace;
 import net.imagej.ops.Op;
@@ -974,7 +975,7 @@ public class CIP extends AbstractNamespace{
 			
 			///////////////////////////////////////////////////////////////////////////////
 			// check if one of the output is null and discard it from the results list
-			cipService.discardNullValue(resultsTemp);
+			results = cipService.discardNullValue(resultsTemp);
 			
 		}
 		else 
@@ -1046,17 +1047,17 @@ public class CIP extends AbstractNamespace{
     
     
     
-    public void show( Object ... args) {
+    public void show( Object image, String ...  lutNames ) {
     	
-    	FunctionParameters2 params = new FunctionParameters2("show");
-    	params.addRequired("inputImage", 	Type.image				);
-    	params.addOptional("lut", 			Type.string, 	"grays"	);
+    	//FunctionParameters2 params = new FunctionParameters2("show");
+    	//params.addRequired("inputImage", 	Type.image				);
+    	//params.addOptional("lut", 			Type.string, 	"grays"	);
 		
-    	if ( params.parseInput( args ) )
-		{
-    		// convert to a dataset with the proper lut associated
-    		uiService.show( params.get("inputImage").value );
-		}
+    	//if ( params.parseInput( args ) )
+		//{
+    	ImgPlus<?> imgPlus = cipService.toImgPlus( image ); 
+    	uiService.show( imgPlus );
+		//}
     }
     
     
