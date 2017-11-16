@@ -9,7 +9,7 @@ import java.util.Map;
 
 import ij.process.LUT;
 
-
+@Deprecated
 public class MetadataCIP {
 
 	public int channelDim = -1;

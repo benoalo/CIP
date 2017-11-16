@@ -10,6 +10,7 @@ import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPositionable;
 
+@Deprecated
 public class RAI_CIP<T> extends MetadataCIP implements RandomAccessibleInterval<T> {
 
 	RandomAccessibleInterval<T> rai;
