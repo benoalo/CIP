@@ -15,6 +15,7 @@ import org.scijava.script.ScriptService;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 
+
 import ij.ImagePlus;
 import ij.measure.Calibration;
 import ij.plugin.LutLoader;
@@ -23,10 +24,15 @@ import invizio.cip.parameters.DefaultParameter2;
 import net.imagej.Dataset;
 import net.imagej.ImageJService;
 import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imagej.axis.DefaultAxisType;
 import net.imagej.ops.OpService;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
+import net.imglib2.img.ImgView;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
@@ -36,6 +42,7 @@ import net.imglib2.type.numeric.integer.LongType;
 import net.imglib2.type.numeric.integer.ShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
+import net.imglib2.util.Util;
  
 
 
@@ -636,7 +643,7 @@ public class CIPService extends AbstractService implements ImageJService {
 			RandomAccessibleInterval<?> rai = (RandomAccessibleInterval<?>) input;
 			int nDim = rai.numDimensions();
 			for(int d=0; d<nDim; d++) {
-				axesUnit.add( null );
+				axesUnit.add( "arbitrary" );
 			}
 		}
 		else if (	input instanceof Dataset )
@@ -694,8 +701,14 @@ public class CIPService extends AbstractService implements ImageJService {
 		{ 
 			RandomAccessibleInterval<?> rai = (RandomAccessibleInterval<?>) input;
 			int nDim = rai.numDimensions();
+			String[] defaultNames = new String[] {"X", "Y", "Z"};
 			for(int d=0; d<nDim; d++) {
-				axesName.add( "D"+d );
+				String axisName;
+				if (d < 3)
+					axesName.add( defaultNames[d] );
+				else
+					axesName.add( "D"+d );
+				;
 			}
 		}
 		else if (	input instanceof Dataset )
@@ -796,11 +809,6 @@ public class CIPService extends AbstractService implements ImageJService {
 			else
 				outputImage = toRaiCIP( outputImage, inputImage );
 			
-			if ( outputType.toLowerCase().equals("segmentation") )
-			{
-				LUT lut = LutLoader.openLut( CIP.class.getResource("/glasbey_inverted.lut").getPath() );
-				( (RaiCIP<?>) outputImage ).lut( lut );
-			}
 			
 		}
 		return outputImage;
@@ -826,5 +834,91 @@ public class CIPService extends AbstractService implements ImageJService {
 		return results;
 	}
 
+	
+	public <T extends RealType<T> & NativeType<T>> ImgPlus<T> toImgPlus(Object image )
+	{
+		ImgPlus<T> imgPlus = null;
+		
+		if (	image instanceof RaiCIP2)
+		{ 
+			imgPlus = toImgPlus( (RaiCIP2<T>) image );
+		}
+		else if (	image instanceof RandomAccessibleInterval )
+		{ 
+			RandomAccessibleInterval<T> rai = (RandomAccessibleInterval<T>) image;
+			Img<T> img = ImgView.wrap(  rai, Util.getArrayOrCellImgFactory( rai , rai.randomAccess().get() ) );
+			imgPlus = new ImgPlus<T>( img );
+		}
+		else if (	image instanceof Dataset )
+		{
+			Dataset dataset = (Dataset) image;
+			imgPlus = (ImgPlus<T>) dataset.getImgPlus();
+		}
+		else if (	image instanceof ImgPlus )
+		{
+			imgPlus = (ImgPlus<T>) image;
+		}
+		else if (	image instanceof ImagePlus )
+		{
+			ImagePlus imp = (ImagePlus) image;
+			Dataset dataset = (Dataset) convertService.convert( imp , Dataset.class );
+			imgPlus = (ImgPlus<T>) dataset.getImgPlus();
+		}
+		else
+		{
+			System.err.println("Unknown image type:" + image.getClass().getName() );
+		}
+
+		return imgPlus;
+	}
+	
+	public <T extends RealType<T> & NativeType<T>> ImgPlus<T> toImgPlus(RaiCIP2<T> raiCIP )
+	{		
+		Img<T> img = ImgView.wrap( raiCIP , Util.getArrayOrCellImgFactory( raiCIP , raiCIP.randomAccess().get() ) );
+		
+		int nDim = raiCIP.nDim;
+		AxisType[] axesType = new AxisType[nDim];
+		double[] spacing = new double[nDim];
+		for(int d=0; d<nDim; d++)
+		{
+			spacing[d] = raiCIP.spacing(d);
+			int nSpacDim = 0;
+			if( raiCIP.axes(d).toUpperCase().equals("X") ) {
+				axesType[d] = Axes.X;
+				nSpacDim++;
+			}
+			else if( raiCIP.axes(d).toUpperCase().equals("Y") ) {
+				axesType[d] = Axes.Y;
+				nSpacDim++;
+			}
+			else if( raiCIP.axes(d).toUpperCase().equals("Z") ) {
+				axesType[d] = Axes.Z;
+				nSpacDim++;
+			}
+			else if( raiCIP.axes(d).toUpperCase().equals("T") ) {
+				axesType[d] = Axes.TIME;
+			}
+			else if( raiCIP.axes(d).toUpperCase().equals("C") ) {
+				axesType[d] = Axes.CHANNEL;
+			}
+			else {
+				if ( nSpacDim < 3 ) {
+					axesType[d] = new DefaultAxisType( raiCIP.axes(d) , true );
+					nSpacDim++;
+				}
+				else
+					axesType[d] = new DefaultAxisType( raiCIP.axes(d) , false );
+				
+			}	
+		}
+		
+		String[] unit = raiCIP.unit().toArray(new String[1]);
+		String name = new String(raiCIP.name);
+		
+		ImgPlus<T> imgPlus = new ImgPlus<T>(img , name, axesType , spacing, unit );
+		
+		return imgPlus;
+	}
+	
 	
 }
