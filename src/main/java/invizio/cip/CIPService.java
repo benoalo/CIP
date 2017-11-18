@@ -1,7 +1,11 @@
 package invizio.cip;
 
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,9 +31,11 @@ import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imagej.axis.DefaultAxisType;
+import net.imagej.lut.LUTService;
 import net.imagej.ops.OpService;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.display.ColorTable;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgView;
 import net.imglib2.type.NativeType;
@@ -63,6 +69,10 @@ public class CIPService extends AbstractService implements ImageJService {
   
   @Parameter
   private ConvertService convertService;
+  
+  @Parameter
+  private LUTService lutService;
+  
   
   @Override
   public void initialize() {
@@ -514,6 +524,8 @@ public class CIPService extends AbstractService implements ImageJService {
 	
 	public <T extends RealType<T> > RaiCIP2<T> toRaiCIP(Object input)
 	{
+		
+		String name = "";
 		RandomAccessibleInterval<T> rai = null;
 		if (	input instanceof RaiCIP2)
 		{ 
@@ -527,17 +539,20 @@ public class CIPService extends AbstractService implements ImageJService {
 		{
 			Dataset dataset = (Dataset) input;
 			rai = (Img<T>) convertService.convert( dataset , Img.class );
+			name = dataset.getName();
 		}
 		else if (	input instanceof ImgPlus )
 		{
 			ImgPlus<T> imgPlus = (ImgPlus<T>) input;
 			rai = (Img<T>) convertService.convert( imgPlus , Img.class );
+			name = imgPlus.getName();
 		}
 		else if (	input instanceof ImagePlus )
 		{
 			ImagePlus imp = (ImagePlus) input;
 			Dataset dataset = (Dataset) convertService.convert( imp , Dataset.class );
 			rai = (Img<T>) dataset.getImgPlus().getImg();
+			name = imp.getTitle();
 		}
 		else
 		{
@@ -545,7 +560,10 @@ public class CIPService extends AbstractService implements ImageJService {
 			return null;
 		}
 		
-		return new RaiCIP2<T>( rai , spacing(input) , axes(input), unit(input));
+		RaiCIP2<T> output = new RaiCIP2<T>( rai , spacing(input) , axes(input), unit(input));
+		output.name = name;
+		
+		return output;
 	}
 
 	
@@ -787,17 +805,11 @@ public class CIPService extends AbstractService implements ImageJService {
 	
 	public Object setMetadata( Object outputImage )
 	{	
-		return setMetadata(outputImage, null );
+		return setMetadata(outputImage, null, "" );
 	}
 	
 	
-	public Object setMetadata( Object outputImage, DefaultParameter2 inputImage )
-	{	
-		return setMetadata(outputImage, inputImage, "default" );
-	}
-	
-	
-	public Object setMetadata( Object outputImage, DefaultParameter2 inputImage, String outputType )
+	public Object setMetadata( Object outputImage, DefaultParameter2 inputImage, String str)
 	{
 		if( outputImage == null ) {
 			return null;
@@ -806,9 +818,11 @@ public class CIPService extends AbstractService implements ImageJService {
 		{
 			if( inputImage==null )
 				outputImage = toRaiCIP( outputImage );
-			else
+			else {
 				outputImage = toRaiCIP( outputImage, inputImage );
-			
+				if( outputImage instanceof RaiCIP2)
+					((RaiCIP2<?>) outputImage).name = str + inputImage.name ;
+			}
 			
 		}
 		return outputImage;
@@ -920,5 +934,88 @@ public class CIPService extends AbstractService implements ImageJService {
 		return imgPlus;
 	}
 	
+	
+	
+	
+	Map<String,URL> lutsURL;
+	
+	public ColorTable lut( String lut ) throws IOException
+	{		
+		if( lutsURL == null )
+			initLutURL();
+		
+		if ( ! lutsURL.containsKey(lut) )
+			return null;
+		
+		return lutService.loadLUT( lutsURL.get(lut) );
+	}
+	
+	
+	private void initLutURL()
+	{
+		
+		/*
+		File lutDir = new File( IJ.getDirectory("luts") );
+		File[] lutsFileRaw = lutDir.listFiles();
+		Map<String, File> lutsFile = new HashMap<String,File>();
+		for(File f : lutsFileRaw) {
+			if( f.isFile() && ( f.getName().endsWith(".txt") || f.getName().endsWith(".lut") ) )
+			{
+				String key = f.getName();
+				key = key.replaceAll(".txt$", "");
+				key = key.replaceAll(".lut$", "");
+				lutsFile.put(key.toLowerCase(), f );
+			}
+		}
+		*/
+		
+		lutsURL = new HashMap<String,URL>();
+		// find and format available luts
+		Map<String,URL> lutURLRaw = lutService.findLUTs();
+		for(Entry<String,URL> e : lutURLRaw.entrySet() ) {
+			String key = e.getKey();
+			String key2 = key.replaceAll( ".lut$", "");
+			key2 = (new File(key2)).getName();
+			lutsURL.put(key2.toLowerCase(), e.getValue() );
+		}
+		
+		
+		// create short cut for the basic color
+		// r g b c y m w
+		lutsURL.put("r", lutsURL.get("red") );
+		lutsURL.put("g", lutsURL.get("green") );
+		lutsURL.put("b", lutsURL.get("blue") );
+		lutsURL.put("c", lutsURL.get("cyan") );
+		lutsURL.put("y", lutsURL.get("yellow") );
+		lutsURL.put("m", lutsURL.get("magenta") );
+		lutsURL.put("w", lutsURL.get("grays") );
+		
+	}
+	
+	static Map<String,String> letterToColor;
+	static {
+		letterToColor = new HashMap<String,String>();
+		letterToColor.put("r", "red");
+		letterToColor.put("g", "green");
+		letterToColor.put("b", "blue");
+		letterToColor.put("c", "cyan");
+		letterToColor.put("y", "yellow");
+		letterToColor.put("m", "magenta");
+		letterToColor.put("w", "grays");	
+	}
+	
+	public String[] parseStringToBasicColor( String str )
+	{
+		String[] lutNames = new String[str.length()];
+		for(int i=0 ; i<str.length() ; i++ )
+		{
+			String letter = str.substring(i, i+1).toLowerCase();
+			if ( letterToColor.containsKey( letter ) )
+				lutNames[i] = letterToColor.get(letter);
+			else
+				return new String[0];
+		}
+		return lutNames;
+	}
 	
 }
