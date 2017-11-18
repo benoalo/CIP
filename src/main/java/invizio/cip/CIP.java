@@ -9,9 +9,12 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.UIService;
 
+import ij.ImagePlus;
 import invizio.cip.parameters.DefaultParameter2;
 import invizio.cip.parameters.FunctionParameters2;
 import invizio.cip.parameters.DefaultParameter2.Type;
+import net.imagej.Dataset;
+import net.imagej.DefaultDataset;
 import net.imagej.ImageJ;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
@@ -1110,6 +1113,26 @@ public class CIP extends AbstractNamespace{
     	uiService.show( imgPlus );
 		//}
     }
+    
+    
+    
+    // 
+    public Dataset toIJ2(Object image) {
+    	
+    	Dataset dataset = new DefaultDataset( this.context() , cipService.toImgPlus( image ) );
+    	
+    	return dataset; 
+    	
+    }
+    
+    
+    // TODO: in the longer term add vconversion from imglib2 Regions to IJ1 Roi
+    public ImagePlus toIJ1(Object image) {
+    	
+    	return cipService.toImagegPlus( image ); 
+    	
+    }
+    
     
     
     /////////////////////////////////////////////////////////

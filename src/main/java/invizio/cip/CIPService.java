@@ -26,6 +26,7 @@ import ij.plugin.LutLoader;
 import ij.process.LUT;
 import invizio.cip.parameters.DefaultParameter2;
 import net.imagej.Dataset;
+import net.imagej.DefaultDataset;
 import net.imagej.ImageJService;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
@@ -935,7 +936,21 @@ public class CIPService extends AbstractService implements ImageJService {
 	}
 	
 	
-	
+	public <T extends RealType<T> & NativeType<T>> ImagePlus toImagegPlus( Object image )
+	{
+		
+		// convert everything to ImgPlus
+		ImgPlus<T> imgPlus = toImgPlus( image );
+		
+		// wrap in dataset 
+		Dataset dataset = new DefaultDataset( this.context(), imgPlus ); 
+		
+		// convert to IJ1 ImagePlus
+		ImagePlus imagePlus = (ImagePlus) convertService.convert( dataset , ImagePlus.class );
+		
+		return imagePlus;
+	}
+
 	
 	Map<String,URL> lutsURL;
 	
@@ -1017,5 +1032,8 @@ public class CIPService extends AbstractService implements ImageJService {
 		}
 		return lutNames;
 	}
+	
+	
+	
 	
 }

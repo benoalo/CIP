@@ -279,17 +279,19 @@ import net.imglib2.view.Views;
 			
 			//ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
 			ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/mitosis_t1.tif");
+			Dataset dataset = (Dataset) ij.io().open("C:/Users/Ben/workspace/testImages/mitosis_t1.tif");
+			Img<UnsignedByteType> img = ImageJFunctions.wrap(imp);
+			
 			//ij.ui().show(imp);
 			
 			
-			Img<UnsignedByteType> img = ImageJFunctions.wrap(imp);
 			
 			CIP cip = new CIP();
 			cip.setContext( ij.getContext() );
 			cip.setEnvironment( ij.op() );
 			
 			@SuppressWarnings("unchecked")
-			RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( img , 3 , "max", "projection"  );
+			RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( imp, 3 , "max", "projection"  );
 			//RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( img1 , 2 , "max", "projection"  );
 					
 			
@@ -298,10 +300,13 @@ import net.imglib2.view.Views;
 			System.out.println("hello projection:" + str );
 			//ij.ui().show(output);
 			
-			Dataset dataset = (Dataset) ij.io().open("C:/Users/Ben/workspace/testImages/mitosis_t1.tif");
+			//Dataset dataset = (Dataset) ij.io().open("C:/Users/Ben/workspace/testImages/mitosis_t1.tif");
 			
+			cip.toIJ1(output).show();
+			System.out.println("hello toIJ2 " + cip.toIJ2(output) );
+			ij.ui().show( cip.toIJ2(output) );
 			
-			cip.show(output );
+			//cip.show(output, "gw");
 			
 			System.out.println("done!");
 		}
