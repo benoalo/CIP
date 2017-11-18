@@ -2,7 +2,9 @@ package invizio.cip.misc;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
@@ -11,6 +13,10 @@ import org.scijava.plugin.Plugin;
 import ij.IJ;
 import ij.ImagePlus;
 import invizio.cip.CIP;
+import invizio.cip.MetadataCIP;
+import invizio.cip.MetadataCIP2;
+import invizio.cip.RaiCIP;
+import invizio.cip.RaiCIP2;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 
@@ -42,7 +48,7 @@ import net.imglib2.view.Views;
 		
 		
 		@Parameter (type = ItemIO.INPUT)
-		private RandomAccessibleInterval<T> inputImage;
+		private RaiCIP2<T> inputImage;
 		
 		@Parameter( label="origin", persist=false, required=false  ) 
 		private Long[] origin;
@@ -54,7 +60,7 @@ import net.imglib2.view.Views;
 		private String method = "shallow";
 
 		@Parameter (type = ItemIO.OUTPUT)
-		private	RandomAccessibleInterval<T> outputImage;
+		private	RaiCIP2<T> outputImage;
 		
 		
 		@Parameter
@@ -98,27 +104,12 @@ import net.imglib2.view.Views;
 				for( int i=0; i<origin.length; i++)
 				{
 					min2[i] = origin[i] + min[i];
-					max2[i] = min2[i] + size[i] - 1;
+					max2[i] = min2[i] + Math.max(size[i],1) - 1;
 				}
 				
-//				System.out.println("input min "+ Arrays.toString(min) );
-//				System.out.println("input max "+ Arrays.toString(max3) );
-//				System.out.println("target min "+ Arrays.toString(origin2) );
-//				System.out.println("target max "+ Arrays.toString(max2) );
-				
-				//temp = Views.interval( inputImage, new FinalInterval(origin2 , max2)  );
 				
 				temp = Views.offsetInterval( inputImage, new FinalInterval(min2 , max2)  );
 			}
-//			else if( origin == null && size == null )
-//			{
-//				long[] min = new long[nDim];
-//				long[] max = new long[nDim];
-//				inputImage.min(min);
-//				inputImage.max(max);
-//				temp = Views.interval( inputImage, min , max  );
-//
-//			}
 			else
 			{
 				// TODO: error message, dimensions and position should exist and have the same size 
@@ -129,21 +120,36 @@ import net.imglib2.view.Views;
 			temp = Views.dropSingletonDimensions( temp);
 			
 			
+			RandomAccessibleInterval<T> outputRAI;
 			if( method.toLowerCase().equals("deep") )
 			{
-				outputImage = op.copy().rai( temp);
+				outputRAI = op.copy().rai( temp);
 			}
 			else {
-				outputImage = temp;
+				outputRAI = temp;
 			}
 			
+			// adapt metadata for the output image
+			MetadataCIP2 metadata = new MetadataCIP2( inputImage );
+			//remove the singleton dimensions
+			List<Integer> dimsToDrop = new ArrayList<Integer>();
+			for(int i=0 ; i<size.length ; i++ ) {
+				if( size[i]<=1 )
+					dimsToDrop.add(i);
+			}
+			Integer[] dims = dimsToDrop.toArray(new Integer[0]);
+			metadata.dropDimensions( dims );	
 			
-			long[] min4 = new long[nDim];
-			outputImage.min(min4);
-			long[] max4 = new long[nDim];
-			outputImage.max(max4);
-			System.out.println("output min "+ Arrays.toString(min4) );
-			System.out.println("output max "+ Arrays.toString(max4) );
+			
+			outputImage = new RaiCIP2<T>(outputRAI , metadata );
+			
+			
+//			long[] min4 = new long[nDim];
+//			outputImage.min(min4);
+//			long[] max4 = new long[nDim];
+//			outputImage.max(max4);
+//			System.out.println("output min "+ Arrays.toString(min4) );
+//			System.out.println("output max "+ Arrays.toString(max4) );
 			
 			
 		}
@@ -176,7 +182,7 @@ import net.imglib2.view.Views;
 			
 			String str = output==null ? "null" : output.toString();
 			
-			//System.out.println("hello duplicate image:" + str );
+			System.out.println("hello duplicate image:" + str );
 			ij.ui().show(output);
 			
 			ImageJFunctions.show(output);

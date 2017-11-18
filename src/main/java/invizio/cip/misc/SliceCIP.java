@@ -1,40 +1,25 @@
 package invizio.cip.misc;
 
 
+import java.io.IOException;
+
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-import ij.IJ;
-import ij.ImagePlus;
 import invizio.cip.CIP;
+import invizio.cip.MetadataCIP;
+import invizio.cip.MetadataCIP2;
+import invizio.cip.RaiCIP2;
+import net.imagej.Dataset;
 import net.imagej.ImageJ;
 
 import net.imagej.ops.AbstractOp;
 import net.imagej.ops.OpService;
 import net.imagej.ops.Op;
-import net.imglib2.Dimensions;
-import net.imglib2.FinalDimensions;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.Img;
-import net.imglib2.img.ImgFactory;
-import net.imglib2.img.ImgView;
-import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.ByteType;
-import net.imglib2.type.numeric.integer.IntType;
-import net.imglib2.type.numeric.integer.LongType;
-import net.imglib2.type.numeric.integer.ShortType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.type.numeric.integer.UnsignedIntType;
-import net.imglib2.type.numeric.integer.UnsignedLongType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.numeric.real.DoubleType;
-import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
 
@@ -51,7 +36,7 @@ import net.imglib2.view.Views;
 		
 		
 		@Parameter (type = ItemIO.INPUT)
-		private RandomAccessibleInterval<T> inputImage;
+		private RaiCIP2<T> inputImage;
 		
 		@Parameter( label="dimensions", persist=false ) 
 		private Integer[] dimensions;
@@ -63,7 +48,7 @@ import net.imglib2.view.Views;
 		private String method = "shallow";
 
 		@Parameter (type = ItemIO.OUTPUT)
-		private	RandomAccessibleInterval<T> outputImage;
+		private	RaiCIP2<T> outputImage;
 		
 		
 		@Parameter
@@ -103,15 +88,26 @@ import net.imglib2.view.Views;
 			
 			
 			RandomAccessibleInterval<T> temp = Views.offsetInterval( inputImage, new FinalInterval( min , max ) );
-			temp = Views.dropSingletonDimensions( temp);
+			temp = Views.dropSingletonDimensions( temp );
 			
+			RandomAccessibleInterval<T> raiTmp;
 			if( method.toLowerCase().equals("deep") )
 			{
-				outputImage = op.copy().rai( temp);
+				raiTmp= op.copy().rai( temp);
 			}
 			else {
-				outputImage = temp;
+				raiTmp = temp;
 			}
+			
+			
+			// adapt input metadata for the output
+			MetadataCIP2 metadata = new MetadataCIP2( inputImage );
+			if ( dimensions != null && position != null )
+			{
+				metadata.dropDimensions( dimensions );
+			}
+			
+			outputImage = new RaiCIP2<T>(raiTmp , metadata );
 			
 			
 		}
@@ -120,7 +116,7 @@ import net.imglib2.view.Views;
 
 		
 		
-		public static void main(final String... args)
+		public static void main(final String... args) throws IOException
 		{
 			
 			ImageJ ij = new ImageJ();
@@ -130,15 +126,15 @@ import net.imglib2.view.Views;
 			ij.ui().show(imp);
 			
 			
-			Img<UnsignedByteType> img = ImageJFunctions.wrap(imp);
+			//Img<UnsignedByteType> img = ImageJFunctions.wrap(imp);
 			
 			CIP cip = new CIP();
 			cip.setContext( ij.getContext() );
 			cip.setEnvironment( ij.op() );
 			
 			@SuppressWarnings("unchecked")
-			RandomAccessibleInterval<UnsignedByteType> output = (RandomAccessibleInterval<UnsignedByteType>)
-									cip.slice( img , cip.list(2,3) , cip.list(1,2)  );
+			RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>)
+									cip.slice( imp , cip.list(2,3) , cip.list(1,2)  );
 					
 			//cip.create( cip.aslist(100, 50, 2) , 10, "double"  );
 			

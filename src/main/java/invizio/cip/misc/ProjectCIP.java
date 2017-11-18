@@ -31,7 +31,7 @@ import net.imglib2.view.Views;
  *
  */
 
-
+	@Deprecated
 	@Plugin(type = Op.class, name="ProjectCIP", headless = true)
 	public class ProjectCIP  < T extends RealType<T> & NativeType<T> > extends AbstractOp 
 	{
