@@ -7,16 +7,18 @@ import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
+import ij.IJ;
+import ij.ImagePlus;
+
 import invizio.cip.CIP;
-import invizio.cip.MetadataCIP;
 import invizio.cip.MetadataCIP2;
 import invizio.cip.RaiCIP2;
-import net.imagej.Dataset;
-import net.imagej.ImageJ;
 
+import net.imagej.ImageJ;
 import net.imagej.ops.AbstractOp;
 import net.imagej.ops.OpService;
 import net.imagej.ops.Op;
+
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;

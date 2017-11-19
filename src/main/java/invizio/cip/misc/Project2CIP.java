@@ -2,7 +2,6 @@ package invizio.cip.misc;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
@@ -10,13 +9,9 @@ import org.scijava.plugin.Plugin;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.process.LUT;
 import invizio.cip.CIP;
-import invizio.cip.MetadataCIP;
 import invizio.cip.MetadataCIP2;
-import invizio.cip.RaiCIP;
 import invizio.cip.RaiCIP2;
-import net.imagej.Dataset;
 import net.imagej.ImageJ;
 import net.imagej.ops.AbstractOp;
 import net.imagej.ops.OpService;
@@ -26,12 +21,9 @@ import net.imglib2.Cursor;
 import net.imglib2.FinalDimensions;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.Img;
-import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 
@@ -287,7 +279,6 @@ import net.imglib2.view.Views;
 			cip.setContext( ij.getContext() );
 			cip.setEnvironment( ij.op() );
 			
-			@SuppressWarnings("unchecked")
 			RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( imp, 3 , "max", "projection"  );
 			//RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( img1 , 2 , "max", "projection"  );
 					
