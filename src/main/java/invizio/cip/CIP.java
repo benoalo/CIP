@@ -12,6 +12,7 @@ import org.scijava.ui.UIService;
 import ij.ImagePlus;
 import invizio.cip.parameters.DefaultParameter2;
 import invizio.cip.parameters.FunctionParameters2;
+import invizio.cip.region.Regions;
 import invizio.cip.parameters.DefaultParameter2.Type;
 import net.imagej.Dataset;
 import net.imagej.DefaultDataset;
@@ -28,6 +29,9 @@ import net.imglib2.Interval;
 import net.imglib2.display.ColorTable;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.type.logic.BitType;
+import net.imglib2.type.logic.BoolType;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
 
@@ -1133,6 +1137,13 @@ public class CIP extends AbstractNamespace{
     	
     }
     
+    
+    // return an iterable region or a list of iterable regions depending on the input
+    // to check: does a thresholded imagePlus converts to a BooleanType RaiCIP2 ?
+    public Object region( Object image )
+    {
+    	return Regions.toIterableRegion( image, cipService );
+    }
     
     
     /////////////////////////////////////////////////////////
