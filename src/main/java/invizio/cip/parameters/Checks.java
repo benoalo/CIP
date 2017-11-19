@@ -1,11 +1,10 @@
 package invizio.cip.parameters;
 
-import java.util.List;
 
 import ij.ImagePlus;
 import net.imagej.Dataset;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.Img;
+import net.imglib2.roi.IterableRegion;
 
 
 /**
@@ -51,7 +50,32 @@ public class Checks {
 	}
 	
 	
+	public static boolean isOneRegion( Object value)
+	{
+		if( value instanceof IterableRegion )
+			return true;
+		
+		return false;
+	}
+
 	
+	public static boolean isRegion( Object value)
+	{
+		if( isOneRegion( value ) )
+			return true;
+		else {
+			if( isArray(value) ){
+				return isOneRegion( ((Object[]) value)[0] );  // won't work if value is a primitive array
+			}
+			if ( isIterable(value) ){
+				Iterable<?> iterable = (Iterable<?>) value;
+				for( Object obj : iterable ) {
+					return isOneRegion( obj ); // in principle all items would have to be checked
+				}
+			}
+		}
+		return false;
+	}
 	
 
 
@@ -82,8 +106,7 @@ public class Checks {
 	
 	public static boolean isImage( Object value)
 	{
-		if	( 	value instanceof Img 						||
-				value instanceof RandomAccessibleInterval 	||
+		if	( 	value instanceof RandomAccessibleInterval 	||
 				value instanceof Dataset 					||
 				value instanceof ImagePlus					
 		) {
@@ -92,6 +115,8 @@ public class Checks {
 		
 		return false;
 	}
+	
+	
 	
 	
 	
