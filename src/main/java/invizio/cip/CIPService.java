@@ -315,7 +315,7 @@ public class CIPService extends AbstractService implements ImageJService {
 	@SuppressWarnings("unchecked")
 	private <T extends RealType<T>, U extends RealType<U>> void updateImgType( DefaultParameter2 parameter , String type)
 	{
-		RaiCIP<T> input0 = (RaiCIP<T>) parameter.value;
+		RaiCIP2<T> input0 = (RaiCIP2<T>) parameter.value;
 		
 		IterableInterval<T> input = null;
 		//if( parameter.value instanceof RandomAccessibleInterval )
@@ -382,7 +382,7 @@ public class CIPService extends AbstractService implements ImageJService {
 		}
 		
 		RandomAccessibleInterval<U> rai = (RandomAccessibleInterval<U>) parameter.value;
-		parameter.value = new RaiCIP<U>( rai, input0.spacing(), input0.axes(), input0.unit(), input0.lut()  );
+		parameter.value = new RaiCIP2<U>( rai, input0.spacing(), input0.axes(), input0.unit());
 		
 	}
 	
