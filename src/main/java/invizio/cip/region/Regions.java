@@ -6,6 +6,12 @@ import java.util.Set;
 
 import invizio.cip.CIPService;
 import invizio.cip.RaiCIP2;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.Roi;
+import ij.plugin.filter.ThresholdToSelection;
+
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
@@ -90,5 +96,67 @@ public class Regions {
 		return  IterableRandomAccessibleRegion.create( mask );
 	}
 
+
+	
+	
+	public static <B extends BooleanType<B>> List<List<Roi>> toIJ1ROI( List<IterableRegion<B>> regions , CIPService cipService )
+	{
+		List<List<Roi>> roiListPerRegion = new ArrayList<List<Roi>>();
+		for(IterableRegion<B> region : regions)
+		{
+			roiListPerRegion.add( toIJ1ROI( region , cipService ) );
+		}
+		return roiListPerRegion;
+	}
+	
+	// TODO: add toIterableRegion(List<Roi>) toIterableRegion(List<List<Roi>>)
+	
+	
+	
+	
+	public static <B extends BooleanType<B>> List<Roi> toIJ1ROI( IterableRegion<B> region , CIPService cipService )
+	{
+		// convert the region to an image plus mask
+		int nDim = region.numDimensions();
+		ImagePlus impReg = cipService.toImagegPlus( (RandomAccessibleInterval<B>) region );
+		IJ.setThreshold(impReg, 0, 0.5);
+		ThresholdToSelection roiMaker = new ThresholdToSelection();
+		
+		int x0 = (int)region.min(0); // region have no information on axes type so we default x,y to the 2 first axis
+		int y0 = (int)region.min(1); // have region metadata would allow to keep track of that
+		int z0 = 0;
+		if( nDim>=2 )
+		{
+			z0 = (int)region.min(2);
+		}
+		
+		
+		// Iterate on the plane of the imageplus and create a roi on each plane
+		List<Roi> roiList = new ArrayList<Roi>();
+		
+		int nSlice = impReg.getStackSize();
+		if( nSlice==1 )
+		{
+			Roi roi = roiMaker.convert( impReg.getProcessor() );
+			roi.setLocation(x0, y0);
+			roi.setPosition( z0 + 1 );
+			roiList.add(roi);
+		}
+		else
+		{
+			ImageStack stack = impReg.getStack();
+			for(int i=1; i<=nSlice; i++)
+			{
+				Roi roi = roiMaker.convert( stack.getProcessor(i) );
+				roi.setLocation(x0, y0);
+				roi.setPosition( z0 + i );
+				roiList.add(roi);
+			}
+		}
+		
+		return roiList;
+	}
+	
+	
 	
 }

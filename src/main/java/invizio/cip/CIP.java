@@ -1077,6 +1077,21 @@ public class CIP extends AbstractNamespace{
     }
     
     
+    
+    // TODO bring all the show function to a SHOW util containing the variation of show
+    // create a single show function that dispatch the different signature  to the function in the Show util
+    
+    public void show(String imagehandle, Object regions,  String colorStyleString )
+    {
+    	// TODO
+    	// grab the imageplus corresponding to the imageHandle
+    	// create rois for each regions (ready in regions utils)
+    	// parse the color style string (simple handle color from initially, lut and possibly stroke style later on)
+    	// create an overlay and add the region with appropriate stroke and position
+    	//		initially assume image and region have the same dimensionality
+    	// 		then consider different of dimensionality assuming the region dims are xyz
+    	//		then consider more generic case (well... still in the IJ1 context)
+    }
 	
     public void show( Object image, String ...  lutNames ) throws IOException {
     	
@@ -1114,6 +1129,9 @@ public class CIP extends AbstractNamespace{
 	    		imgPlus.setColorTable(cMap, ch);
 	    	}
     	}
+	    //TODO: create for an appropriate display name (add " - 1", " - 2", ... if the display already exist) 
+	    //		then use show(displayName, imgPlus) to visualize the image 
+	    //		return displayname as has the image handle
     	uiService.show( imgPlus );
 		//}
     }
@@ -1130,7 +1148,7 @@ public class CIP extends AbstractNamespace{
     }
     
     
-    // TODO: in the longer term add vconversion from imglib2 Regions to IJ1 Roi
+    // TODO: in the longer term add conversion from imglib2 Regions to IJ1 Roi
     public ImagePlus toIJ1(Object image) {
     	
     	return cipService.toImagegPlus( image ); 
