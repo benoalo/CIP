@@ -5,24 +5,24 @@ CIP is a Java library focused in Image processing. It exposes Classic Image Proc
 * Maintaining a carefully curated list of functions
   * Select function already adopted by the community
   * Provide minimal set of functions to go from an 
-  * all function works in 2D/3D (and nD whenever possible)
-  * measuring processing speed (with aim to be on par with IJ1 and faster whenever possible)
+  * All function works in 2D/3D (and nD whenever possible)
+  * Aim to be on par with IJ1  speed-wise and faster whenever possible)
 
 * Easing functions discovery and learning
-  * consitent function interfaces
-  * optional and named parameter
-  * strong documentation
-  * never modify function input
+  * Consitent function interfaces
+  * Optional and named parameter
+  * Strong documentation
 
-* Making scripting less verbose and more readable
-  * minimize the number of type to manuipulate
-  * handling image type behind the scene
-  * minimizing imports
+* Making scripting easier to wite and understand
+  * Minimize the number of type to manipulate
+  * Handling image type and conversion behind the scene
+  * Minimizing library imports
+  * Never modify function input
 
 
 * Rely on existing infrastructure to allow CIP to work hand in hand with imageJ tools
-  * rely on ImgLib2 and ImageJ Op
-  * handling conversion to IJ1 and IJ2 image and regions
+  * Rely on ImgLib2 and ImageJ Op
+  * Handling conversion to IJ1 and IJ2 image and regions
  
  
  
