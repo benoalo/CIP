@@ -56,6 +56,7 @@ CIP is a Java library focused in Image processing. It exposes Classic Image Proc
 
 
 ### to use CIP in ImageJ
+CIP and ImgAlgo jar will be soon available via an ImageJ update site
 1. Drop the ImgAlgo and CIP jar in your ImageJ plugins folder
 2. Restart ImageJ
 3. Open ImageJ script editor
