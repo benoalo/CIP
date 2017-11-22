@@ -1,15 +1,17 @@
 package invizio.cip;
 
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.scijava.display.DisplayService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.UIService;
 
+import ij.IJ;
 import ij.ImagePlus;
+import invizio.cip.misc.ShowCIPService;
 import invizio.cip.parameters.DefaultParameter2;
 import invizio.cip.parameters.FunctionParameters2;
 import invizio.cip.region.Regions;
@@ -17,21 +19,14 @@ import invizio.cip.parameters.DefaultParameter2.Type;
 import net.imagej.Dataset;
 import net.imagej.DefaultDataset;
 import net.imagej.ImageJ;
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.lut.LUTService;
 import net.imagej.ops.AbstractNamespace;
 import net.imagej.ops.Namespace;
 import net.imagej.ops.Op;
 import net.imagej.ops.OpMethod;
 import net.imglib2.Cursor;
 import net.imglib2.Interval;
-import net.imglib2.display.ColorTable;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.type.logic.BitType;
-import net.imglib2.type.logic.BoolType;
-import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
 
@@ -105,10 +100,17 @@ public class CIP extends AbstractNamespace{
 	private CIPService cipService;
 	
 	@Parameter
-	private UIService uiService;
+	private ShowCIPService showCipService;
 	
 	@Parameter
-	private LUTService lutService;
+	private UIService uiService;
+	
+	//@Parameter
+	//private LUTService lutService;
+	
+	@Parameter
+	private DisplayService displayService;
+	
 	
 	public CIP() {
 		super();
@@ -203,7 +205,7 @@ public class CIP extends AbstractNamespace{
 		FunctionParameters2 params = new FunctionParameters2("Distance");
 		params.addRequired("inputImage", 	Type.image 	);
 		params.addOptional("threshold", 	Type.scalar , 		null	);
-		params.addOptional("pixelSize", 	Type.numeric , 		1f		);
+		params.addOptional("pixelSize", 	Type.scalars , 		1f		);
 		
 		if ( params.parseInput( args ) )
 		{
@@ -252,7 +254,7 @@ public class CIP extends AbstractNamespace{
 		params.addOptional("ScaleMax",		Type.scalar , 	null 	);
 		params.get( "ScaleMax" ).aliases.add( "smax" );
 		params.addOptional("Method", 		Type.string , 	null	);
-		params.addOptional("PixelSize", 	Type.numeric, 	null	);
+		params.addOptional("PixelSize", 	Type.scalars, 	null	);
 		
 		if ( params.parseInput( args ) )
 		{
@@ -367,9 +369,9 @@ public class CIP extends AbstractNamespace{
     	
     	FunctionParameters2 params = new FunctionParameters2("gaussian convolution");
    		params.addRequired("inputImage", 	Type.image 	);
-   		params.addRequired("radius", 		Type.numeric ); 
+   		params.addRequired("radius", 		Type.scalars ); 
    		params.addOptional("boundary", 		Type.string  , 	null	); 
-   		params.addOptional("pixelSize", 	Type.numeric , 	null	); 
+   		params.addOptional("pixelSize", 	Type.scalars , 	null	); 
    		
    		if ( params.parseInput( args ) )
    		{
@@ -389,10 +391,10 @@ public class CIP extends AbstractNamespace{
   	
   		FunctionParameters2 params = new FunctionParameters2("median");
  		params.addRequired("inputImage", 	Type.image 	);
- 		params.addRequired("radius", 		Type.numeric );
+ 		params.addRequired("radius", 		Type.scalars );
  		params.addOptional("shape", 		Type.string  , 	null	); 
  		params.addOptional("boundary", 		Type.string  , 	null	); 
- 		params.addOptional("pixelSize", 	Type.numeric , 	null	); 
+ 		params.addOptional("pixelSize", 	Type.scalars , 	null	); 
  		
  		
  		if ( params.parseInput( args ) )
@@ -441,12 +443,12 @@ public class CIP extends AbstractNamespace{
    	
    		FunctionParameters2 params = new FunctionParameters2("dilation");
   		params.addRequired("inputImage", 	Type.image 	);
-  		params.addRequired("radius", 		Type.numeric );
+  		params.addRequired("radius", 		Type.scalars );
   		params.addOptional("shape", 		Type.string  , 	null	); 
   		params.addOptional("boundary", 		Type.string  , 	null	); 
   		params.addOptional("output", 		Type.string  ,	null	);
-  		params.addOptional("pixelSize", 	Type.numeric , 	null	); 
-  		params.addOptional("nthread", 		Type.numeric ,	null	);
+  		params.addOptional("pixelSize", 	Type.scalars , 	null	); 
+  		params.addOptional("nthread", 		Type.scalars ,	null	);
   		
   		
   		if ( params.parseInput( args ) )
@@ -467,12 +469,12 @@ public class CIP extends AbstractNamespace{
    	
    		FunctionParameters2 params = new FunctionParameters2("erosion");
   		params.addRequired("inputImage", 	Type.image 	);
-  		params.addRequired("radius", 		Type.numeric );
+  		params.addRequired("radius", 		Type.scalars );
   		params.addOptional("shape", 		Type.string  , 	null	); 
   		params.addOptional("boundary", 		Type.string  , 	null	); 
   		params.addOptional("output", 		Type.string  ,	null	);
-  		params.addOptional("pixelSize", 	Type.numeric , 	null	); 
-  		params.addOptional("nthread", 		Type.numeric ,	nThread	);
+  		params.addOptional("pixelSize", 	Type.scalars , 	null	); 
+  		params.addOptional("nthread", 		Type.scalars ,	nThread	);
   		
   		
   		if ( params.parseInput( args ) )
@@ -492,12 +494,12 @@ public class CIP extends AbstractNamespace{
    	
    		FunctionParameters2 params = new FunctionParameters2("opening");
   		params.addRequired("inputImage", 	Type.image 	);
-  		params.addRequired("radius", 		Type.numeric );
+  		params.addRequired("radius", 		Type.scalars );
   		params.addOptional("shape", 		Type.string  , 	null	); 
   		params.addOptional("boundary", 		Type.string  , 	null	); 
   		params.addOptional("output", 		Type.string  ,	null	);
-  		params.addOptional("pixelSize", 	Type.numeric , 	null	); 
-  		params.addOptional("nthread", 		Type.numeric ,	nThread	);
+  		params.addOptional("pixelSize", 	Type.scalars , 	null	); 
+  		params.addOptional("nthread", 		Type.scalars ,	nThread	);
   		
   		
   		if ( params.parseInput( args ) )
@@ -519,12 +521,12 @@ public class CIP extends AbstractNamespace{
    	
    		FunctionParameters2 params = new FunctionParameters2("closing");
   		params.addRequired("inputImage", 	Type.image 	);
-  		params.addRequired("radius", 		Type.numeric );
+  		params.addRequired("radius", 		Type.scalars );
   		params.addOptional("shape", 		Type.string  , 	null	); 
   		params.addOptional("boundary", 		Type.string  , 	null	); 
   		params.addOptional("output", 		Type.string  ,	null	);
-  		params.addOptional("pixelSize", 	Type.numeric , 	null	); 
-  		params.addOptional("nthread", 		Type.numeric ,	nThread	);
+  		params.addOptional("pixelSize", 	Type.scalars , 	null	); 
+  		params.addOptional("nthread", 		Type.scalars ,	nThread	);
   		
   		
   		if ( params.parseInput( args ) )
@@ -545,12 +547,12 @@ public class CIP extends AbstractNamespace{
    	
    		FunctionParameters2 params = new FunctionParameters2("tophat");
   		params.addRequired("inputImage", 	Type.image 	);
-  		params.addRequired("radius", 		Type.numeric );
+  		params.addRequired("radius", 		Type.scalars );
   		params.addOptional("shape", 		Type.string  , 	null	); 
   		params.addOptional("boundary", 		Type.string  , 	null	); 
   		params.addOptional("output", 		Type.string  ,	null	);
-  		params.addOptional("pixelSize", 	Type.numeric , 	null	); 
-  		params.addOptional("nthread", 		Type.numeric ,	nThread	);
+  		params.addOptional("pixelSize", 	Type.scalars , 	null	); 
+  		params.addOptional("nthread", 		Type.scalars ,	nThread	);
   		
   		
   		if ( params.parseInput( args ) )
@@ -871,7 +873,7 @@ public class CIP extends AbstractNamespace{
 		params1.addOptional("name", 		Type.string , 	"new_"+count	);
 		  		
    		FunctionParameters2 params2 = new FunctionParameters2("create2");
-		params2.addRequired("extent", 		Type.numeric	);
+		params2.addRequired("extent", 		Type.scalars	);
 		params2.addOptional("value", 		Type.scalar , 	0	);
 		params2.addOptional("type", 		Type.string , 	"float"	);
 		params2.addOptional("name", 		Type.string , 	"new_"+count	);
@@ -924,9 +926,9 @@ public class CIP extends AbstractNamespace{
    		
    		FunctionParameters2 params = new FunctionParameters2("sliceCIP");
 		params.addRequired("inputImage", 	Type.image	);
-		params.addOptional("dimensions", 	Type.numeric,	null	);
-		params.addOptional("position",		Type.numeric, 	null	);
-		params.addOptional("method",		Type.numeric, 	"shallow"	);
+		params.addOptional("dimensions", 	Type.scalars,	null	);
+		params.addOptional("position",		Type.scalars, 	null	);
+		params.addOptional("method",		Type.string, 	"shallow"	);
 		
 		if ( params.parseInput( args ) )
 		{
@@ -952,8 +954,8 @@ public class CIP extends AbstractNamespace{
    	
    		FunctionParameters2 params = new FunctionParameters2("sliceCIP");
 		params.addRequired("inputImage", 	Type.image	);
-		params.addOptional("origin", 		Type.numeric,	null	);
-		params.addOptional("size",			Type.numeric, 	null	);
+		params.addOptional("origin", 		Type.scalars,	null	);
+		params.addOptional("size",			Type.scalars, 	null	);
 		params.addOptional("method",		Type.string, 	"shallow"	);
 
 		if ( params.parseInput( args ) )
@@ -1078,80 +1080,91 @@ public class CIP extends AbstractNamespace{
     
     
     
-    // TODO bring all the show function to a SHOW util containing the variation of show
-    // create a single show function that dispatch the different signature  to the function in the Show util
     
-    public void show(String imagehandle, Object regions,  String colorStyleString )
-    {
-    	// TODO
-    	// grab the imageplus corresponding to the imageHandle
-    	// create rois for each regions (ready in regions utils)
-    	// parse the color style string (simple handle color from initially, lut and possibly stroke style later on)
-    	// create an overlay and add the region with appropriate stroke and position
-    	//		initially assume image and region have the same dimensionality
-    	// 		then consider different of dimensionality assuming the region dims are xyz
-    	//		then consider more generic case (well... still in the IJ1 context)
+    public String show( Object ... args )
+    {	
+    	
+    	FunctionParameters2 paramsImg = new FunctionParameters2("showImage");
+    	paramsImg.addRequired("inputImage", 	Type.image				);
+    	paramsImg.addOptional("lut", 			Type.strings, 	"grays"	);
+    	// params.addOptional("channelDim", 	Type.scalar	, null		);  //if ch dim exist , swap with requested dim, else overwrite the proposed dim 
+    	
+    	
+    	FunctionParameters2 paramsReg = new FunctionParameters2("showRegion");
+    	paramsReg.addRequired("imageHandle", 	Type.string				);
+    	paramsReg.addRequired("region", 		Type.region 			); // should also handle the case of roi, list<roi>, and list<list<roi>>
+    	paramsReg.addOptional("color", 			Type.string,  "lila" 	);
+    	paramsReg.addOptional("width", 			Type.scalar,   1.0 		);
+    	paramsReg.addOptional("scalars", 		Type.scalars,  null 	);
+    	paramsReg.addOptional("reset", 		Type.logic,    new Boolean(false) ); // whether one should reset the overlay or not
+    	// also fill for fill color and style for the stroke type
+    	
+    	
+    	String name = null;
+    	
+    	if ( paramsImg.parseInput( args ) )
+		{
+    		name  = showCipService.showImage(paramsImg);
+    	}
+    	else if ( paramsReg.parseInput( args ) )
+		{
+    		showCipService.showRegion(paramsReg);
+		}
+    	
+    	return name;
     }
 	
-    public void show( Object image, String ...  lutNames ) throws IOException {
+    
+    
+    
+    
+    
+    public Object toIJ2(Object ... args ) {
     	
+    	Object result = null;
     	
-    	// TODO: would be nice to pass the channel dimension if not well guessed from the metadata
-    	
-//    	FunctionParameters2 params = new FunctionParameters2("show");
-//    	params.addRequired("inputImage", 	Type.image				);
-//    	params.addOptional("channelDim", 	Type.scalar	, null		);  //if ch dim exist , swap with requested dim, else overwrite the proposed dim 
-//    	params.addOptional("lut", 		Type.string, 	"grays"	);
-//		
-//    	if ( params.parseInput( args ) )
-//		{
-//    		
-//    	}
-    	
-    	ImgPlus<?> imgPlus = cipService.toImgPlus( image ); 
-    	
-    	int nCh = (int)imgPlus.dimension( imgPlus.dimensionIndex( Axes.CHANNEL ) );
-    	imgPlus.initializeColorTables(nCh);
-		
-    	if ( lutNames.length == 1  && cipService.lut(lutNames[0])==null )
-		{
-			// try to parse the string as first letter of basic colors
-			lutNames = cipService.parseStringToBasicColor( lutNames[0] );
+    	FunctionParameters2 paramsImg = new FunctionParameters2("toIJ1_Image");
+    	paramsImg.addRequired("image", 	Type.image				);
+
+    	FunctionParameters2 paramsReg = new FunctionParameters2("toIJ1_Region");
+    	paramsImg.addRequired("region", 	Type.region				);
+
+    	if ( paramsImg.parseInput( args ) )
+		{	
+    		Object image = paramsImg.get("image").value;
+    		result = new DefaultDataset( this.context() , cipService.toImgPlus( image ) );
 		}
-		
-		int nLut = lutNames.length;
-	    if( nLut>0 )
-	    {
-			for( int ch=0; ch<nCh; ch++)
-	    	{
-    			int lutIdx = Math.min(ch, nLut-1);
-	    		ColorTable cMap = cipService.lut( lutNames[lutIdx] );
-	    		imgPlus.setColorTable(cMap, ch);
-	    	}
+    	else if ( paramsReg.parseInput( args ) )
+		{
+    		// TODO: add conversion from Roi or List<Roi> to Region or List<Region>
+		}
+    	
+    	return result; 
+    	
+    }
+    
+    
+    
+    public Object toIJ1(Object ... args) {
+    	
+    	Object result = null;
+    	
+    	FunctionParameters2 paramsImg = new FunctionParameters2("toIJ1_Image");
+    	paramsImg.addRequired("image", 	Type.image				);
+
+    	FunctionParameters2 paramsReg = new FunctionParameters2("toIJ1_Region");
+    	paramsImg.addRequired("region", 	Type.region				);
+
+    	if ( paramsImg.parseInput( args ) )
+		{
+    		result = cipService.toImagegPlus( paramsImg.get("image").value );
     	}
-	    //TODO: create for an appropriate display name (add " - 1", " - 2", ... if the display already exist) 
-	    //		then use show(displayName, imgPlus) to visualize the image 
-	    //		return displayname as has the image handle
-    	uiService.show( imgPlus );
-		//}
-    }
-    
-    
-    
-    // 
-    public Dataset toIJ2(Object image) {
+    	else if ( paramsReg.parseInput( args ) )
+		{
+    		result = Regions.toIJ1ROI( paramsReg.get("region").value );
+		}
     	
-    	Dataset dataset = new DefaultDataset( this.context() , cipService.toImgPlus( image ) );
-    	
-    	return dataset; 
-    	
-    }
-    
-    
-    // TODO: in the longer term add conversion from imglib2 Regions to IJ1 Roi
-    public ImagePlus toIJ1(Object image) {
-    	
-    	return cipService.toImagegPlus( image ); 
+    	return result; 
     	
     }
     
@@ -1169,14 +1182,30 @@ public class CIP extends AbstractNamespace{
     /////////////////////////////////////////////////////////
     
     // this way I only need to add list support in the input parsing
-    public static List<Double> list( double ... ds ) {
-		List<Double> list = new ArrayList<Double>();
-		for ( double value : ds ) {
-			list.add( value );
+//    public static List<Object> list( Object ... args ) {
+//		List<Object> list = new ArrayList<Object>();
+//		for ( Object obj : args ) {
+//			list.add( obj );
+//		}
+//		return list;
+//	}
+	
+    public static <T> List<T> list( T ... args ) {
+		List<T> list = new ArrayList<T>();
+		for ( T obj : args ) {
+			list.add( obj );
 		}
 		return list;
 	}
-	
+    
+    public static List<Double> list( Double ... args ) {
+		List<Double> list = new ArrayList<Double>();
+		for ( Double obj : args ) {
+			list.add( obj );
+		}
+		return list;
+	}
+
     
     // would be awesome if all arrays and scalar would represented by RAIs (i.e. not only images)
 	@Deprecated
@@ -1203,30 +1232,32 @@ public class CIP extends AbstractNamespace{
 	
 	
 	
-	public static void main(final String... args)
+	public static void main(final String... args) 
 	{
 		
 		ImageJ ij = new ImageJ();
-		
-		//ij.ui().showUI();
+		ij.ui().showUI();
 		
 		//ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
-		//ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs32.tif");
+		ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs32.tif");
 		//ij.ui().show(imp);
-		/*
-		
-		Img<FloatType> img = ImageJFunctions.wrap(imp);
-		float threshold = 100;
-		Float[] pixelSize = new Float[] {0.5f};
+//		Img<FloatType> img = ImageJFunctions.wrap(imp);
+//		float threshold = 100;
+//		Float[] pixelSize = new Float[] {0.5f};
 		
 		CIP cip = new CIP();
 		cip.setContext( ij.getContext() );
 		cip.setEnvironment( ij.op() );
-		@SuppressWarnings("unchecked")
-		RandomAccessibleInterval<IntType> distMap = (RandomAccessibleInterval<IntType>) cip.distance(img, threshold );
+//		@SuppressWarnings("unchecked")
+//		RandomAccessibleInterval<IntType> distMap = (RandomAccessibleInterval<IntType>) cip.distance(img, threshold );
+//		
+//		ij.ui().show(distMap);
 		
-		ij.ui().show(distMap);
-		*/
+		String h1 = cip.show( imp , "red");
+		String h2 = cip.show( imp , "green");
+		
+		System.out.println("h1 -> "+h1);
+		System.out.println("h2 -> "+h2);
 		System.out.println("done!");
 	}
 	

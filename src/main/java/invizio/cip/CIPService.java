@@ -1,11 +1,7 @@
 package invizio.cip;
 
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,12 +15,12 @@ import org.scijava.script.ScriptService;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 
-
 import ij.ImagePlus;
 import ij.measure.Calibration;
-import ij.plugin.LutLoader;
-import ij.process.LUT;
+
+import invizio.cip.parameters.Checks;
 import invizio.cip.parameters.DefaultParameter2;
+
 import net.imagej.Dataset;
 import net.imagej.DefaultDataset;
 import net.imagej.ImageJService;
@@ -32,11 +28,10 @@ import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imagej.axis.DefaultAxisType;
-import net.imagej.lut.LUTService;
 import net.imagej.ops.OpService;
+
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.display.ColorTable;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgView;
 import net.imglib2.type.NativeType;
@@ -71,8 +66,7 @@ public class CIPService extends AbstractService implements ImageJService {
   @Parameter
   private ConvertService convertService;
   
-  @Parameter
-  private LUTService lutService;
+ 
   
   
   @Override
@@ -523,6 +517,7 @@ public class CIPService extends AbstractService implements ImageJService {
 		parameter.value = toRaiCIP( parameter.value ); 
 	}
 	
+	@SuppressWarnings("unchecked")
 	public <T extends RealType<T> > RaiCIP2<T> toRaiCIP(Object input)
 	{
 		
@@ -568,6 +563,7 @@ public class CIPService extends AbstractService implements ImageJService {
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	public <T extends RealType<T> > Object toRaiCIP( Object result, DefaultParameter2 parameter)
 	{
 		RaiCIP2<T> outputCIP = null;
@@ -622,10 +618,7 @@ public class CIPService extends AbstractService implements ImageJService {
 		{
 			ImagePlus imp = (ImagePlus) input;
 			int[] dims = imp.getDimensions();
-			int nDim=0;
-			for( int extent : dims )
-				if( extent > 1 )
-					nDim++;
+			
 			spacing = new ArrayList<Double>();
 
 			double[] impSpacing = new double[5];
@@ -722,7 +715,6 @@ public class CIPService extends AbstractService implements ImageJService {
 			int nDim = rai.numDimensions();
 			String[] defaultNames = new String[] {"X", "Y", "Z"};
 			for(int d=0; d<nDim; d++) {
-				String axisName;
 				if (d < 3)
 					axesName.add( defaultNames[d] );
 				else
@@ -831,6 +823,7 @@ public class CIPService extends AbstractService implements ImageJService {
 	
 	
 	
+	@SuppressWarnings("unchecked")
 	public Object discardNullValue( List<Object> resultsTemp )
 	{
 		Object results = new ArrayList<Object>();
@@ -850,6 +843,7 @@ public class CIPService extends AbstractService implements ImageJService {
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	public <T extends RealType<T> & NativeType<T>> ImgPlus<T> toImgPlus(Object image )
 	{
 		ImgPlus<T> imgPlus = null;
@@ -951,89 +945,84 @@ public class CIPService extends AbstractService implements ImageJService {
 		return imagePlus;
 	}
 
-	
-	Map<String,URL> lutsURL;
-	
-	public ColorTable lut( String lut ) throws IOException
-	{		
-		if( lutsURL == null )
-			initLutURL();
-		
-		if ( ! lutsURL.containsKey(lut) )
-			return null;
-		
-		return lutService.loadLUT( lutsURL.get(lut) );
-	}
-	
-	
-	private void initLutURL()
+
+	public Double scalarToDouble( Object value)
 	{
+		//Double d = (double) value;
+		Double d = null;
 		
-		/*
-		File lutDir = new File( IJ.getDirectory("luts") );
-		File[] lutsFileRaw = lutDir.listFiles();
-		Map<String, File> lutsFile = new HashMap<String,File>();
-		for(File f : lutsFileRaw) {
-			if( f.isFile() && ( f.getName().endsWith(".txt") || f.getName().endsWith(".lut") ) )
-			{
-				String key = f.getName();
-				key = key.replaceAll(".txt$", "");
-				key = key.replaceAll(".lut$", "");
-				lutsFile.put(key.toLowerCase(), f );
+		if( 	value instanceof Byte		)
+			d = (double)(byte) value;
+		
+		else if( 	value instanceof Short		)
+			d = (double)(short) value;
+		
+		else if( 	value instanceof Integer	)
+			d = (double)(int) value;
+		
+		else if( 	value instanceof Float		)
+			d = (double)(float) value;
+		
+		else if( 	value instanceof Double		)
+			d = (double) value;		
+		return d;
+	}	
+	
+	
+	// valid only if value was check with Checks.isScalars(value) , this is usually done
+	//	in the parseinput function of FunctionParameters2
+	@SuppressWarnings("unchecked")
+	public List<Double> scalarsToDouble( Object value )
+	{
+		List<Double> list2 = new ArrayList<Double>();
+		
+		if ( Checks.isScalar(value) ) {
+			list2.add( (double) value );
+		}
+		else if ( value instanceof List ) {
+			List<?> list = (List<?>) value;
+			int n = list.size();
+			Object item = null;
+			if( n>0 )
+				item = list.get(0);
+			if( item!=null ) {
+				
+				if( 	value instanceof Byte		) {
+					for( int i=0; i<n ; i++) {
+						list2.add( (double) (byte) list.get(i) );
+					}
+				}
+				
+				else if( 	value instanceof Short	) {
+					for( int i=0; i<n ; i++) {
+						list2.add( (double) (short) list.get(i) );
+					}
+				}
+				
+				else if( 	value instanceof Integer	) {
+					for( int i=0; i<n ; i++) {
+						list2.add( (double) (int) list.get(i) );
+					}
+				}
+				
+				else if( 	value instanceof Float	) {
+					for( int i=0; i<n ; i++) {
+						list2.add( (double) (float) list.get(i) );
+					}
+				}
+				
+				else if( 	value instanceof Double	) {
+					list2 = (List<Double>) list;
+				}
+
 			}
 		}
-		*/
-		
-		lutsURL = new HashMap<String,URL>();
-		// find and format available luts
-		Map<String,URL> lutURLRaw = lutService.findLUTs();
-		for(Entry<String,URL> e : lutURLRaw.entrySet() ) {
-			String key = e.getKey();
-			String key2 = key.replaceAll( ".lut$", "");
-			key2 = (new File(key2)).getName();
-			lutsURL.put(key2.toLowerCase(), e.getValue() );
+		else {
+			return null;
 		}
-		
-		
-		// create short cut for the basic color
-		// r g b c y m w
-		lutsURL.put("r", lutsURL.get("red") );
-		lutsURL.put("g", lutsURL.get("green") );
-		lutsURL.put("b", lutsURL.get("blue") );
-		lutsURL.put("c", lutsURL.get("cyan") );
-		lutsURL.put("y", lutsURL.get("yellow") );
-		lutsURL.put("m", lutsURL.get("magenta") );
-		lutsURL.put("w", lutsURL.get("grays") );
-		
+		return list2;
 	}
 	
-	static Map<String,String> letterToColor;
-	static {
-		letterToColor = new HashMap<String,String>();
-		letterToColor.put("r", "red");
-		letterToColor.put("g", "green");
-		letterToColor.put("b", "blue");
-		letterToColor.put("c", "cyan");
-		letterToColor.put("y", "yellow");
-		letterToColor.put("m", "magenta");
-		letterToColor.put("w", "grays");	
-	}
-	
-	public String[] parseStringToBasicColor( String str )
-	{
-		String[] lutNames = new String[str.length()];
-		for(int i=0 ; i<str.length() ; i++ )
-		{
-			String letter = str.substring(i, i+1).toLowerCase();
-			if ( letterToColor.containsKey( letter ) )
-				lutNames[i] = letterToColor.get(letter);
-			else
-				return new String[0];
-		}
-		return lutNames;
-	}
-	
-	
-	
+		
 	
 }

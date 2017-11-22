@@ -40,10 +40,11 @@ public class DefaultParameter2 implements Parameter{
 	public enum Type{
 		
 		image("Image"),
+		logic("Boolean"),
 		scalar("Scalar"),
-		numeric("Numeric"),
+		scalars("Scalars"),
 		string("String"),
-		text("Text"),
+		strings("Strings"),
 		region("Region");
 		
 		String str;
@@ -61,20 +62,26 @@ public class DefaultParameter2 implements Parameter{
 			case image :
 				return Checks.isImage(obj);
 				
+			case logic :
+				return Checks.isLogic(obj);
+			
 			case scalar :
 				return Checks.isScalar(obj);
 				
-			case numeric :
-				return Checks.isNumeric(obj);
+			case scalars :
+				return Checks.isScalars(obj);
 				
 			case string :
 				return Checks.isString(obj);
+			
+			case strings :
+				return Checks.isStrings(obj);
 				
 			case region :
-				return Checks.isRegion(obj);
+				return Checks.isRegion2(obj);
 				
 			default : // text :
-				return Checks.isText(obj);
+				return Checks.isStrings(obj);
 				
 			}
 		}

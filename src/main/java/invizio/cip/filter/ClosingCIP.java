@@ -89,8 +89,8 @@ import net.imglib2.util.Util;
 			
 			
 			Img<FloatType> img = ImageJFunctions.wrap(imp);
-			List<Double> pixelSize = CIP.list( 1, 1 );
-			List<Double> radius = CIP.list( 5 , 5 );
+			List<Object> pixelSize = CIP.list( 1, 1 );
+			List<Object> radius = CIP.list( 5 , 5 );
 			String boundary = "same";
 			String shape = "disk";
 			String outputType = "same";

@@ -1,8 +1,13 @@
 package invizio.cip.parameters;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ij.ImagePlus;
+import ij.gui.Roi;
 import net.imagej.Dataset;
+import net.imagej.ImgPlus;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.roi.IterableRegion;
 
@@ -13,8 +18,20 @@ import net.imglib2.roi.IterableRegion;
  *
  */
 
-public class Checks {
 
+// 2017-11-2017 : remove Array support as List as systematically used in functions,
+//					could be added later if array<->list converter are in place (rk: available from IJ2 )
+
+public class Checks {
+	
+	public static boolean isLogic( Object value)
+	{
+		if( value instanceof Boolean )
+			return true;
+		
+		return false;
+	}
+	
 	public static boolean isScalar( Object value)
 	{
 		if( 	value instanceof Byte		||
@@ -31,18 +48,18 @@ public class Checks {
 	
 	
 	
-	public static boolean isNumeric( Object value)
+	public static boolean isScalars( Object value)
 	{
 		if( isScalar( value ) )
 			return true;
 		else {
-			if( isArray(value) ){
-				return isScalar( ((Object[]) value)[0] );  // won't work if value is a primitive array
-			}
-			if ( isIterable(value) ){
-				Iterable<?> iterable = (Iterable<?>) value;
-				for( Object obj : iterable ) {
-					return isScalar( obj ); // in principle would have to be checked
+			//if( isArray(value) ){
+			//	return isScalar( ((Object[]) value)[0] );  // won't work if value is a primitive array
+			//}
+			if ( isList(value) ){
+				List<?> list = (List<?>) value;
+				for( Object obj : list ) {
+					return isScalar( obj ); // in all item should here only the first one if it exist
 				}
 			}
 		}
@@ -54,6 +71,9 @@ public class Checks {
 	{
 		if( value instanceof IterableRegion )
 			return true;
+		else if ( value instanceof Roi)
+    		return true;
+    	
 		
 		return false;
 	}
@@ -64,11 +84,11 @@ public class Checks {
 		if( isOneRegion( value ) )
 			return true;
 		else {
-			if( isArray(value) ){
-				return isOneRegion( ((Object[]) value)[0] );  // won't work if value is a primitive array
-			}
-			if ( isIterable(value) ){
-				Iterable<?> iterable = (Iterable<?>) value;
+			//if( isArray(value) ){
+			//	return isOneRegion( ((Object[]) value)[0] );  // won't work if value is a primitive array
+			//}
+			if ( isList(value) ){
+				List<?> iterable = (List<?>) value;
 				for( Object obj : iterable ) {
 					return isOneRegion( obj ); // in principle all items would have to be checked
 				}
@@ -78,7 +98,33 @@ public class Checks {
 	}
 	
 
-
+	public static boolean isRegion2( Object value)
+	{
+		// IterableRegion or Roi
+		if( isOneRegion( value ) )
+			return true;
+		
+		// List<?>
+		else if ( isList( value )  &&  ((List<?>)value).size()>0  ) {
+    		
+			Object item = ((List<?>)value).get(0);
+			
+			// List<Roi> or List<IterableRegion>
+			if( isOneRegion( item ) )
+				return true;
+			
+			// List<List<Roi>>
+			else if( item instanceof List ) {
+				if( ((List<?>)item).size()>0 && ((List<?>)item).get(0) instanceof Roi) {
+					return true;
+				}
+			}
+    	}
+    	
+		
+    	return false;
+	}
+	
 
 	public static boolean isString( Object value)
 	{
@@ -90,14 +136,21 @@ public class Checks {
 	
 	
 	
-	public static boolean isText( Object value)
+	public static boolean isStrings( Object value)
 	{
 		if( isString( value ) )
 			return true;
 		else {
-			if( isArray(value) ){
-				return isString( ((Object[]) value)[0] );  // won't work if value is a primitive array
+			//if( isArray(value) ){
+			//	return isString( ((Object[]) value)[0] );  // won't work if value is a primitive array
+			//}
+			if ( isList(value) ){
+				List<?> list = (List<?>) value;
+				for( Object obj : list ) {
+					return isString( obj ); // in all item should here only the first one if it exist
+				}
 			}
+			
 		}
 		return false;
 	}
@@ -107,6 +160,7 @@ public class Checks {
 	public static boolean isImage( Object value)
 	{
 		if	( 	value instanceof RandomAccessibleInterval 	||
+				value instanceof ImgPlus					||
 				value instanceof Dataset 					||
 				value instanceof ImagePlus					
 		) {
@@ -120,24 +174,34 @@ public class Checks {
 	
 	
 	
-	public static boolean isArray( Object value)
-	{
+//	public static boolean isArray( Object value)
+//	{
+//		if ( value == null )
+//			return false;
+//		
+//		if	( value.getClass().isArray() )
+//			return true;
+//		
+//		
+//		return false;
+//	}
+	
+	
+//	private static boolean isIterable(Object value) {
+//		if ( value == null )
+//			return false;
+//		
+//		if	( value instanceof Iterable )
+//			return true;
+//		
+//		return false;
+//	}
+	
+	private static boolean isList(Object value) {
 		if ( value == null )
 			return false;
 		
-		if	( value.getClass().isArray() )
-			return true;
-		
-		
-		return false;
-	}
-	
-	
-	private static boolean isIterable(Object value) {
-		if ( value == null )
-			return false;
-		
-		if	( value instanceof Iterable )
+		if	( value instanceof List )
 			return true;
 		
 		return false;

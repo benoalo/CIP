@@ -1,7 +1,10 @@
 package invizio.cip.misc;
 
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
@@ -9,6 +12,8 @@ import org.scijava.plugin.Plugin;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
+import ij.gui.Roi;
 import invizio.cip.CIP;
 import invizio.cip.MetadataCIP2;
 import invizio.cip.RaiCIP2;
@@ -269,8 +274,10 @@ import net.imglib2.view.Views;
 			ImageJ ij = new ImageJ();
 			ij.ui().showUI();
 			
-			ImagePlus imp = IJ.openImage(	CIP.class.getResource( "/mitosis_t1.tif" ).getFile()	);
-			ij.ui().show(imp);
+			//String file = CIP.class.getResource( "/mitosis_t1.tif" ).getFile(); 
+			ImagePlus imp = IJ.openImage(	"C:/Users/Ben/workspace/testImages/blobs32.tif" 	);
+			ImagePlus imp2 = IJ.openImage(	"C:/Users/Ben/workspace/testImages/mitosis_t1.tif" 	);
+			//ij.ui().show(imp);
 			
 			
 			
@@ -279,22 +286,58 @@ import net.imglib2.view.Views;
 			cip.setContext( ij.getContext() );
 			cip.setEnvironment( ij.op() );
 			
-			RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( imp, 3 , "max", "projection"  );
+			//RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( imp, 3 , "max", "projection"  );
 			//RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( img1 , 2 , "max", "projection"  );
 					
 			
-			String str = output==null ? "null" : output.toString();
+			//String str = output==null ? "null" : output.toString();
 			
-			System.out.println("hello projection:" + str );
+			//System.out.println("hello projection:" + str );
 			//ij.ui().show(output);
 			
 			//Dataset dataset = (Dataset) ij.io().open("C:/Users/Ben/workspace/testImages/mitosis_t1.tif");
 			
-			cip.toIJ1(output).show();
-			System.out.println("hello toIJ2 " + cip.toIJ2(output) );
-			ij.ui().show( cip.toIJ2(output) );
-			
+			//cip.toIJ1(output).show();
+			//System.out.println("hello toIJ2 " + cip.toIJ2(output) );
+			//ij.ui().show( cip.toIJ2(output) );
 			//cip.show(output, "gw");
+			
+			
+			
+			
+			
+			
+			Object impSeg1 = cip.label( imp , 100 );
+			Object region1 = cip.region( impSeg1 );
+			
+			Object impSeg2 = cip.threshold( imp , 100 );
+			Object region2 = cip.region( impSeg2 );
+
+			Roi region3 = new Roi(50,50, 100, 50);
+
+			List<Roi> region4 = new ArrayList<Roi>();
+			region4.add( new Roi(100,100, 20, 20) );
+			region4.add( new Roi(110,110, 40, 20) );
+			
+
+			//String h1 = cip.show( imp2 , "rb");
+			
+			//String h2 = cip.show( imp2 , cip.list("red", "green"));
+
+			//String h3 = cip.show( imp , "cyan");
+			//String h4 = cip.show( imp );
+			String h5 = cip.show( imp );
+			String h6 = cip.show( imp );
+
+			//cip.show(h3, region1, "fire", "width", 2.0 );
+			//cip.show(h4, region2, "red", "width", 2.0 );
+			cip.show(h5, region3, "magenta", 5 );
+			cip.show(h6, region4, "fire", "width", 2);
+			
+			//String h2 = cip.show( imp , "green");
+			
+			//System.out.println("h2 -> "+h2);
+			
 			
 			System.out.println("done!");
 		}
