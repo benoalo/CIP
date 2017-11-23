@@ -1,5 +1,6 @@
 package invizio.cip.region;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -12,10 +13,13 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.gui.Roi;
 import ij.plugin.filter.ThresholdToSelection;
-
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.converter.Converter;
+import net.imglib2.converter.Converters;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.IterableRegion;
@@ -24,8 +28,10 @@ import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.roi.labeling.LabelingType;
 import net.imglib2.roi.util.IterableRandomAccessibleRegion;
 import net.imglib2.type.BooleanType;
+import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
@@ -41,6 +47,9 @@ import net.imglib2.view.Views;
 public class Regions {
 
 	
+	//////////////////////////////////////////////////////////////
+	// label map and masks to Iterable Regions
+	//////////////////////////////////////////////////////////////
 	
 	public static <B extends BooleanType<B>, T extends RealType<T>> Object toIterableRegion( Object image, CIPService cipService )
 	{
@@ -102,9 +111,121 @@ public class Regions {
 	
 	
 	
-	// TODO: add toIterableRegion(List<Roi>) toIterableRegion(List<List<Roi>>)
 	
 	
+	
+	
+	
+	
+	
+	//////////////////////////////////////////////////////////////
+	// label map and masks to Iterable Regions
+	//////////////////////////////////////////////////////////////
+
+	// TODO: test toIterableRegions2D and toIterableRegion3D, write toIterableRegion(Object rois) calling all the other functions
+	
+	
+	
+	
+	private static List<IterableRegion<BitType>> toIterableRegions3D( List<List<Roi>> rois3D )
+	{
+		List<IterableRegion<BitType>> regions = new ArrayList<IterableRegion<BitType>>();
+		for(List<Roi> roi3D : rois3D) {
+			regions.add( toIterableRegion3D(roi3D) );
+		}
+		return regions;
+	}
+	
+	private static IterableRegion<BitType> toIterableRegion3D(List<Roi> rois)
+	{
+		int[] min = new int[] {Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE};
+		int[] max = new int[] {Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE};
+		for(Roi roi : rois) {
+			Rectangle rect = roi.getBounds();
+			int x = rect.x;
+			int y = rect.y;
+			int z = roi.getPosition();
+			int xM= x+rect.width;
+			int yM= y+rect.height;
+			
+			if ( x < min[0])
+				min[0] = x;
+			if ( y < min[1])
+				min[1] = y;
+			if ( z < min[2])
+				min[2] = z;
+			if ( xM > max[0])
+				max[0]= xM;
+			if ( yM < max[1])
+				max[1] = yM;
+			if ( z > max[2])
+				max[2] = z;
+		}
+		int width  = max[0] - min[0];
+		int height = max[1] - min[1];
+		int depth  = max[2] - min[2];
+		
+		ImageStack stack = new ImageStack(width, height, depth);
+		for(Roi roi : rois ) {
+			Rectangle rect = roi.getBounds();
+			int z = roi.getPosition();
+			
+			ImageProcessor ip = new ByteProcessor( rect.width, rect.height);
+			roi.setLocation(rect.x-min[0], rect.y-min[1]);
+			roi.setPosition(0);
+			ip.setValue(255);
+			ip.fill(roi);
+			roi.setLocation(rect.x, rect.y);
+			roi.setPosition(z);
+			
+			stack.setProcessor(ip, z);
+		}
+		ImagePlus imp = new ImagePlus("3D Mask", stack );
+		
+		long[] min2 = new long[3];
+		for (int d=0 ; d<3; d++)
+			min2[d] = - min[d]; 
+		
+		return imagePlusToIterableRegion( imp, min2);
+	}
+	
+	
+	
+	private static List<IterableRegion<BitType>> toIterableRegions2D(List<Roi> rois)
+	{
+		List<IterableRegion<BitType>> regions = new ArrayList<IterableRegion<BitType>>();
+		for(Roi roi : rois) {
+			regions.add( toIterableRegion2D(roi) );
+		}
+		return regions;
+	}
+	
+	
+	
+	private static IterableRegion<BitType> toIterableRegion2D(Roi roi)
+	{
+		Rectangle rect = roi.getBounds();
+		long[] min = new long[] { -rect.x, -rect.y};
+		ImageProcessor ip = new ByteProcessor( rect.width, rect.height);
+		roi.setLocation(0, 0);
+		ip.setValue(255);
+		ip.fill(roi);
+		roi.setLocation(rect.x, rect.y);
+		//ip.setBinaryThreshold();
+		ImagePlus imp = new ImagePlus("mask_"+roi.getName() , ip );
+		
+		return imagePlusToIterableRegion( imp, min);
+	}
+	
+	private static IterableRegion<BitType> imagePlusToIterableRegion( ImagePlus imp, long[] min)
+	{
+		RandomAccessibleInterval<UnsignedByteType> rai = ImageJFunctions.wrap(imp);
+		rai = Views.offset(rai , min );
+		
+		RandomAccessibleInterval<BitType> mask = Converters.convert(rai, ( i, o ) -> o.set( i.get()>0 ),  new BitType() );
+		
+		return IterableRandomAccessibleRegion.create( mask );
+	}
 	
 	
 	
@@ -243,6 +364,16 @@ public class Regions {
 		return roiList;
 	}
 	
+	
+	public static void main(final String... args)
+	{
+		
+		Roi roi = new Roi(50,50, 100, 50);
+		
+		IterableRegion<?> region = toIterableRegion2D(roi);
+		System.out.println("region:" + region.toString() );
+		
+	}
 	
 	
 }
