@@ -196,7 +196,7 @@ public class Regions {
 			Rectangle rect = roi.getBounds();
 			int x = rect.x;
 			int y = rect.y;
-			int z = roi.getPosition();
+			int z = roi.getPosition()-1;
 			int xM= x+rect.width;
 			int yM= y+rect.height;
 			
@@ -208,21 +208,21 @@ public class Regions {
 				min[2] = z;
 			if ( xM > max[0])
 				max[0]= xM;
-			if ( yM < max[1])
+			if ( yM > max[1])
 				max[1] = yM;
 			if ( z > max[2])
 				max[2] = z;
 		}
-		int width  = max[0] - min[0];
-		int height = max[1] - min[1];
-		int depth  = max[2] - min[2];
+		int width  = max[0] - min[0] + 1;
+		int height = max[1] - min[1] + 1;
+		int depth  = max[2] - min[2] + 1;
 		
 		ImageStack stack = new ImageStack(width, height, depth);
 		for(Roi roi : rois ) {
 			Rectangle rect = roi.getBounds();
 			int z = roi.getPosition();
 			
-			ImageProcessor ip = new ByteProcessor( rect.width, rect.height);
+			ImageProcessor ip = new ByteProcessor( width, height);
 			roi.setLocation(rect.x-min[0], rect.y-min[1]);
 			roi.setPosition(0);
 			ip.setValue(255);
@@ -230,7 +230,7 @@ public class Regions {
 			roi.setLocation(rect.x, rect.y);
 			roi.setPosition(z);
 			
-			stack.setProcessor(ip, z);
+			stack.setProcessor(ip, z-min[2]);
 		}
 		ImagePlus imp = new ImagePlus("3D Mask", stack );
 		
@@ -280,6 +280,15 @@ public class Regions {
 		return IterableRandomAccessibleRegion.create( mask );
 	}
 	
+	
+	
+	
+	
+	
+	
+	/////////////////////////////////////////////////////////////////////////
+	//  conversion to IJ1 Roi
+	/////////////////////////////////////////////////////////////////////////
 	
 	
 	@SuppressWarnings("unchecked")
