@@ -1123,11 +1123,11 @@ public class CIP extends AbstractNamespace{
     	
     	Object result = null;
     	
-    	FunctionParameters2 paramsImg = new FunctionParameters2("toIJ1_Image");
+    	FunctionParameters2 paramsImg = new FunctionParameters2("toIJ2_Image");
     	paramsImg.addRequired("image", 	Type.image				);
 
-    	FunctionParameters2 paramsReg = new FunctionParameters2("toIJ1_Region");
-    	paramsImg.addRequired("region", 	Type.region				);
+    	FunctionParameters2 paramsReg = new FunctionParameters2("toIJ2_Region");
+    	paramsReg.addRequired("region", 	Type.region				);
 
     	if ( paramsImg.parseInput( args ) )
 		{	
@@ -1155,7 +1155,7 @@ public class CIP extends AbstractNamespace{
     	paramsImg.addRequired("image", 	Type.image				);
 
     	FunctionParameters2 paramsReg = new FunctionParameters2("toIJ1_Region");
-    	paramsImg.addRequired("region", 	Type.region				);
+    	paramsReg.addRequired("region", 	Type.region				);
 
     	if ( paramsImg.parseInput( args ) )
 		{
