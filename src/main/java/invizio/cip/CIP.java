@@ -1137,6 +1137,8 @@ public class CIP extends AbstractNamespace{
     	else if ( paramsReg.parseInput( args ) )
 		{
     		// TODO: add conversion from Roi or List<Roi> to Region or List<Region>
+    		Object regions = paramsReg.get("region").value; // a region, list of region, roi, list<roi> (2d), List<List<Roi>> (3d)
+    		result = Regions.toIterableRegion(regions); // always return a list of iterable regions
 		}
     	
     	return result; 
