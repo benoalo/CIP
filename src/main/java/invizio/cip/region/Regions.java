@@ -10,15 +10,14 @@ import invizio.cip.RaiCIP2;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.Prefs;
 import ij.gui.Roi;
 import ij.plugin.filter.ThresholdToSelection;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
+
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
@@ -57,7 +56,8 @@ public class Regions {
     	T valT = raiCIP.randomAccess().get();
     	if( valT instanceof BooleanType )
     	{
-    		RandomAccessibleInterval<B> mask = (RandomAccessibleInterval<B>)raiCIP;
+    		@SuppressWarnings("unchecked")
+			RandomAccessibleInterval<B> mask = (RandomAccessibleInterval<B>)raiCIP;
     		return Regions.maskToIterableRegion( mask );
     	}
     	else {
@@ -67,6 +67,7 @@ public class Regions {
 	
 	
 	// use realtype rather than integertype as input for flexibility reason 
+	@SuppressWarnings("unchecked")
 	private static <B extends BooleanType<B>, T extends RealType<T>> List<IterableRegion<B>> labelMapToIterableRegions( RandomAccessibleInterval<T> labelMap )
 	{
 		// create an imgLabeling
@@ -103,6 +104,9 @@ public class Regions {
 	
 	private static <B extends BooleanType<B>> IterableRegion<B> maskToIterableRegion( RandomAccessibleInterval<B> mask )
 	{
+		// getting min max position of the on pixel would allow to create a view 
+		// on mask and reduce data to explore in further process
+		
 		// create an IterableRandomAccessibleRegion
 		return  IterableRandomAccessibleRegion.create( mask );
 	}
@@ -122,21 +126,69 @@ public class Regions {
 	// label map and masks to Iterable Regions
 	//////////////////////////////////////////////////////////////
 
-	// TODO: test toIterableRegions2D and toIterableRegion3D, write toIterableRegion(Object rois) calling all the other functions
+	// TODO: test toIterableRegions2D and toIterableRegion3D
 	
-	
-	
-	
-	private static List<IterableRegion<BitType>> toIterableRegions3D( List<List<Roi>> rois3D )
+	@SuppressWarnings("unchecked")
+	public static <B extends BooleanType<B>> List<IterableRegion<B>> toIterableRegion( Object regions )
 	{
-		List<IterableRegion<BitType>> regions = new ArrayList<IterableRegion<BitType>>();
+	
+		List<IterableRegion<B>> iterRegions = null;
+		// IterableRegion
+    	if ( regions instanceof IterableRegion ) {
+    		IterableRegion<B> region = (IterableRegion<B>) regions;
+    		iterRegions = new ArrayList<IterableRegion<B>>();
+    		iterRegions.add( region );
+    	}
+    	
+    	// Roi
+    	else if ( regions instanceof Roi) {
+    		Roi roi = (Roi) regions;
+    		iterRegions = new ArrayList<IterableRegion<B>>();
+    		iterRegions.add( toIterableRegion2D(roi) );
+    	}
+    	
+    	// List<?>
+    	else if ( regions instanceof List) {
+    		
+    		if( ((List<?>)regions).size()>0 ) {
+    			
+    			Object item = ((List<Object>)regions).get(0);
+    			
+    			//List<IterableRegion>
+    			if( item instanceof IterableRegion ) {
+    				iterRegions = (List<IterableRegion<B>>) regions;
+    			}
+    			
+    			// List<Roi>
+    			else if(item instanceof Roi) {
+    				List<Roi> roiList = (List<Roi>) regions;
+    				iterRegions = toIterableRegions2D( roiList );
+    			}
+    			
+    			// List<List<Roi>>
+    			else if( item instanceof List ) {
+    				if( ((List<?>)item).size()>0 && ((List<?>)item).get(0) instanceof Roi) {
+    					List<List<Roi>> roisPerRegions = (List<List<Roi>>) regions;
+    					iterRegions = toIterableRegions3D( roisPerRegions );
+    				}
+    			}
+    			
+    		}
+    	}
+		
+		return iterRegions;
+	}
+	
+	private static <B extends BooleanType<B>> List<IterableRegion<B>> toIterableRegions3D( List<List<Roi>> rois3D )
+	{
+		List<IterableRegion<B>> regions = new ArrayList<IterableRegion<B>>();
 		for(List<Roi> roi3D : rois3D) {
 			regions.add( toIterableRegion3D(roi3D) );
 		}
 		return regions;
 	}
 	
-	private static IterableRegion<BitType> toIterableRegion3D(List<Roi> rois)
+	private static <B extends BooleanType<B>> IterableRegion<B> toIterableRegion3D(List<Roi> rois)
 	{
 		int[] min = new int[] {Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE};
 		int[] max = new int[] {Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE};
@@ -191,9 +243,9 @@ public class Regions {
 	
 	
 	
-	private static List<IterableRegion<BitType>> toIterableRegions2D(List<Roi> rois)
+	private static <B extends BooleanType<B>> List<IterableRegion<B>> toIterableRegions2D(List<Roi> rois)
 	{
-		List<IterableRegion<BitType>> regions = new ArrayList<IterableRegion<BitType>>();
+		List<IterableRegion<B>> regions = new ArrayList<IterableRegion<B>>();
 		for(Roi roi : rois) {
 			regions.add( toIterableRegion2D(roi) );
 		}
@@ -202,7 +254,7 @@ public class Regions {
 	
 	
 	
-	private static IterableRegion<BitType> toIterableRegion2D(Roi roi)
+	private static <B extends BooleanType<B>> IterableRegion<B> toIterableRegion2D(Roi roi)
 	{
 		Rectangle rect = roi.getBounds();
 		long[] min = new long[] { -rect.x, -rect.y};
@@ -217,18 +269,20 @@ public class Regions {
 		return imagePlusToIterableRegion( imp, min);
 	}
 	
-	private static IterableRegion<BitType> imagePlusToIterableRegion( ImagePlus imp, long[] min)
+	private static <B extends BooleanType<B>> IterableRegion<B> imagePlusToIterableRegion( ImagePlus imp, long[] min)
 	{
 		RandomAccessibleInterval<UnsignedByteType> rai = ImageJFunctions.wrap(imp);
 		rai = Views.offset(rai , min );
 		
-		RandomAccessibleInterval<BitType> mask = Converters.convert(rai, ( i, o ) -> o.set( i.get()>0 ),  new BitType() );
+		@SuppressWarnings("unchecked")
+		RandomAccessibleInterval<B> mask = (RandomAccessibleInterval<B>) Converters.convert(rai, ( i, o ) -> o.set( i.get()>0 ),  new BitType() );
 		
 		return IterableRandomAccessibleRegion.create( mask );
 	}
 	
 	
 	
+	@SuppressWarnings("unchecked")
 	public static <B extends BooleanType<B>> List<List<Roi>> toIJ1ROI( Object regions )
 	{
 		List<IterableRegion<B>> regions2 = null;
@@ -254,9 +308,9 @@ public class Regions {
     	// List<?>
     	else if ( regions instanceof List) {
     		
-    		if( ((List)regions).size()>0 ) {
+    		if( ((List<?>)regions).size()>0 ) {
     			
-    			Object item = ((List)regions).get(0);
+    			Object item = ((List<Object>)regions).get(0);
     			
     			//List<IterableRegion>
     			if( item instanceof IterableRegion ) {
@@ -277,7 +331,7 @@ public class Regions {
     			
     			// List<List<Roi>>
     			else if( item instanceof List ) {
-    				if( ((List)item).size()>0 && ((List)item).get(0) instanceof Roi) {
+    				if( ((List<?>)item).size()>0 && ((List<Object>)item).get(0) instanceof Roi) {
     					roisPerRegions = (List<List<Roi>>) regions;
     				}
     			}
@@ -332,6 +386,7 @@ public class Regions {
 			z0 = (int)region.min(2);
 		}
 		
+		System.out.println("x0 "+x0+" ; y0 "+y0+" ; z0 "+z0);
 		
 		// Iterate on the plane of the imageplus and create a roi on each plane
 		List<Roi> roiList = new ArrayList<Roi>();
@@ -344,7 +399,8 @@ public class Regions {
 		{
 			Roi roi = roiMaker.convert( impReg.getProcessor() );
 			if( roi !=null ) {
-				roi.setLocation( x0 , y0 );
+				Rectangle rect  = roi.getBounds();
+				roi.setLocation( x0+rect.x , y0 + rect.y );
 				roi.setPosition( z0 + 1 );
 			}
 			roiList.add(roi);
@@ -355,9 +411,12 @@ public class Regions {
 			for(int i=1; i<=nSlice; i++)
 			{
 				Roi roi = roiMaker.convert( stack.getProcessor(i) );   // this could be slow, lets see
-				roi.setLocation(x0, y0);
-				roi.setPosition( z0 + i );
-				roiList.add(roi);
+				if( roi!=null ) {
+					Rectangle rect  = roi.getBounds();
+					roi.setLocation( x0+rect.x , y0 + rect.y );
+					roi.setPosition( z0 + i );
+					roiList.add(roi);
+				}
 			}
 		}
 		
