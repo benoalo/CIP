@@ -79,23 +79,23 @@ public class Checks {
 	}
 
 	
-	public static boolean isRegion( Object value)
-	{
-		if( isOneRegion( value ) )
-			return true;
-		else {
-			//if( isArray(value) ){
-			//	return isOneRegion( ((Object[]) value)[0] );  // won't work if value is a primitive array
-			//}
-			if ( isList(value) ){
-				List<?> iterable = (List<?>) value;
-				for( Object obj : iterable ) {
-					return isOneRegion( obj ); // in principle all items would have to be checked
-				}
-			}
-		}
-		return false;
-	}
+//	public static boolean isRegion( Object value)
+//	{
+//		if( isOneRegion( value ) )
+//			return true;
+//		else {
+//			//if( isArray(value) ){
+//			//	return isOneRegion( ((Object[]) value)[0] );  // won't work if value is a primitive array
+//			//}
+//			if ( isList(value) ){
+//				List<?> iterable = (List<?>) value;
+//				for( Object obj : iterable ) {
+//					return isOneRegion( obj ); // in principle all items would have to be checked
+//				}
+//			}
+//		}
+//		return false;
+//	}
 	
 
 	public static boolean isRegion2( Object value)
@@ -159,7 +159,7 @@ public class Checks {
 	
 	public static boolean isImage( Object value)
 	{
-		if	( 	value instanceof RandomAccessibleInterval 	||
+		if	( ( value instanceof RandomAccessibleInterval  &&  (!(value instanceof IterableRegion)) ) 	||
 				value instanceof ImgPlus					||
 				value instanceof Dataset 					||
 				value instanceof ImagePlus					
