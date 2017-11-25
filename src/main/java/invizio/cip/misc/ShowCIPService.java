@@ -47,11 +47,8 @@ public class ShowCIPService extends AbstractService implements ImageJService {
 	@Parameter
 	private LUTService lutService;
 	
-	// done - create rois for each regions (ready in regions utils)
-	//  create an overlay and add the region with appropriate stroke and position
-	//		done - initially assume image and region have the same dimensionality
-	// 		then consider different of dimensionality assuming the region dims are xyz
 	
+	// still need to handle the case where the region belong to a particular timestep in the sequence
 	public void showRegion( FunctionParameters2 params ) {
 		
 		ImagePlus imp;
@@ -62,6 +59,11 @@ public class ShowCIPService extends AbstractService implements ImageJService {
 			imp = WindowManager.getCurrentImage();
 		else	
 			imp = WindowManager.getImage( imageHandle );
+		
+		if( imp==null )
+			return;
+		
+		int nCh = imp.getNChannels();
 		
 		// convert regions to list of rois
 		Object regions =  params.get("region").value;
@@ -109,18 +111,39 @@ public class ShowCIPService extends AbstractService implements ImageJService {
     	
     	// Set the region in an overlay with the proper color     		
     	int count=0;
-    	for( List<Roi> roiList : roisPerRegion ) {
-    		if (mode.equals("lut") ) {
-    			color = stringToColor(colorString, values.get(count) );
-    			count++;
-    		}
-    		for( Roi roi : roiList ) {
-    			if( roi != null) {
-    				roi.setStrokeColor( color );
-    				roi.setStrokeWidth(width);
-    	    		ov.add(roi);
-    			}
-    		}
+    	if( nCh==1 ) {
+	    	for( List<Roi> roiList : roisPerRegion ) {
+	    		if (mode.equals("lut") ) {
+	    			color = stringToColor(colorString, values.get(count) );
+	    			count++;
+	    		}
+	    		for( Roi roi : roiList ) {
+	    			if( roi != null) {
+    					roi.setStrokeColor( color );
+    					roi.setStrokeWidth(width);
+    					ov.add(roi);
+	    			}
+	    		}
+	    	}
+	    }
+    	else {
+    		for( List<Roi> roiList : roisPerRegion ) {
+	    		if (mode.equals("lut") ) {
+	    			color = stringToColor(colorString, values.get(count) );
+	    			count++;
+	    		}
+	    		for( Roi roi : roiList ) {
+	    			if( roi != null) {
+	    				for(int ch=1; ch<=nCh; ch++) {
+	    					Roi roi2 = (Roi) roi.clone();
+	    					roi2.setStrokeColor( color );
+	    					roi2.setStrokeWidth(width);
+	    					roi2.setPosition(ch, roi.getPosition(), 1);
+	    					ov.add(roi2);
+	    				}
+	    			}
+	    		}
+	    	}
     	}
     	imp.setOverlay(ov);
     	
@@ -139,7 +162,12 @@ public class ShowCIPService extends AbstractService implements ImageJService {
 		Object image = params.get("inputImage").value;
     	ImgPlus<?> imgPlus = cipService.toImgPlus( image ); 
     	
-    	int nCh = (int)imgPlus.dimension( imgPlus.dimensionIndex( Axes.CHANNEL ) );
+    	
+    	int chIndex = imgPlus.dimensionIndex( Axes.CHANNEL );
+    	int nCh = 1;
+    	if ( chIndex >= 0 ) {
+    		nCh = (int)imgPlus.dimension( chIndex );
+    	}
     	imgPlus.initializeColorTables(nCh);
 		
     	List<String> lutNames;
