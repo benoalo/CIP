@@ -1,12 +1,10 @@
-package invizio.cip.region;
+package invizio.cip;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import invizio.cip.CIPService;
-import invizio.cip.RaiCIP2;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -46,9 +44,18 @@ import net.imglib2.view.Views;
 public class Regions {
 
 	
+	
+	// TODO: create a function that receive image regions or rois and return list<RegionCIP>
+	
+	
 	//////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////
+	//
 	// label map and masks to Iterable Regions
+	//
 	//////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////
+	
 	
 	public static <B extends BooleanType<B>, T extends RealType<T>> Object toIterableRegion( Object image, CIPService cipService )
 	{
@@ -106,9 +113,30 @@ public class Regions {
 	{
 		// getting min max position of the on pixel would allow to create a view 
 		// on mask and reduce data to explore in further process
+		int nDim = mask.numDimensions();
+		long[] min = new long[nDim];
+		long[] max = new long[nDim];
+		for( int d=0; d<nDim; d++) {
+			min[d] = mask.max(d);
+			max[d] = mask.min(d);
+		}
 		
+		Cursor<B> c = Views.iterable(mask).cursor();
+		long[] pos = new long[nDim]; 
+		while( c.hasNext() ) {
+			B val = c.next();
+			if( val.get() ) {
+				c.localize(pos);
+				for(int d=0; d<nDim ; d++) {
+					if( pos[d]<min[d])
+						min[d]=pos[d];
+					if( pos[d]>max[d])
+						max[d] = pos[d];
+				}
+			}
+		}
 		// create an IterableRandomAccessibleRegion
-		return  IterableRandomAccessibleRegion.create( mask );
+		return  IterableRandomAccessibleRegion.create(  Views.interval( mask , min , max )  );
 	}
 
 
@@ -121,12 +149,16 @@ public class Regions {
 	
 	
 	
+	//////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////
+	//
+	// IJ1 Rois to Iterable Regions
+	//
+	//////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////
 	
-	//////////////////////////////////////////////////////////////
-	// label map and masks to Iterable Regions
-	//////////////////////////////////////////////////////////////
-
-	// TODO: test toIterableRegions2D and toIterableRegion3D
+	
+	// TODO: test toIterableRegions2D
 	
 	@SuppressWarnings("unchecked")
 	public static <B extends BooleanType<B>> List<IterableRegion<B>> toIterableRegion( Object regions )
@@ -285,12 +317,15 @@ public class Regions {
 	
 	
 	
-	
-	/////////////////////////////////////////////////////////////////////////
-	//  conversion to IJ1 Roi
-	/////////////////////////////////////////////////////////////////////////
-	
-	
+	//////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////
+	//
+	// Iterable regions to IJ1 Rois
+	//
+	//////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////
+
+		
 	@SuppressWarnings("unchecked")
 	public static <B extends BooleanType<B>> List<List<Roi>> toIJ1ROI( Object regions )
 	{

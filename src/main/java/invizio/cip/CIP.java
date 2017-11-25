@@ -14,7 +14,6 @@ import ij.ImagePlus;
 import invizio.cip.misc.ShowCIPService;
 import invizio.cip.parameters.DefaultParameter2;
 import invizio.cip.parameters.FunctionParameters2;
-import invizio.cip.region.Regions;
 import invizio.cip.parameters.DefaultParameter2.Type;
 import net.imagej.Dataset;
 import net.imagej.DefaultDataset;
