@@ -946,7 +946,7 @@ public class CIPService extends AbstractService implements ImageJService {
 	}
 
 
-	public Double scalarToDouble( Object value)
+	public Double scalar( Object value)
 	{
 		//Double d = (double) value;
 		Double d = null;
@@ -972,7 +972,7 @@ public class CIPService extends AbstractService implements ImageJService {
 	// valid only if value was check with Checks.isScalars(value) , this is usually done
 	//	in the parseinput function of FunctionParameters2
 	@SuppressWarnings("unchecked")
-	public List<Double> scalarsToDouble( Object value )
+	public List<Double> scalars( Object value )
 	{
 		List<Double> list2 = new ArrayList<Double>();
 		
@@ -1023,6 +1023,24 @@ public class CIPService extends AbstractService implements ImageJService {
 		return list2;
 	}
 	
+	
+	
+	@SuppressWarnings("unchecked")
+	public List<String> strings(Object value )
+	{
+		List<String> strings = null;
 		
+		if( value instanceof String ) {
+			strings = new ArrayList<String>();
+			strings.add( (String) value );
+		}
+		else if( 	value instanceof List  		&&
+					((List<?>) value).size()>0	&&
+					((List<?>) value).get(0) instanceof String ) {
+			strings = (List<String>) value; 
+		}
+		
+		return strings;
+	}
 	
 }

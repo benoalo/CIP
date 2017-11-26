@@ -72,7 +72,7 @@ public class ShowCIPService extends AbstractService implements ImageJService {
     	
     	// handle array of values
     	String mode; 
-    	List<Double> values = cipService.scalarsToDouble( params.get("scalars").value );
+    	List<Double> values = cipService.scalars( params.get("scalars").value );
 		if( values==null ) {
 			mode="color";
 			values = new ArrayList<Double>();
@@ -102,7 +102,7 @@ public class ShowCIPService extends AbstractService implements ImageJService {
     	}
     	
     	// line width
-    	double width = cipService.scalarToDouble( params.get("width").value );
+    	double width = cipService.scalar( params.get("width").value );
     	
     	// create or reset the
     	Overlay ov = imp.getOverlay();
