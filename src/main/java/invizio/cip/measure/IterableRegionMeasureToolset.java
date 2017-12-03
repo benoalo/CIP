@@ -6,14 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ij.gui.Roi;
+import invizio.cip.Regions;
 import invizio.cip.parameters.DefaultParameter2;
 import net.imagej.ops.OpService;
-//import net.imagej.ops.geom.geom3d.mesh.Mesh;
+import net.imagej.ops.geom.geom3d.mesh.Mesh;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.IterableRegion;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.numeric.real.DoubleType;
-//import net.imglib2.roi.geometric.Polygon;
+import net.imglib2.roi.geometric.Polygon;
 
 
 
@@ -84,17 +86,32 @@ public class IterableRegionMeasureToolset<B extends BooleanType<B>> extends Abst
 		//IterableRegionMeasureToolset<C> toolset;
 		
 		BoundarySizeMeasureTool() { // IterableRegionMeasureToolset<C> toolset ){	
-			name = "boundary size";
+			name = "boundary";
 			inputType = AbstractMeasureToolbox.MeasurableType.REGION;
 			outputType = DefaultParameter2.Type.scalar;
 			//this.toolset = toolset;
 		}
 		
 		@Override
-		public Measure measure(N measurable) {
+		public Measure measure(N region) {
 			
-			Double value = ( (DoubleType) op.run("geom.boundarySize", measurable ) ).getRealDouble();
-
+			// // opService should trigger the necessary conversion (did not work, or only for labelRegion)
+			// Double value = ( (DoubleType) op.run("geom.boundarySize", measurable ) ).getRealDouble();
+			
+			Double value = null;
+			int nDim = region.numDimensions();
+			if ( nDim == 2 ) {
+				//boolean useJacobs = true;
+				//Polygon polygon = op.geom().contour(region, useJacobs); // works only for connected component
+				//value = op.geom().boundarySize(polygon).getRealDouble();
+				List<Roi> roiList = Regions.toIJ1ROI(region);
+				value = roiList.get(0).getLength();		
+			}
+			else if( nDim == 3 ) {
+				Mesh mesh = op.geom().marchingCubes( region ); // to check but marching cube should work fine with arbitrary mask, 
+				value = op.geom().boundarySize(mesh).getRealDouble();
+			}
+			
 			// if one would need to take pixel size into account,
 			// in general one would need to create adequate geometry (with unit pixel size ops algo)
 			// and reposition mesh/poly points according to pixel size 

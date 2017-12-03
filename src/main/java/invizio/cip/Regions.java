@@ -430,7 +430,7 @@ public class Regions {
 			z0 = (int)region.min(2);
 		}
 		
-		System.out.println("x0 "+x0+" ; y0 "+y0+" ; z0 "+z0);
+		//System.out.println("x0 "+x0+" ; y0 "+y0+" ; z0 "+z0);
 		
 		// Iterate on the plane of the imageplus and create a roi on each plane
 		List<Roi> roiList = new ArrayList<Roi>();
