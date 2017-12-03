@@ -17,6 +17,7 @@ import ij.gui.Roi;
 import invizio.cip.CIP;
 import invizio.cip.MetadataCIP2;
 import invizio.cip.RaiCIP2;
+import invizio.cip.Regions;
 import net.imagej.ImageJ;
 import net.imagej.ops.AbstractOp;
 import net.imagej.ops.OpService;
@@ -305,19 +306,81 @@ import net.imglib2.view.Views;
 			
 			
 			
-			
-			
-			Object impSeg1 = cip.label( imp , 100 );
-			Object region1 = cip.region( impSeg1 );
-			
-			Object impSeg2 = cip.threshold( imp , 100 );
-			Object region2 = cip.region( impSeg2 );
+			String rtName = "my measures";
 
-			Roi region3 = new Roi(50,50, 100, 50);
+			// measures in an image
+			Object measNames = CIP.list( "test", "size", "boundary", "position");
+			Object measures = cip.measure(imp , measNames);
+			//cip.show( measures , rtName);
 
-			List<Roi> region4 = new ArrayList<Roi>();
-			region4.add( new Roi(100,100, 20, 20) );
-			region4.add( new Roi(110,110, 40, 20) );
+			//Object measNames2 = CIP.list( "median", "size", "position");
+			//Object measures2 = cip.measure(imp , measNames2);
+			//cip.show( measures2 , rtName);
+			
+			
+			
+//			// measure in a region
+//			Object impSeg1 = cip.threshold( imp , 100 );
+//			Object region1 = cip.region( impSeg1 );
+//			Object measures1 = cip.measure(region1 , measNames, "prefix","thresh_");
+//			
+//			System.out.println("above threshold:");
+//			System.out.println(measures1);
+//			System.out.println("\n");
+//			
+//			
+//			// measure in a region with a source image
+//			Object measures11 = cip.measure(region1 , measNames, imp, "prefix","thresh_");
+//			
+//			System.out.println("above threshold, measure with source:");
+//			System.out.println(measures11);
+//			System.out.println("\n");
+			
+			
+			// measure of the cc
+			Object impSeg2 = cip.label( imp , 100 );
+			Object regions = cip.region( impSeg2 );
+			Object measures2 = cip.measure(regions , measNames, "prefix","reg_");
+			Object measures22 = cip.measure(regions , measNames, imp, "prefix","reg_");
+			cip.show( measures22 , "region measures");
+			cip.show( measures2  , "region measures");
+			
+			//System.out.println("regions above threshold:");
+			//System.out.println(measures2);
+			//System.out.println("\n");
+
+			//System.out.println("region above threshold with source:");
+			//System.out.println(measures22);
+			//System.out.println("\n");
+
+			//String h = cip.show( imp );
+			//cip.show(h, regions, "fire", "width", 1.0 );
+
+			
+			//Object impSeg2 = cip.threshold( imp , 100 );
+			//Object region2 = cip.region( impSeg2 );
+
+			//Object imp3 = cip.slice(imp2,2,0);
+			//Object impSeg3 = cip.threshold( imp3 , 7000 );
+
+			//Object regionFromImg = cip.region( impSeg3 );
+			//Object regionIJ1 = cip.toIJ1(regionFromImg);
+			//Object regionIJ2 = cip.toIJ2(regionIJ1);
+			
+			//Object h1 = cip.show( imp3, "g" );
+			//cip.show( h1, regionFromImg, "cyan" );
+
+			//Object h2 = cip.show( imp3, "g" );
+			//cip.show( h2, regionIJ1, "yellow" );
+
+			//Object h3 = cip.show( imp3, "g" );
+			//cip.show( h3, regionIJ2, "magenta" );
+
+			//Roi region3 = new Roi(50,50, 100, 50);
+
+			//List<Roi> region4 = new ArrayList<Roi>();
+			//region4.add( new Roi(100,100, 20, 20) );
+			//region4.add( new Roi(110,110, 40, 20) );
 			
 
 			//String h1 = cip.show( imp2 , "rb");
@@ -326,13 +389,21 @@ import net.imglib2.view.Views;
 
 			//String h3 = cip.show( imp , "cyan");
 			//String h4 = cip.show( imp );
-			String h5 = cip.show( imp );
-			String h6 = cip.show( imp );
+			//String h5 = cip.show( imp );
+			//String h6 = cip.show( imp );
 
 			//cip.show(h3, region1, "fire", "width", 2.0 );
 			//cip.show(h4, region2, "red", "width", 2.0 );
-			cip.show(h5, region3, "magenta", 5 );
-			cip.show(h6, region4, "fire", "width", 2);
+			
+			//cip.show(h5, region3, "green", 5 );
+			
+			//Object region5 = Regions.toIterableRegion(region3);
+			//cip.show(h5, region5, "magenta", 1 );
+			
+			//System.out.println("region:" + region5.toString() );
+			
+			
+			//cip.show(h6, region4, "fire", "width", 2);
 			
 			//String h2 = cip.show( imp , "green");
 			
