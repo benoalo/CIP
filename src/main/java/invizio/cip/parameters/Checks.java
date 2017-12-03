@@ -3,6 +3,7 @@ package invizio.cip.parameters;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import ij.ImagePlus;
 import ij.gui.Roi;
@@ -171,7 +172,17 @@ public class Checks {
 	}
 	
 	
-	
+	public static boolean isMeasure( Object value )
+	{
+		if ( value instanceof Map ) {
+			Map<?,?> map = (Map<?,?>) value; 
+			if (  map.keySet().iterator().next() instanceof String  &&  map.values().iterator().next() instanceof List ) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 	
 	
 //	public static boolean isArray( Object value)

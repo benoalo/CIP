@@ -45,7 +45,8 @@ public class DefaultParameter2 implements Parameter{
 		scalars("Scalars"),
 		string("String"),
 		strings("Strings"),
-		region("Region");
+		region("Region"),
+		measure("Measure");
 		
 		String str;
 		Type(String str){
@@ -79,6 +80,9 @@ public class DefaultParameter2 implements Parameter{
 				
 			case region :
 				return Checks.isRegion2(obj);
+				
+			case measure :
+				return Checks.isMeasure(obj);
 				
 			default : // text :
 				return Checks.isStrings(obj);

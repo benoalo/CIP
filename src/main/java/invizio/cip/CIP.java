@@ -11,6 +11,7 @@ import org.scijava.ui.UIService;
 
 import ij.IJ;
 import ij.ImagePlus;
+import invizio.cip.measure.MeasureCIP;
 import invizio.cip.misc.ShowCIPService;
 import invizio.cip.parameters.DefaultParameter2;
 import invizio.cip.parameters.FunctionParameters2;
@@ -26,6 +27,9 @@ import net.imglib2.Cursor;
 import net.imglib2.Interval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.roi.IterableRegion;
+import net.imglib2.type.BooleanType;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
 
@@ -70,7 +74,7 @@ import net.imglib2.type.numeric.real.DoubleType;
  *  	[-] implement miscellaneous
  *  		[x] create 
  *  		[x] duplicate/slice
- *			[-] projection ( min, max, sum, median, stdev )
+ *			[x] projection ( min, max, sum )
  *  		[-] concat (repeat the same image along a dim, or concat image along a dim)
  *  		[-] resample
  *  
@@ -104,8 +108,8 @@ public class CIP extends AbstractNamespace{
 	@Parameter
 	private UIService uiService;
 	
-	//@Parameter
-	//private LUTService lutService;
+	@Parameter
+	private MeasureCIP measuresCIPService;
 	
 	@Parameter
 	private DisplayService displayService;
@@ -1095,9 +1099,15 @@ public class CIP extends AbstractNamespace{
     	paramsReg.addOptional("color", 			Type.string,  "lila" 	);
     	paramsReg.addOptional("width", 			Type.scalar,   1.0 		);
     	paramsReg.addOptional("scalars", 		Type.scalars,  null 	);
-    	paramsReg.addOptional("reset", 		Type.logic,    new Boolean(false) ); // whether one should reset the overlay or not
+    	paramsReg.addOptional("reset", 			Type.logic,    new Boolean(false) ); // whether one should reset the overlay or not
     	// also fill for fill color and style for the stroke type
     	
+    	
+    	FunctionParameters2 paramsMeas = new FunctionParameters2("showMeasure");
+    	paramsMeas.addRequired("measures", 		Type.measure						);
+    	paramsMeas.addOptional("handle", 		Type.string		,"Results"			);
+    	paramsMeas.addOptional("reset",	 		Type.logic		,new Boolean(false)	);
+    	// add list of regions that could be use to create some feedback between an image and a result table
     	
     	String name = null;
     	
@@ -1108,6 +1118,10 @@ public class CIP extends AbstractNamespace{
     	else if ( paramsReg.parseInput( args ) )
 		{
     		showCipService.showRegion(paramsReg);
+		}
+    	else if ( paramsMeas.parseInput( args ) )
+		{
+    		name = showCipService.showMeasure(paramsMeas);
 		}
     	
     	return name;
@@ -1172,11 +1186,55 @@ public class CIP extends AbstractNamespace{
     
     // return an iterable region or a list of iterable regions depending on the input
     // to check: does a thresholded imagePlus converts to a BooleanType RaiCIP2 ?
+    // TODO: when RegionCIP are defined, this function should convert any mask, rois, Iterableregion to RegionsCIP 
     public Object region( Object image )
     {
     	return Regions.toIterableRegion( image, cipService );
     }
     
+    
+    
+    public <T extends RealType<T>, B extends BooleanType<B>> Object measure( Object ...args )
+    {
+    	Object result = null;
+    	
+    	FunctionParameters2 paramsImg = new FunctionParameters2("Image_Measure");
+    	paramsImg.addRequired("image", 		Type.image		);
+    	paramsImg.addRequired("measures", 	Type.strings	);
+    	paramsImg.addOptional("unit", 		Type.logic	, 	true	);
+    	paramsImg.addOptional("prefix", 	Type.string	, 	""		);
+    	
+
+    	FunctionParameters2 paramsReg = new FunctionParameters2("toIJ1_Region");
+    	paramsReg.addRequired("regions", 	Type.region		);
+    	paramsReg.addRequired("measures", 	Type.strings	);
+    	paramsReg.addOptional("source", 	Type.image	,	null	);
+    	//paramsImg.addOptional("unit", 		Type.logic	, 	true	);
+    	paramsReg.addOptional("prefix", 	Type.string	, 	""		);
+
+    	
+    	
+    	if ( paramsImg.parseInput( args ) )
+		{
+    		RaiCIP2<T> raiCIP = cipService.toRaiCIP( paramsImg.get("image").value );
+    		List<String> measureNames = cipService.strings(  paramsImg.get("measures").value );
+    		Boolean useUnit = (Boolean) paramsImg.get("unit").value;
+    		String prefix = (String) paramsImg.get("prefix").value;
+    		
+    		result = measuresCIPService.imageMeasures(	raiCIP , measureNames , useUnit , prefix );
+    	}
+    	else if ( paramsReg.parseInput( args ) )
+		{
+    		List<IterableRegion<B>> regions = Regions.toIterableRegion( paramsReg.get("regions").value );
+    		List<String> measureNames = cipService.strings(  paramsReg.get("measures").value );
+    		RaiCIP2<T> source = cipService.toRaiCIP( paramsReg.get("source").value );
+    		String prefix = (String) paramsReg.get("prefix").value;
+    		
+    		result = measuresCIPService.regionMeasures( regions, measureNames , source , prefix  );
+		}
+    	
+    	return result; 
+    }
     
     /////////////////////////////////////////////////////////
     // helper to pass a list from jython             //

@@ -408,8 +408,8 @@ public class Regions {
 		// convert the region to an image plus mask
 		int nDim = region.numDimensions();
 		
-		long[] min = new long[nDim];
-		region.min(min);
+		//long[] min = new long[nDim];
+		//region.min(min);
 		//RandomAccessibleInterval<B> rai = Views.offset( region , min );  // necessary when converting via IJ2 but not with
 		
 		//ImagePlus impReg = cipService.toImagegPlus( rai ); // very slow as compared to ImageJFunction even on small images
@@ -430,7 +430,7 @@ public class Regions {
 			z0 = (int)region.min(2);
 		}
 		
-		System.out.println("x0 "+x0+" ; y0 "+y0+" ; z0 "+z0);
+		//System.out.println("x0 "+x0+" ; y0 "+y0+" ; z0 "+z0);
 		
 		// Iterate on the plane of the imageplus and create a roi on each plane
 		List<Roi> roiList = new ArrayList<Roi>();

@@ -1,6 +1,7 @@
 package invizio.cip.misc;
 
 import java.awt.Color;
+import java.awt.Window;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -20,7 +21,9 @@ import org.scijava.service.Service;
 import org.scijava.ui.UIService;
 
 import ij.ImagePlus;
+import ij.measure.ResultsTable;
 import ij.WindowManager;
+import ij.text.TextWindow;
 import ij.gui.Overlay;
 import ij.gui.Roi;
 import invizio.cip.CIPService;
@@ -31,6 +34,16 @@ import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.lut.LUTService;
 import net.imglib2.display.ColorTable;
+
+
+
+/**
+ * 
+ * @author Benoit Lombardot
+ *
+ **/
+
+
 
 @Plugin(type = Service.class)
 public class ShowCIPService extends AbstractService implements ImageJService {
@@ -219,6 +232,119 @@ public class ShowCIPService extends AbstractService implements ImageJService {
 	
 	
 	
+	public String showMeasure(FunctionParameters2 params ) {
+		
+		
+		// parse parameters
+		@SuppressWarnings("unchecked")
+		Map<String,List<Object>> measures = (Map<String,List<Object>>) params.get("measures").value;
+		String resultTableName = (String) params.get("handle").value;
+		boolean reset = (Boolean) params.get("reset").value;
+		
+		
+		// get the results table
+		Window win = WindowManager.getWindow(resultTableName);
+		ResultsTable resultTable = null;
+		if ( (win!=null) && win instanceof TextWindow)
+		{
+			resultTable = ((TextWindow)win).getTextPanel().getResultsTable();
+			if ( reset ) {
+				resultTable.reset();
+			}
+		}
+		else
+		{
+			resultTable = new ResultsTable();
+		}
+		
+		
+		// insert measures in the result table
+		
+		int rowOffset = resultTable.getCounter();
+		//System.out.println("count: "+ rowOffset);
+		boolean isFirstCol = true;
+		
+		for( Entry<String,List<Object>> e : measures.entrySet() )
+		{
+			String colName = e.getKey();
+			List<?> colValues = e.getValue();
+
+			if(  colValues.size()>0  )
+			{
+				if( colValues.get(0) instanceof String )
+				{
+					@SuppressWarnings("unchecked")
+					List<String> colValues2 = (List<String>) colValues;
+					addStringColumn( colValues2, colName, rowOffset, resultTable, isFirstCol);
+				}
+				else if ( colValues.get(0) instanceof Double )
+				{
+					@SuppressWarnings("unchecked")
+					List<Double> colValues2 = (List<Double>) colValues;
+					addDoubleColumn( colValues2, colName, rowOffset, resultTable, isFirstCol);	
+				}
+				else
+				{
+					List<String> colValues2 = new ArrayList<String>(colValues.size());
+					for( Object value : colValues)
+						colValues2.add( value.toString() );
+					addStringColumn( colValues2, colName, rowOffset, resultTable, isFirstCol);
+				}
+				
+			}
+			isFirstCol = false;
+			
+		}
+		
+		resultTable.show( resultTableName );
+		
+		return resultTableName;
+	}
+		
+	
+	
+	private <T> void addStringColumn(List<String> colValues, String colName, int rowOffset, ResultsTable resultTable, boolean isFirstColumn)
+	{
+		if ( isFirstColumn )
+		{
+			for( String value : colValues)
+			{
+				resultTable.incrementCounter();
+				resultTable.addValue( colName , value );
+			}
+		}
+		else {
+			int index = 0;
+			for( String value : colValues)
+			{
+				resultTable.setValue( colName, rowOffset+index , value );
+				index++;
+			}
+		}		
+	}
+	
+	
+	
+	private <T> void addDoubleColumn(List<Double> colValues, String colName, int rowOffset, ResultsTable resultTable, boolean isFirstColumn)
+	{
+		if ( isFirstColumn )
+		{
+			for( Double value : colValues)
+			{
+				resultTable.incrementCounter();
+				resultTable.addValue( colName , value );
+			}
+		}
+		else {
+			int index = 0;
+			for( Double value : colValues)
+			{
+				resultTable.setValue( colName, rowOffset+index , value );
+				index++;
+			}
+		}
+	}
+	
 	
 	
 	Map<String,URL> lutsURL;
@@ -245,6 +371,7 @@ public class ShowCIPService extends AbstractService implements ImageJService {
 		
 		return colorTable;
 	}
+	
 	
 	
 	private void initLutURL()
