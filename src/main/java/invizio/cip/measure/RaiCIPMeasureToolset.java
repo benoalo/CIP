@@ -1,6 +1,5 @@
 package invizio.cip.measure;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +7,6 @@ import java.util.Map;
 import invizio.cip.RaiCIP2;
 import invizio.cip.parameters.DefaultParameter2;
 import net.imagej.ops.OpService;
-import net.imglib2.meta.Axes;
 import net.imglib2.type.numeric.RealType;
 
 
