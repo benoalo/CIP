@@ -27,6 +27,8 @@ import net.imglib2.Cursor;
 import net.imglib2.Interval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.roi.IterableRegion;
+import net.imglib2.type.BooleanType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
@@ -72,7 +74,7 @@ import net.imglib2.type.numeric.real.DoubleType;
  *  	[-] implement miscellaneous
  *  		[x] create 
  *  		[x] duplicate/slice
- *			[-] projection ( min, max, sum, median, stdev )
+ *			[x] projection ( min, max, sum )
  *  		[-] concat (repeat the same image along a dim, or concat image along a dim)
  *  		[-] resample
  *  
@@ -1182,7 +1184,7 @@ public class CIP extends AbstractNamespace{
     
     
     
-    public <T extends RealType<T>> Object measure( Object ...args )
+    public <T extends RealType<T>, B extends BooleanType<B>> Object measure( Object ...args )
     {
     	Object result = null;
     	
@@ -1194,12 +1196,14 @@ public class CIP extends AbstractNamespace{
     	
 
     	FunctionParameters2 paramsReg = new FunctionParameters2("toIJ1_Region");
-    	paramsReg.addRequired("region", 	Type.region		);
-    	paramsReg.addRequired("measures", 	Type.region		);
-    	paramsReg.addOptional("source", 	Type.region	,	null	);
-    	paramsImg.addOptional("unit", 		Type.logic	, 	true	);
-    	paramsImg.addOptional("prefix", 	Type.string	, 	""		);
+    	paramsReg.addRequired("regions", 	Type.region		);
+    	paramsReg.addRequired("measures", 	Type.strings	);
+    	paramsReg.addOptional("source", 	Type.image	,	null	);
+    	//paramsImg.addOptional("unit", 		Type.logic	, 	true	);
+    	paramsReg.addOptional("prefix", 	Type.string	, 	""		);
 
+    	
+    	
     	if ( paramsImg.parseInput( args ) )
 		{
     		RaiCIP2<T> raiCIP = cipService.toRaiCIP( paramsImg.get("image").value );
@@ -1211,7 +1215,12 @@ public class CIP extends AbstractNamespace{
     	}
     	else if ( paramsReg.parseInput( args ) )
 		{
-    		//result = Measures.regionMeasure( paramsReg.getParsedInput() );
+    		List<IterableRegion<B>> regions = Regions.toIterableRegion( paramsReg.get("regions").value );
+    		List<String> measureNames = cipService.strings(  paramsReg.get("measures").value );
+    		RaiCIP2<T> source = cipService.toRaiCIP( paramsReg.get("source").value );
+    		String prefix = (String) paramsReg.get("prefix").value;
+    		
+    		result = measuresCIPService.regionMeasures( regions, measureNames , source , prefix  );
 		}
     	
     	return result; 

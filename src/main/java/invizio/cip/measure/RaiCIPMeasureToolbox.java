@@ -15,7 +15,7 @@ import net.imglib2.view.Views;
  *
  **/
 
-public class RaiCIPMeasureToolbox<T extends RealType<T>> extends AbstractMeasureToolbox<T> {
+public class RaiCIPMeasureToolbox<T extends RealType<T>> extends AbstractMeasureToolbox {
 
 	
 	public RaiCIPMeasureToolbox( OpService op , Boolean useUnit) {

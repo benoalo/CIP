@@ -20,16 +20,16 @@ import net.imglib2.type.numeric.RealType;
 
 
 
-public abstract class AbstractMeasureToolbox<T extends RealType<T>>  {
+public abstract class AbstractMeasureToolbox { //<T extends RealType<T>>  {
 
 	// 
-	Map<String, AbstractMeasureTool<Object,T>> tools;
+	Map<String, AbstractMeasureTool<Object, ? extends RealType<?>> > tools;
 	LinkedHashMap<String, Measure > results;
 	
 	// measurable instance
-	Iterable<T> iterable;
+	Iterable<? extends RealType<?>> iterable;
 	Interval interval;
-	RaiCIP2<T> raiCIP;
+	RaiCIP2<? extends RealType<?>> raiCIP;
 	IterableRegion<? extends BooleanType<?>> region;
 	
 	
@@ -45,18 +45,18 @@ public abstract class AbstractMeasureToolbox<T extends RealType<T>>  {
 	
 	public AbstractMeasureToolbox()
 	{
-		tools = new HashMap<String, AbstractMeasureTool<Object,T> >() ;
+		tools = new HashMap<String, AbstractMeasureTool<Object,? extends RealType<?>> >() ;
 	}
 	
 	
 	
-	public void measure( String toolName )
+	public Measure measure( String toolName )
 	{
 		Measure result = null;
 		toolName = toolName.toLowerCase();
 		if( tools.containsKey(toolName) ) {
 			
-			AbstractMeasureTool<Object,T> tool = tools.get(toolName);
+			AbstractMeasureTool<Object,? extends RealType<?>> tool = tools.get(toolName);
 			
 			switch( tool.inputType )
 			{
@@ -80,31 +80,33 @@ public abstract class AbstractMeasureToolbox<T extends RealType<T>>  {
 				result = null;
 				break;
 			}
-			results.put(toolName, result);
+			//if result
+			//results.put(toolName, result);
 		}
-			
+		
+		return result;
 	}
 
-	public Map<String,Measure> results()
-	{
-		return results;
-	}
+//	public Map<String,Measure> results()
+//	{
+//		return results;
+//	}
 
-	public Map<String,Measure> results(String prefix)
-	{
-		Map<String,Measure> results2 = new LinkedHashMap<String,Measure>();
-		for(Entry<String,Measure> e : results.entrySet() )
-			results2.put( prefix + e.getKey() , e.getValue() );
-			
-		return results2;
-	}
+//	public Map<String,Measure> results(String prefix)
+//	{
+//		Map<String,Measure> results2 = new LinkedHashMap<String,Measure>();
+//		for(Entry<String,Measure> e : results.entrySet() )
+//			results2.put( prefix + e.getKey() , e.getValue() );
+//			
+//		return results2;
+//	}
 
 	
-	public void add( AbstractMeasureToolset<?,T> toolset )
+	public void add( AbstractMeasureToolset<?,? extends RealType<?>> toolset )
 	{
-		for(AbstractMeasureTool<?,T> tool : toolset )
+		for(AbstractMeasureTool<?,? extends RealType<?>> tool : toolset )
 		{
-			tools.put( tool.name , (AbstractMeasureTool<Object, T>) tool );
+			tools.put( tool.name , (AbstractMeasureTool<Object, ? extends RealType<?>>) tool );
 		}
 	}
 	

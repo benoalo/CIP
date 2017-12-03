@@ -32,6 +32,16 @@ import net.imagej.axis.Axes;
 import net.imagej.lut.LUTService;
 import net.imglib2.display.ColorTable;
 
+
+
+/**
+ * 
+ * @author Benoit Lombardot
+ *
+ **/
+
+
+
 @Plugin(type = Service.class)
 public class ShowCIPService extends AbstractService implements ImageJService {
 	

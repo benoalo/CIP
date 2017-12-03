@@ -552,7 +552,7 @@ public class CIPService extends AbstractService implements ImageJService {
 		}
 		else
 		{
-			System.err.println("Unknown image type:" + input.getClass().getName() );
+			//System.err.println("Unknown image type:" + input.getClass().getName() );
 			return null;
 		}
 		

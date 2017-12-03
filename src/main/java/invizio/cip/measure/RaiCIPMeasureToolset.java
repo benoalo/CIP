@@ -63,7 +63,7 @@ public class RaiCIPMeasureToolset<T extends RealType<T>> extends AbstractMeasure
 		RaiCIPMeasureToolset<U> toolbox;
 		
 		BoundarySizeMeasureTool( RaiCIPMeasureToolset<U> toolbox ){	
-			name = "position";
+			name = "boundary size";
 			inputType = AbstractMeasureToolbox.MeasurableType.RAICIP;
 			outputType = DefaultParameter2.Type.scalar;
 			this.toolbox = toolbox;
