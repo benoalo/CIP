@@ -1099,9 +1099,15 @@ public class CIP extends AbstractNamespace{
     	paramsReg.addOptional("color", 			Type.string,  "lila" 	);
     	paramsReg.addOptional("width", 			Type.scalar,   1.0 		);
     	paramsReg.addOptional("scalars", 		Type.scalars,  null 	);
-    	paramsReg.addOptional("reset", 		Type.logic,    new Boolean(false) ); // whether one should reset the overlay or not
+    	paramsReg.addOptional("reset", 			Type.logic,    new Boolean(false) ); // whether one should reset the overlay or not
     	// also fill for fill color and style for the stroke type
     	
+    	
+    	FunctionParameters2 paramsMeas = new FunctionParameters2("showMeasure");
+    	paramsMeas.addRequired("measures", 		Type.measure						);
+    	paramsMeas.addOptional("handle", 		Type.string		,"Results"			);
+    	paramsMeas.addOptional("reset",	 		Type.logic		,new Boolean(false)	);
+    	// add list of regions that could be use to create some feedback between an image and a result table
     	
     	String name = null;
     	
@@ -1112,6 +1118,10 @@ public class CIP extends AbstractNamespace{
     	else if ( paramsReg.parseInput( args ) )
 		{
     		showCipService.showRegion(paramsReg);
+		}
+    	else if ( paramsMeas.parseInput( args ) )
+		{
+    		name = showCipService.showMeasure(paramsMeas);
 		}
     	
     	return name;
