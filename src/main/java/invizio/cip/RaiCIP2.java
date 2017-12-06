@@ -3,36 +3,44 @@ package invizio.cip;
 import java.util.List;
 
 
-import ij.process.LUT;
 import net.imglib2.Interval;
 import net.imglib2.Positionable;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPositionable;
 
-public class RaiCIP2<T> extends MetadataCIP2 implements RandomAccessibleInterval<T> {
+public class RaiCIP2<T> implements RandomAccessibleInterval<T> , Metadata {
 
 	RandomAccessibleInterval<T> rai;
-	
+	MetadataCIP2 metadata;
+	public String name;
 	
 	public RaiCIP2( RandomAccessibleInterval<T> rai)
 	{
-		super( rai.numDimensions() );
+		metadata = new MetadataCIP2( rai.numDimensions() );
 		this.rai = rai;		
+		this.name = metadata.name;
 	}
 	
 	
 	public RaiCIP2( RandomAccessibleInterval<T> rai, List<Double> spacing, List<String> axesName, List<String> axesUnit)
 	{
-		super( spacing , axesName, axesUnit);
+		metadata = new MetadataCIP2( spacing , axesName, axesUnit);
 		this.rai = rai;
+		this.name = metadata.name;
 	}
 		
 	
 	public RaiCIP2( RandomAccessibleInterval<T> rai, List<AxisCIP> metadata )
 	{
-		super( metadata );
+		this.metadata = new MetadataCIP2( metadata );
 		this.rai = rai;
+		this.name = this.metadata.name;
+	}
+	
+	
+	public MetadataCIP2 metadata() {
+		return metadata;
 	}
 	
 	
@@ -120,5 +128,57 @@ public class RaiCIP2<T> extends MetadataCIP2 implements RandomAccessibleInterval
 	public long dimension(int d) {
 		return rai.dimension( d );
 	}
+	
+	
+	// Metadata methods
+	
+	@Override
+	public int axesIndex(String name) {
+		return metadata.axesIndex(name);
+	}
+
+
+	@Override
+	public List<String> axes() {
+		return metadata.axes();
+	}
+
+
+	@Override
+	public String axes(int d) {
+		// TODO Auto-generated method stub
+		return metadata.axes(d);
+	}
+
+
+	@Override
+	public List<Double> spacing() {
+		return metadata.spacing();
+	}
+
+
+	@Override
+	public double spacing(int d) {
+		return metadata.spacing(d);
+	}
+
+
+	@Override
+	public double spacing(String axisName) {
+		return metadata.spacing(axisName);
+	}
+
+
+	@Override
+	public List<String> unit() {
+		return metadata.unit();
+	}
+
+
+	@Override
+	public String unit(int d) {
+		return metadata.unit(d);
+	}
+
 
 }

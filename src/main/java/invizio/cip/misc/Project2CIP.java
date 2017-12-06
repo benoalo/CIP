@@ -209,7 +209,7 @@ import net.imglib2.view.Views;
 		private <V extends RealType<V>> RaiCIP2<V> toRaiCIP( RandomAccessibleInterval<V> rai ){
 			
 			// adapt input metadata for the output
-			MetadataCIP2 metadata = new MetadataCIP2( inputImage );
+			MetadataCIP2 metadata = new MetadataCIP2( inputImage.metadata() );
 			if ( dimension != null )
 				metadata.dropDimension( dimension );	
 			

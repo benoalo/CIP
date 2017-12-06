@@ -885,7 +885,7 @@ public class CIPService extends AbstractService implements ImageJService {
 	{		
 		Img<T> img = ImgView.wrap( raiCIP , Util.getArrayOrCellImgFactory( raiCIP , raiCIP.randomAccess().get() ) );
 		
-		int nDim = raiCIP.nDim;
+		int nDim = raiCIP.numDimensions();
 		AxisType[] axesType = new AxisType[nDim];
 		double[] spacing = new double[nDim];
 		for(int d=0; d<nDim; d++)
