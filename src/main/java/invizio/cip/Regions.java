@@ -12,7 +12,6 @@ import ij.gui.Roi;
 import ij.plugin.filter.ThresholdToSelection;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
@@ -45,8 +44,45 @@ public class Regions {
 
 	
 	
-	// TODO: create a function that receive image regions or rois and return list<RegionCIP>
+	// TODO: create a function that receive rois and return list<RegionCIP>
+	public static <B extends BooleanType<B>, T extends RealType<T>> Object ImagetoRegionCIP( RaiCIP2<T> raiCIP )
+	{
+    	T valT = raiCIP.randomAccess().get();
+    	if( valT instanceof BooleanType )
+    	{
+    		@SuppressWarnings("unchecked")
+			RaiCIP2<B> mask = (RaiCIP2<B>)raiCIP;
+    		return Regions.maskToRegionCIP( mask );
+    	}
+    	else {
+    		return Regions.labelMapToRegionCIP( raiCIP );    		
+    	}
+	}
 	
+	
+	
+	private static <B extends BooleanType<B>, T extends RealType<T>> List<RegionCIP<B>> labelMapToRegionCIP( RaiCIP2<T> labelMap )
+	{
+		List<IterableRegion<B>> iterableRegions = labelMapToIterableRegions(labelMap);
+		List<RegionCIP<B>> regions = new ArrayList<RegionCIP<B>>( iterableRegions.size() );
+		for( IterableRegion<B> iterableRegion : iterableRegions ) {
+			final MetadataCIP2 metadata = new MetadataCIP2(labelMap.metadata() );
+			final RegionCIP<B> region = new RegionCIP<B>( iterableRegion , metadata );
+			regions.add( region );
+		}
+		
+		return regions;
+	}
+	
+	
+	private static <B extends BooleanType<B>> RegionCIP<B> maskToRegionCIP( RaiCIP2<B> mask )
+	{
+		final IterableRegion<B> iterableRegion = maskToIterableRegion( mask );
+		final MetadataCIP2 metadata = new MetadataCIP2(mask.metadata() );
+		final RegionCIP<B> region = new RegionCIP<B>( iterableRegion , metadata );
+		
+		return  region;
+	}
 	
 	//////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////
@@ -57,20 +93,20 @@ public class Regions {
 	//////////////////////////////////////////////////////////////
 	
 	
-	public static <B extends BooleanType<B>, T extends RealType<T>> Object toIterableRegion( Object image, CIPService cipService )
-	{
-    	RaiCIP2<T> raiCIP = cipService.toRaiCIP( image );
-    	T valT = raiCIP.randomAccess().get();
-    	if( valT instanceof BooleanType )
-    	{
-    		@SuppressWarnings("unchecked")
-			RandomAccessibleInterval<B> mask = (RandomAccessibleInterval<B>)raiCIP;
-    		return Regions.maskToIterableRegion( mask );
-    	}
-    	else {
-    		return Regions.labelMapToIterableRegions( raiCIP );    		
-    	}
-	}
+//	public static <B extends BooleanType<B>, T extends RealType<T>> Object toIterableRegion( Object image, CIPService cipService )
+//	{
+//    	RaiCIP2<T> raiCIP = cipService.toRaiCIP( image );
+//    	T valT = raiCIP.randomAccess().get();
+//    	if( valT instanceof BooleanType )
+//    	{
+//    		@SuppressWarnings("unchecked")
+//			RandomAccessibleInterval<B> mask = (RandomAccessibleInterval<B>)raiCIP;
+//    		return Regions.maskToIterableRegion( mask );
+//    	}
+//    	else {
+//    		return Regions.labelMapToIterableRegions( raiCIP );    		
+//    	}
+//	}
 	
 	
 	// use realtype rather than integertype as input for flexibility reason 
@@ -157,8 +193,76 @@ public class Regions {
 	//////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////
 	
+	@SuppressWarnings("unchecked")
+	public static <B extends BooleanType<B>> List<RegionCIP<B>> toRegionCIP( Object regions )
+	{
 	
-	// TODO: test toIterableRegions2D
+		List<RegionCIP<B>> regionCIPs = null;
+		
+		// IterableRegion
+    	if ( regions instanceof RegionCIP ) {
+    		RegionCIP<B> region = (RegionCIP<B>) regions;
+    		regionCIPs = new ArrayList<RegionCIP<B>>();
+    		regionCIPs.add( region );
+    	}
+    	
+		// IterableRegion
+    	if ( regions instanceof IterableRegion ) {
+    		RegionCIP<B> region = new RegionCIP<B>( (IterableRegion<B>) regions );
+    		regionCIPs = new ArrayList<RegionCIP<B>>();
+    		regionCIPs.add( region );
+    	}
+    	
+    	// Roi :we bet the roi is XY. if it as a position it could well be 3D, but let's not complicate things more ...
+    	else if ( regions instanceof Roi) {
+    		Roi roi = (Roi) regions;
+    		regionCIPs = new ArrayList<RegionCIP<B>>();
+    		regionCIPs.add( new RegionCIP<B>( toIterableRegion2D(roi) ) );
+    	}
+    	
+    	// List<?>
+    	else if ( regions instanceof List) {
+    		
+    		if( ((List<?>)regions).size()>0 ) {
+    			
+    			Object item = ((List<Object>)regions).get(0);
+    			
+    			if( item instanceof RegionCIP ) {
+    				regionCIPs = (List<RegionCIP<B>>) regions;
+    			}
+    			
+    			//List<IterableRegion>
+    			if( item instanceof IterableRegion ) {
+    				List<IterableRegion<B>> iterRegions = (List<IterableRegion<B>>) regions;
+    				for( IterableRegion<B> iterReg : iterRegions )
+    					regionCIPs.add( new RegionCIP<B>( iterReg ) );
+    			}
+    			
+    			// List<Roi>  // we assume the roi represent many region of dimensions xy
+    			else if(item instanceof Roi) {
+    				List<Roi> roiList = (List<Roi>) regions;
+    				List<IterableRegion<B>> iterRegions = toIterableRegions2D( roiList );
+    				for( IterableRegion<B> iterReg : iterRegions )
+    					regionCIPs.add( new RegionCIP<B>( iterReg ) );
+    			}
+    			
+    			// List<List<Roi>>  // looking at the Roi position one could guess the 3rd dimensions, for now Z by default
+    			else if( item instanceof List ) {
+    				if( ((List<?>)item).size()>0 && ((List<?>)item).get(0) instanceof Roi) {
+    					List<List<Roi>> roisPerRegions = (List<List<Roi>>) regions;
+    					List<IterableRegion<B>> iterRegions = toIterableRegions3D( roisPerRegions );
+    					for( IterableRegion<B> iterReg : iterRegions )
+        					regionCIPs.add( new RegionCIP<B>( iterReg ) );
+    				}
+    			}
+    		}
+    	}
+		
+		return regionCIPs;
+	}
+
+	
+	
 	
 	@SuppressWarnings("unchecked")
 	public static <B extends BooleanType<B>> List<IterableRegion<B>> toIterableRegion( Object regions )
