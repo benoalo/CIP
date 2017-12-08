@@ -231,4 +231,9 @@ public class RegionCIP<B extends BooleanType<B>> implements IterableRegion<B>, M
 		return metadata.unit(d);
 	}
 	
+	@Override
+	public String toString() {
+		return "Region: " + name;
+	}
+	
 }

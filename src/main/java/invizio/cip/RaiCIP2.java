@@ -180,5 +180,9 @@ public class RaiCIP2<T> implements RandomAccessibleInterval<T> , Metadata {
 		return metadata.unit(d);
 	}
 
-
+	@Override
+	public String toString() {
+		return "Image: " + name;
+	}
+	
 }
