@@ -15,7 +15,7 @@ public class RegionCIP<B extends BooleanType<B>> implements IterableRegion<B>, M
 
 	IterableRegion<B> region;
 	MetadataCIP2 metadata;
-	public String name;
+	public String name="";
 	
 	public RegionCIP( IterableRegion<B> region )
 	{
@@ -35,7 +35,7 @@ public class RegionCIP<B extends BooleanType<B>> implements IterableRegion<B>, M
 	
 	public RegionCIP(IterableRegion<B> region, List<AxisCIP> metadata )
 	{
-		metadata = new MetadataCIP2( metadata );
+		this.metadata = new MetadataCIP2( metadata );
 		this.region = region;
 		name = this.metadata.name;
 	}
