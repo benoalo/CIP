@@ -45,42 +45,51 @@ public class Regions {
 	
 	
 	// TODO: create a function that receive rois and return list<RegionCIP>
-	public static <B extends BooleanType<B>, T extends RealType<T>> Object ImagetoRegionCIP( RaiCIP2<T> raiCIP )
+	public static <B extends BooleanType<B>, T extends RealType<T>> Object ImagetoRegionCIP( RaiCIP2<T> raiCIP, String prefix )
 	{
     	T valT = raiCIP.randomAccess().get();
     	if( valT instanceof BooleanType )
     	{
     		@SuppressWarnings("unchecked")
 			RaiCIP2<B> mask = (RaiCIP2<B>)raiCIP;
-    		return Regions.maskToRegionCIP( mask );
+    		return Regions.maskToRegionCIP( mask, prefix );
     	}
     	else {
-    		return Regions.labelMapToRegionCIP( raiCIP );    		
+    		return Regions.labelMapToRegionCIP( raiCIP, prefix );    		
     	}
 	}
 	
 	
 	
-	private static <B extends BooleanType<B>, T extends RealType<T>> List<RegionCIP<B>> labelMapToRegionCIP( RaiCIP2<T> labelMap )
+	private static <B extends BooleanType<B>, T extends RealType<T>> List<RegionCIP<B>> labelMapToRegionCIP( RaiCIP2<T> labelMap, String prefix )
 	{
+		if( prefix==null) {
+			prefix="";
+		}
 		List<IterableRegion<B>> iterableRegions = labelMapToIterableRegions(labelMap);
 		List<RegionCIP<B>> regions = new ArrayList<RegionCIP<B>>( iterableRegions.size() );
+		int count=0;
 		for( IterableRegion<B> iterableRegion : iterableRegions ) {
 			final MetadataCIP2 metadata = new MetadataCIP2(labelMap.metadata() );
 			final RegionCIP<B> region = new RegionCIP<B>( iterableRegion , metadata );
+			region.name = prefix+count;
 			regions.add( region );
+			count++;
 		}
 		
 		return regions;
 	}
 	
 	
-	private static <B extends BooleanType<B>> RegionCIP<B> maskToRegionCIP( RaiCIP2<B> mask )
+	private static <B extends BooleanType<B>> RegionCIP<B> maskToRegionCIP( RaiCIP2<B> mask , String name)
 	{
+		if( name==null) {
+			name="region_"+mask.name;
+		}
 		final IterableRegion<B> iterableRegion = maskToIterableRegion( mask );
 		final MetadataCIP2 metadata = new MetadataCIP2(mask.metadata() );
 		final RegionCIP<B> region = new RegionCIP<B>( iterableRegion , metadata );
-		
+		region.name = name;
 		return  region;
 	}
 	
@@ -194,14 +203,20 @@ public class Regions {
 	//////////////////////////////////////////////////////////////
 	
 	@SuppressWarnings("unchecked")
-	public static <B extends BooleanType<B>> List<RegionCIP<B>> toRegionCIP( Object regions )
+	public static <B extends BooleanType<B>> List<RegionCIP<B>> toRegionCIP( Object regions, String prefix )
 	{
 	
 		List<RegionCIP<B>> regionCIPs = null;
-		
+		boolean prefixWasNull=false;
+		if( prefix==null ){
+			prefix="region";
+			prefixWasNull = true;
+		}
 		// IterableRegion
     	if ( regions instanceof RegionCIP ) {
     		RegionCIP<B> region = (RegionCIP<B>) regions;
+    		if( !prefixWasNull)
+    			region.name = prefix;
     		regionCIPs = new ArrayList<RegionCIP<B>>();
     		regionCIPs.add( region );
     	}
@@ -209,6 +224,7 @@ public class Regions {
 		// IterableRegion
     	if ( regions instanceof IterableRegion ) {
     		RegionCIP<B> region = new RegionCIP<B>( (IterableRegion<B>) regions );
+    		region.name = prefix;
     		regionCIPs = new ArrayList<RegionCIP<B>>();
     		regionCIPs.add( region );
     	}
@@ -217,7 +233,12 @@ public class Regions {
     	else if ( regions instanceof Roi) {
     		Roi roi = (Roi) regions;
     		regionCIPs = new ArrayList<RegionCIP<B>>();
-    		regionCIPs.add( new RegionCIP<B>( toIterableRegion2D(roi) ) );
+    		final RegionCIP<B> region = new RegionCIP<B>( toIterableRegion2D(roi) );
+    		if( !prefixWasNull)
+    			region.name = roi.getName();
+    		else
+    			region.name = prefix;
+    		regionCIPs.add( region );
     	}
     	
     	// List<?>
@@ -229,21 +250,41 @@ public class Regions {
     			
     			if( item instanceof RegionCIP ) {
     				regionCIPs = (List<RegionCIP<B>>) regions;
+    				if( !prefixWasNull) {
+    					int count=0;
+        				for( RegionCIP<B> region : regionCIPs) {
+        					region.name =  prefix + "_" + count;
+        					count++;
+        				}
+    				}
     			}
     			
     			//List<IterableRegion>
     			if( item instanceof IterableRegion ) {
     				List<IterableRegion<B>> iterRegions = (List<IterableRegion<B>>) regions;
-    				for( IterableRegion<B> iterReg : iterRegions )
-    					regionCIPs.add( new RegionCIP<B>( iterReg ) );
+    				int count=0;
+    				for( IterableRegion<B> iterReg : iterRegions ) {
+    					final RegionCIP<B> region = new RegionCIP<B>( iterReg );
+    					region.name = prefix + "_" + count;
+    					regionCIPs.add( region );
+    					count++;
+    				}
     			}
     			
     			// List<Roi>  // we assume the roi represent many region of dimensions xy
     			else if(item instanceof Roi) {
     				List<Roi> roiList = (List<Roi>) regions;
     				List<IterableRegion<B>> iterRegions = toIterableRegions2D( roiList );
-    				for( IterableRegion<B> iterReg : iterRegions )
-    					regionCIPs.add( new RegionCIP<B>( iterReg ) );
+    				int count=0;
+    				for( IterableRegion<B> iterReg : iterRegions ) {
+    					final RegionCIP<B> region = new RegionCIP<B>( iterReg );
+    					if( !prefixWasNull)
+    		    			region.name = roiList.get(count).getName();
+    					else
+    						region.name = prefix + "_" + count;
+    					regionCIPs.add( region );
+    					count++;
+    				}
     			}
     			
     			// List<List<Roi>>  // looking at the Roi position one could guess the 3rd dimensions, for now Z by default
@@ -251,8 +292,13 @@ public class Regions {
     				if( ((List<?>)item).size()>0 && ((List<?>)item).get(0) instanceof Roi) {
     					List<List<Roi>> roisPerRegions = (List<List<Roi>>) regions;
     					List<IterableRegion<B>> iterRegions = toIterableRegions3D( roisPerRegions );
-    					for( IterableRegion<B> iterReg : iterRegions )
-        					regionCIPs.add( new RegionCIP<B>( iterReg ) );
+    					int count=0;
+        				for( IterableRegion<B> iterReg : iterRegions ) {
+        					final RegionCIP<B> region = new RegionCIP<B>( iterReg );
+        					region.name = prefix + "_" + count;
+        					regionCIPs.add( region );
+        					count++;
+        				}
     				}
     			}
     		}

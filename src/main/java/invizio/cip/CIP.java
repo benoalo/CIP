@@ -1073,14 +1073,11 @@ public class CIP extends AbstractNamespace{
     
     public List<String> unit( Object input ) {
     	
-    	// TODO: cf spacing
-    	
     	return cipService.unit( input );
     }
 
     public List<String> axes( Object input ) {
     	
-    	// TODO: cf spacing
     	return cipService.axes( input );
     }
     
@@ -1194,18 +1191,22 @@ public class CIP extends AbstractNamespace{
     	Object result = null;
     	
     	FunctionParameters2 paramsImg = new FunctionParameters2("ImageToRegion");
-    	paramsImg.addRequired("image", 		Type.image		);
+    	paramsImg.addRequired("image", 		Type.image					);
+    	paramsImg.addOptional("name", 		Type.string ,	"region"	);
     	
     	FunctionParameters2 paramsReg = new FunctionParameters2("regionToRegion");
-    	paramsImg.addRequired("regions", 	Type.region		);
+    	paramsReg.addRequired("regions", 	Type.region		);
+    	paramsReg.addOptional("name", 		Type.string ,	"region"	);
     	
     	if( paramsImg.parseInput( args ) ) {
     		RaiCIP2<T> image = cipService.toRaiCIP( paramsImg.get("image").value );
-    		result = Regions.ImagetoRegionCIP( image );
+    		String name = (String) paramsImg.get("name").value;
+    		result = Regions.ImagetoRegionCIP( image, name );
     	}
     	else if( paramsReg.parseInput( args ) ) {
-    		Object regions = paramsImg.get("image").value;
-    		result = Regions.toRegionCIP(regions);
+    		Object regions = paramsReg.get("regions").value;
+    		String name = (String) paramsReg.get("name").value;
+    		result = Regions.toRegionCIP(regions , name );
     	}
     	
     	return result;
@@ -1228,7 +1229,7 @@ public class CIP extends AbstractNamespace{
     	paramsReg.addRequired("regions", 	Type.region		);
     	paramsReg.addRequired("measures", 	Type.strings	);
     	paramsReg.addOptional("source", 	Type.image	,	null	);
-    	//paramsImg.addOptional("unit", 		Type.logic	, 	true	);
+    	paramsReg.addOptional("unit", 		Type.logic	, 	true	);
     	paramsReg.addOptional("prefix", 	Type.string	, 	""		);
 
     	
@@ -1244,12 +1245,13 @@ public class CIP extends AbstractNamespace{
     	}
     	else if ( paramsReg.parseInput( args ) )
 		{
-    		List<IterableRegion<B>> regions = Regions.toIterableRegion( paramsReg.get("regions").value );
+    		List<RegionCIP<B>> regions = Regions.toRegionCIP( paramsReg.get("regions").value , null);
     		List<String> measureNames = cipService.strings(  paramsReg.get("measures").value );
     		RaiCIP2<T> source = cipService.toRaiCIP( paramsReg.get("source").value );
+    		Boolean useUnit = (Boolean) paramsImg.get("unit").value;
     		String prefix = (String) paramsReg.get("prefix").value;
     		
-    		result = measuresCIPService.regionMeasures( regions, measureNames , source , prefix  );
+    		result = measuresCIPService.regionCIPMeasures( regions, measureNames , source , useUnit , prefix );
 		}
     	
     	return result; 
@@ -1268,7 +1270,8 @@ public class CIP extends AbstractNamespace{
 //		return list;
 //	}
 	
-    public static <T> List<T> list( T ... args ) {
+    @SafeVarargs
+	public static <T> List<T> list( T ... args ) {
 		List<T> list = new ArrayList<T>();
 		for ( T obj : args ) {
 			list.add( obj );
