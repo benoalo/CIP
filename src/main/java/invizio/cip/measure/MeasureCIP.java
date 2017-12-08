@@ -2,7 +2,6 @@ package invizio.cip.measure;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,7 @@ import org.scijava.service.Service;
 
 import invizio.cip.CIPService;
 import invizio.cip.RaiCIP2;
+import invizio.cip.RegionCIP;
 import invizio.cip.parameters.DefaultParameter2.Type;
 import net.imagej.ImageJService;
 import net.imagej.ops.OpService;
@@ -22,7 +22,6 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.roi.IterableRegion;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.view.Views;
 
 
 
@@ -58,6 +57,8 @@ public class MeasureCIP  extends AbstractService implements ImageJService {
 		// instantiate a measure Toolbox
 		RaiCIPMeasureToolbox<T> measureToolbox = new RaiCIPMeasureToolbox<T>( op , useUnit );
 		measureToolbox.setMeasurable( raiCIP );
+		measures.put("object", new ArrayList<Object>() );
+		measures.get("object").add( raiCIP );
 		for( String measureName : measureNames) {
 			Measure measure = measureToolbox.measure( measureName );
 			initMeasures(prefix, measureName, measure, measures);
@@ -69,6 +70,62 @@ public class MeasureCIP  extends AbstractService implements ImageJService {
 	}
 
 
+	
+	@SuppressWarnings("unchecked")
+	public <B extends BooleanType<B> , T extends RealType<T>> Map<String,List<Object>>
+					regionCIPMeasures( List<RegionCIP<B>> regions, List<String> measureNames, RandomAccessibleInterval<T> source, Boolean  useUnit, String prefix)
+	{
+		boolean needInit = true;
+		boolean updateSource = false;
+		// parse input parameters
+		if (prefix == null)
+			prefix = "";
+		if( source == null) 
+			updateSource=true;
+		
+		LinkedHashMap<String,List<Object>> measures = new LinkedHashMap<String, List<Object>>();
+		
+		// instantiate a measure Toolbox
+		RegionCIPMeasureToolbox<T,B> measureToolbox = new RegionCIPMeasureToolbox<T,B>( op , useUnit);
+		
+		for( RegionCIP<B> region : regions )
+		{
+			//long[] min = new long[region.numDimensions()];
+			//region.min(min);
+			//System.out.println("(x,y) = (" + min[0] +","+ min[1]+")" ) ;
+			
+			if( updateSource ) 
+				source = (RandomAccessibleInterval<T>) region;
+			
+			measureToolbox.setMeasurable( region, source );
+			
+			if ( needInit )
+			{
+				measures.put("object", new ArrayList<Object>() );
+				measures.get("object").add( region );
+				for( String measureName : measureNames)
+				{
+					final Measure measure = measureToolbox.measure( measureName );
+					initMeasures(prefix, measureName, measure, measures);
+					addToMeasures(prefix, measureName, measure, measures);
+				}
+				needInit = false;
+			}
+			else
+			{
+				measures.get("object").add( region );
+				for( String measureName : measureNames)
+				{
+					final Measure measure = measureToolbox.measure( measureName );
+					addToMeasures(prefix, measureName, measure, measures);
+				}
+			}
+		}	
+		
+		return measures;
+	}
+
+	
 	
 	@SuppressWarnings("unchecked")
 	public <B extends BooleanType<B> , T extends RealType<T>> Map<String,List<Object>>
@@ -109,6 +166,7 @@ public class MeasureCIP  extends AbstractService implements ImageJService {
 			}
 			else
 			{
+				measures.get("object").add( region );
 				for( String measureName : measureNames)
 				{
 					final Measure measure = measureToolbox.measure( measureName );
