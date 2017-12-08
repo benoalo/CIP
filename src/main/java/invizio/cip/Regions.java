@@ -222,7 +222,7 @@ public class Regions {
     	}
     	
 		// IterableRegion
-    	if ( regions instanceof IterableRegion ) {
+    	else if ( regions instanceof IterableRegion ) {
     		RegionCIP<B> region = new RegionCIP<B>( (IterableRegion<B>) regions );
     		region.name = prefix;
     		regionCIPs = new ArrayList<RegionCIP<B>>();
@@ -260,7 +260,7 @@ public class Regions {
     			}
     			
     			//List<IterableRegion>
-    			if( item instanceof IterableRegion ) {
+    			else if( item instanceof IterableRegion ) {
     				List<IterableRegion<B>> iterRegions = (List<IterableRegion<B>>) regions;
     				int count=0;
     				for( IterableRegion<B> iterReg : iterRegions ) {
