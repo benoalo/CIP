@@ -311,39 +311,39 @@ import net.imglib2.view.Views;
 			// measures in an image
 			Object measNames = CIP.list( "test", "size", "boundary", "position");
 			Object measures = cip.measure(imp , measNames);
-			//cip.show( measures , rtName);
+			cip.show( measures , rtName);
 
-			//Object measNames2 = CIP.list( "median", "size", "position");
-			//Object measures2 = cip.measure(imp , measNames2);
-			//cip.show( measures2 , rtName);
+			Object measNames2 = CIP.list( "median", "size", "position");
+			Object measures2 = cip.measure(imp , measNames2);
+			cip.show( measures2 , rtName);
 			
 			
 			
-//			// measure in a region
-//			Object impSeg1 = cip.threshold( imp , 100 );
-//			Object region1 = cip.region( impSeg1 );
-//			Object measures1 = cip.measure(region1 , measNames, "prefix","thresh_");
-//			
-//			System.out.println("above threshold:");
-//			System.out.println(measures1);
-//			System.out.println("\n");
-//			
-//			
-//			// measure in a region with a source image
-//			Object measures11 = cip.measure(region1 , measNames, imp, "prefix","thresh_");
-//			
-//			System.out.println("above threshold, measure with source:");
-//			System.out.println(measures11);
-//			System.out.println("\n");
+			// measure in a region
+			Object impSeg1 = cip.threshold( imp , 100 );
+			Object region1 = cip.region( impSeg1 );
+			Object measures1 = cip.measure(region1 , measNames, "prefix","thresh_");
+			
+			System.out.println("above threshold:");
+			System.out.println(measures1);
+			System.out.println("\n");
+			
+			
+			// measure in a region with a source image
+			Object measures11 = cip.measure(region1 , measNames, imp, "prefix","thresh_");
+			
+			System.out.println("above threshold, measure with source:");
+			System.out.println(measures11);
+			System.out.println("\n");
 			
 			
 			// measure of the cc
 			Object impSeg2 = cip.label( imp , 100 );
 			Object regions = cip.region( impSeg2 );
-			Object measures2 = cip.measure(regions , measNames, "prefix","reg_");
-			Object measures22 = cip.measure(regions , measNames, imp, "prefix","reg_");
-			cip.show( measures22 , "region measures");
-			cip.show( measures2  , "region measures");
+			Object measures3 = cip.measure(regions , measNames, "prefix","reg_");
+			Object measures33 = cip.measure(regions , measNames, imp, true ,"reg_");
+			cip.show( measures33 , "region measures");
+			cip.show( measures3  , "region measures 2");
 			
 			//System.out.println("regions above threshold:");
 			//System.out.println(measures2);
