@@ -1040,8 +1040,11 @@ public class CIP extends AbstractNamespace{
     
     public Long[] size( Object... args )
     {
-    	FunctionParameters2 params = new FunctionParameters2("size");
+    	FunctionParameters2 params = new FunctionParameters2("Image Size");
 		params.addRequired("inputImage", 	Type.image	);
+		
+		//FunctionParameters2 params2 = new FunctionParameters2("Region Size");
+		//params2.addRequired("region", 	Type.region	);
 		
 		Long[] size = null;
 		if ( params.parseInput( args ) )
@@ -1070,14 +1073,11 @@ public class CIP extends AbstractNamespace{
     
     public List<String> unit( Object input ) {
     	
-    	// TODO: cf spacing
-    	
     	return cipService.unit( input );
     }
 
     public List<String> axes( Object input ) {
     	
-    	// TODO: cf spacing
     	return cipService.axes( input );
     }
     
@@ -1149,7 +1149,6 @@ public class CIP extends AbstractNamespace{
 		}
     	else if ( paramsReg.parseInput( args ) )
 		{
-    		// TODO: add conversion from Roi or List<Roi> to Region or List<Region>
     		Object regions = paramsReg.get("region").value; // a region, list of region, roi, list<roi> (2d), List<List<Roi>> (3d)
     		result = Regions.toIterableRegion(regions); // always return a list of iterable regions
 		}
@@ -1187,9 +1186,30 @@ public class CIP extends AbstractNamespace{
     // return an iterable region or a list of iterable regions depending on the input
     // to check: does a thresholded imagePlus converts to a BooleanType RaiCIP2 ?
     // TODO: when RegionCIP are defined, this function should convert any mask, rois, Iterableregion to RegionsCIP 
-    public Object region( Object image )
+    public <T extends RealType<T>> Object region( Object ... args )
     {
-    	return Regions.toIterableRegion( image, cipService );
+    	Object result = null;
+    	
+    	FunctionParameters2 paramsImg = new FunctionParameters2("ImageToRegion");
+    	paramsImg.addRequired("image", 		Type.image					);
+    	paramsImg.addOptional("name", 		Type.string ,	"region"	);
+    	
+    	FunctionParameters2 paramsReg = new FunctionParameters2("regionToRegion");
+    	paramsReg.addRequired("regions", 	Type.region		);
+    	paramsReg.addOptional("name", 		Type.string ,	"region"	);
+    	
+    	if( paramsImg.parseInput( args ) ) {
+    		RaiCIP2<T> image = cipService.toRaiCIP( paramsImg.get("image").value );
+    		String name = (String) paramsImg.get("name").value;
+    		result = Regions.ImagetoRegionCIP( image, name );
+    	}
+    	else if( paramsReg.parseInput( args ) ) {
+    		Object regions = paramsReg.get("regions").value;
+    		String name = (String) paramsReg.get("name").value;
+    		result = Regions.toRegionCIP(regions , name );
+    	}
+    	
+    	return result;
     }
     
     
@@ -1209,7 +1229,7 @@ public class CIP extends AbstractNamespace{
     	paramsReg.addRequired("regions", 	Type.region		);
     	paramsReg.addRequired("measures", 	Type.strings	);
     	paramsReg.addOptional("source", 	Type.image	,	null	);
-    	//paramsImg.addOptional("unit", 		Type.logic	, 	true	);
+    	paramsReg.addOptional("unit", 		Type.logic	, 	true	);
     	paramsReg.addOptional("prefix", 	Type.string	, 	""		);
 
     	
@@ -1225,12 +1245,13 @@ public class CIP extends AbstractNamespace{
     	}
     	else if ( paramsReg.parseInput( args ) )
 		{
-    		List<IterableRegion<B>> regions = Regions.toIterableRegion( paramsReg.get("regions").value );
+    		List<RegionCIP<B>> regions = Regions.toRegionCIP( paramsReg.get("regions").value , null);
     		List<String> measureNames = cipService.strings(  paramsReg.get("measures").value );
     		RaiCIP2<T> source = cipService.toRaiCIP( paramsReg.get("source").value );
+    		Boolean useUnit = (Boolean) paramsImg.get("unit").value;
     		String prefix = (String) paramsReg.get("prefix").value;
     		
-    		result = measuresCIPService.regionMeasures( regions, measureNames , source , prefix  );
+    		result = measuresCIPService.regionCIPMeasures( regions, measureNames , source , useUnit , prefix );
 		}
     	
     	return result; 
@@ -1249,7 +1270,8 @@ public class CIP extends AbstractNamespace{
 //		return list;
 //	}
 	
-    public static <T> List<T> list( T ... args ) {
+    @SafeVarargs
+	public static <T> List<T> list( T ... args ) {
 		List<T> list = new ArrayList<T>();
 		for ( T obj : args ) {
 			list.add( obj );

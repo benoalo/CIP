@@ -103,7 +103,7 @@ import net.imglib2.view.Views;
 			
 			
 			// adapt input metadata for the output
-			MetadataCIP2 metadata = new MetadataCIP2( inputImage );
+			MetadataCIP2 metadata = new MetadataCIP2( inputImage.metadata() );
 			if ( dimensions != null && position != null )
 			{
 				metadata.dropDimensions( dimensions );

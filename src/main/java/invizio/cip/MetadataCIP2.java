@@ -7,16 +7,15 @@ import java.util.List;
 import java.util.Map;
 
 
-import ij.process.LUT;
 
+public class MetadataCIP2 extends ArrayList<AxisCIP> implements Metadata{
 
-public class MetadataCIP2 extends ArrayList<AxisCIP>{
-
+	private static final long serialVersionUID = 1L;
 	
 	
-	int nDim;
+	public int nDim;
+	public String name="";
 	Map<String, Integer> axesDim;
-	String name="";
 	String[] defaultNames = new String[] {"X", "Y", "Z"};
 	
 	public MetadataCIP2(int nDim)

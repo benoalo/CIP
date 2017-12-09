@@ -127,7 +127,7 @@ import net.imglib2.view.Views;
 			}
 			
 			// adapt metadata for the output image
-			MetadataCIP2 metadata = new MetadataCIP2( inputImage );
+			MetadataCIP2 metadata = new MetadataCIP2( inputImage.metadata() );
 			//remove the singleton dimensions
 			List<Integer> dimsToDrop = new ArrayList<Integer>();
 			for(int i=0 ; i<size.length ; i++ ) {
