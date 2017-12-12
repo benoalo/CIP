@@ -27,21 +27,22 @@ CIP is a Java library focused in Image processing. It exposes Classic Image Proc
  
 ## Aimed functionalities
  
-| Filters       | Segmentation     | Image wrangling | Image Math     | Misc          | 
-| ---           | ---              | ---             | ---            | ---           |
-| gaussian blur | manual threshold | copy            | add            | region        |
-| erosion       | auto threshold   | duplicate       | sub            | IJ1 converters|
-| dilation      | maxima           | slice           | multiply       | IJ2 converters|
-| opening       | extended maxima  | project         | divide         | show          |
-| closing       | multiscale maxima| concatenate     | logic operators| measures      |
-| tophat        | binary watershed |                 | comparison     |
-| distance map  | gray level watershed|              | sin, cos, ...  |
-| median        | seeded watershed |                 | pow, sqrt      |
-| gradient      | edge detection   |                 | floor, ceil, round|
-| laplacian     | skeletonisation  |                 | log, exp       |
-| hessian       |                  |                 | 
-| Fillholes     |                  |                 |
+| Filters           | Segmentation         | Image wrangling     | Image Math         | Misc              | 
+| ---               | ---                  | ---                 | ---                | ---               |
+| **gaussian blur** | **manual threshold** | concatenate         | **add**            | **region**        |
+| **erosion**       | **auto threshold**   | **duplicate**       | **sub**            | **IJ1 converters**|
+| **dilation**      | **maxima**           | **slice**           | **multiply**       | **IJ2 converters**|
+| **opening**       | **extended maxima**  | **project**         | **divide**         | **show**          |
+| **closing**       | **multiscale maxima**|                     | logic operators    | **measures**      |
+| **tophat**        | **binary watershed** |                     | comparison         |
+| **distance map**  | **gray level watershed**|                  | **sin, cos, ...**  |
+| **median**        | **seeded watershed** |                     | **pow, sqrt**      |
+| gradient          | edge detection       |                     | **floor, ceil, round**|
+| laplacian         | skeletonisation      |                     | **log, exp**       |
+| hessian           |                      |                     | 
+| Fillholes         |                      |                     |
 
+ **Items** in bold font have an implementation
  
 ## Installation
 
