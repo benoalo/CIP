@@ -1,26 +1,25 @@
 ## Classic Image Processing (CIP)
 
-CIP is a Java library focused in Image processing. It exposes Classic Image Processing functions in a convenient way for scripting, more specifically it is thought to be used in ImageJ script editor. It could be a good entry point to start scripting image analysis workflow and aim in general at easing prototyping. CIP tries to attain that goal by doing the following:
+CIP is a Java library focused in Image processing. It exposes Classic Image Processing functions in a convenient way for scripting, more specifically it is thought to be used in ImageJ script editor. It could be a good entry point to start scripting image analysis workflow and aim in general at easing prototyping. CIP tries to reach that goal by doing the following:
 
 * Maintaining a carefully curated list of functions
-  * Select function already adopted by the community
-  * Provide minimal set of functions to go from an 
-  * All function works in 2D/3D (and nD whenever possible)
-  * Aim to be on par with IJ1  speed-wise and faster whenever possible)
+  * Select functions already adopted by the community
+  * Provide minimal set of functions to go from Image to measures
+  * All functions works in 2D/3D (and nD whenever possible)
+  * Aim to be on par with IJ1  speed-wise (and faster whenever possible)
 
 * Easing functions discovery and learning
-  * Consitent function interfaces
-  * Optional and named parameter
+  * Consistent functions interfaces
+  * Optional and named parameters
   * Strong documentation
 
-* Making scripting easier to wite and understand
-  * Minimize the number of type to manipulate
-  * Handling image type and conversion behind the scene
+* Making scripting easier to write and understand
+  * Minimize the number of types to manipulate
+  * Handling image types and conversion behind the scene
   * Minimizing library imports
   * Never modify function input
 
-
-* Rely on existing infrastructure to allow CIP to work hand in hand with imageJ tools
+* Rely on existing infrastructure to allow CIP working hand in hand with imageJ ecosystem
   * Rely on ImgLib2 and ImageJ Op
   * Handling conversion to IJ1 and IJ2 image and regions
  
@@ -56,7 +55,8 @@ CIP is a Java library focused in Image processing. It exposes Classic Image Proc
 
 
 ### to use CIP in ImageJ
-CIP and ImgAlgo jar will be soon available via an ImageJ update site
+CIP and ImgAlgo jar will be soon available via an ImageJ update site soon 
+
 1. Drop the ImgAlgo and CIP jar in your ImageJ plugins folder
 2. Restart ImageJ
 3. Open ImageJ script editor
@@ -66,4 +66,3 @@ CIP and ImgAlgo jar will be soon available via an ImageJ update site
 
 
 
-The source
