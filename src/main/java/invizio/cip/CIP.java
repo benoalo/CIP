@@ -1109,6 +1109,10 @@ public class CIP extends AbstractNamespace{
     	paramsMeas.addOptional("reset",	 		Type.logic		,new Boolean(false)	);
     	// add list of regions that could be use to create some feedback between an image and a result table
     	
+    	FunctionParameters2 paramsLog = new FunctionParameters2("showLog");
+    	paramsLog.addRequired("message", 		Type.strings						);
+    	
+    	
     	String name = null;
     	
     	if ( paramsImg.parseInput( args ) )
@@ -1123,7 +1127,10 @@ public class CIP extends AbstractNamespace{
 		{
     		name = showCipService.showMeasure(paramsMeas);
 		}
-    	
+    	else if ( paramsLog.parseInput( args ) )
+    	{
+    		showCipService.showLog(paramsLog);
+    	}
     	return name;
     }
 	
@@ -1248,7 +1255,7 @@ public class CIP extends AbstractNamespace{
     		List<RegionCIP<B>> regions = Regions.toRegionCIP( paramsReg.get("regions").value , null);
     		List<String> measureNames = cipService.strings(  paramsReg.get("measures").value );
     		RaiCIP2<T> source = cipService.toRaiCIP( paramsReg.get("source").value );
-    		Boolean useUnit = (Boolean) paramsImg.get("unit").value;
+    		Boolean useUnit = (Boolean) paramsReg.get("unit").value;
     		String prefix = (String) paramsReg.get("prefix").value;
     		
     		result = measuresCIPService.regionCIPMeasures( regions, measureNames , source , useUnit , prefix );

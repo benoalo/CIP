@@ -20,6 +20,7 @@ import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 import org.scijava.ui.UIService;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.ResultsTable;
 import ij.WindowManager;
@@ -59,6 +60,18 @@ public class ShowCIPService extends AbstractService implements ImageJService {
 	
 	@Parameter
 	private LUTService lutService;
+	
+	
+	
+	public void showLog( FunctionParameters2 params ) {
+		
+		List<String> messages = cipService.strings( params.get("message").value );
+		
+		for(String message : messages )
+			IJ.log( message );
+		
+	}
+	
 	
 	
 	// still need to handle the case where the region belong to a particular timestep in the sequence
@@ -211,7 +224,10 @@ public class ShowCIPService extends AbstractService implements ImageJService {
     	}
 	    
 	    // create a unique name for the display
-	    String name0 = imgPlus.getName(); 
+	    String name0 = imgPlus.getName();
+	    if( name0 == null) {
+	    	name0="image";
+	    }
 	    String name = name0; 
 	    if ( ! displayService.isUniqueName(name) )
 	    	name = name +" - 1";
