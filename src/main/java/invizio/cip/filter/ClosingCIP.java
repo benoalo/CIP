@@ -93,7 +93,6 @@ import net.imglib2.util.Util;
 			List<Object> radius = CIP.list( 5 , 5 );
 			String boundary = "same";
 			String shape = "disk";
-			String outputType = "same";
 			
 			CIP cip = new CIP();
 			cip.setContext( ij.getContext() );
@@ -102,7 +101,7 @@ import net.imglib2.util.Util;
 			
 			
 			RandomAccessibleInterval<FloatType> output = (RandomAccessibleInterval<FloatType>)
-						cip.closing(img, radius, "shape", shape, "boundary", boundary, "pixelSize", pixelSize, "output", outputType);
+						cip.closing(img, radius, "shape", shape, "boundary", boundary, "pixelSize", pixelSize);
 			
 			String str = output==null ? "null" : output.toString();
 			

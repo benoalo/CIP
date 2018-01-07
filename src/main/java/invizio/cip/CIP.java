@@ -449,9 +449,9 @@ public class CIP extends AbstractNamespace{
   		params.addRequired("radius", 		Type.scalars );
   		params.addOptional("shape", 		Type.string  , 	null	); 
   		params.addOptional("boundary", 		Type.string  , 	null	); 
-  		params.addOptional("output", 		Type.string  ,	null	);
   		params.addOptional("pixelSize", 	Type.scalars , 	null	); 
   		params.addOptional("nthread", 		Type.scalars ,	null	);
+  		//params.addOptional("output", 		Type.string  ,	null	);
   		
   		
   		if ( params.parseInput( args ) )
@@ -475,7 +475,6 @@ public class CIP extends AbstractNamespace{
   		params.addRequired("radius", 		Type.scalars );
   		params.addOptional("shape", 		Type.string  , 	null	); 
   		params.addOptional("boundary", 		Type.string  , 	null	); 
-  		params.addOptional("output", 		Type.string  ,	null	);
   		params.addOptional("pixelSize", 	Type.scalars , 	null	); 
   		params.addOptional("nthread", 		Type.scalars ,	nThread	);
   		
@@ -500,7 +499,7 @@ public class CIP extends AbstractNamespace{
   		params.addRequired("radius", 		Type.scalars );
   		params.addOptional("shape", 		Type.string  , 	null	); 
   		params.addOptional("boundary", 		Type.string  , 	null	); 
-  		params.addOptional("output", 		Type.string  ,	null	);
+  		//params.addOptional("output", 		Type.string  ,	null	);
   		params.addOptional("pixelSize", 	Type.scalars , 	null	); 
   		params.addOptional("nthread", 		Type.scalars ,	nThread	);
   		
@@ -527,7 +526,7 @@ public class CIP extends AbstractNamespace{
   		params.addRequired("radius", 		Type.scalars );
   		params.addOptional("shape", 		Type.string  , 	null	); 
   		params.addOptional("boundary", 		Type.string  , 	null	); 
-  		params.addOptional("output", 		Type.string  ,	null	);
+  		//params.addOptional("output", 		Type.string  ,	null	);
   		params.addOptional("pixelSize", 	Type.scalars , 	null	); 
   		params.addOptional("nthread", 		Type.scalars ,	nThread	);
   		
@@ -553,7 +552,7 @@ public class CIP extends AbstractNamespace{
   		params.addRequired("radius", 		Type.scalars );
   		params.addOptional("shape", 		Type.string  , 	null	); 
   		params.addOptional("boundary", 		Type.string  , 	null	); 
-  		params.addOptional("output", 		Type.string  ,	null	);
+  		//params.addOptional("output", 		Type.string  ,	null	);
   		params.addOptional("pixelSize", 	Type.scalars , 	null	); 
   		params.addOptional("nthread", 		Type.scalars ,	nThread	);
   		

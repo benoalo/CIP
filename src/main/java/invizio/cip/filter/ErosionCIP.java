@@ -105,7 +105,9 @@ import net.imglib2.view.Views;
 			ImageJ ij = new ImageJ();
 			ij.ui().showUI();
 			
-			ImagePlus imp = IJ.openImage(	CIP.class.getResource( "/blobs32.tif" ).getFile()	);
+			ImagePlus imp = IJ.openImage(	"C:/Users/Ben/workspace/testImages/blobs32.tif" 	);
+			
+			//ImagePlus imp = IJ.openImage(	CIP.class.getResource( "/blobs32.tif" ).getFile()	);
 			ij.ui().show(imp);
 			
 			
@@ -114,7 +116,7 @@ import net.imglib2.view.Views;
 			List<Object> radius = CIP.list( 5 , 5 );
 			String boundary = "same";
 			String shape = "disk";
-			String outputType = "same";
+			//String outputType = "same";
 			
 			CIP cip = new CIP();
 			cip.setContext( ij.getContext() );
@@ -123,7 +125,7 @@ import net.imglib2.view.Views;
 			
 			
 			RandomAccessibleInterval<FloatType> output = (RandomAccessibleInterval<FloatType>)
-						cip.erode(img, radius, "shape", shape, "boundary", boundary, "pixelSize", pixelSize, "output", outputType);
+						cip.erode(img, radius, "shape", shape, "boundary", boundary, "pixelSize", pixelSize);
 			
 			String str = output==null ? "null" : output.toString();
 			

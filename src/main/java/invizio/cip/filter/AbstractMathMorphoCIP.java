@@ -64,9 +64,8 @@ import net.imglib2.util.Util;
 		
 		
 		
-		@Parameter( label="output size", persist=false, required=false ) // with persist and required set to false the parameter become optional
+		//Parameter( label="output size", persist=false, required=false ) // with persist and required set to false the parameter become optional
 		protected String outputType="same"; // "same" for same dimension of the image, "full" the output will be larger by the strel diameter - 1
-		
 		String[] outputTypes = new String[] { "same" , "full" }; // how about adding "valid"?
 		
 		

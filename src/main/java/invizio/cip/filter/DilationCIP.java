@@ -119,7 +119,6 @@ import net.imglib2.view.Views;
 			List<Object> radius = CIP.list( 3 , 3 );
 			String boundary = "same";
 			String shape = "rectangle";
-			String outputType = "same";
 			
 			CIP cip = new CIP();
 			cip.setContext( ij.getContext() );
@@ -128,7 +127,7 @@ import net.imglib2.view.Views;
 			
 			
 			RandomAccessibleInterval<FloatType> output = (RandomAccessibleInterval<FloatType>)
-						cip.dilate(img, radius, "shape", shape, "boundary", boundary, "pixelSize", pixelSize, "output", outputType);
+						cip.dilate(img, radius, "shape", shape, "boundary", boundary, "pixelSize", pixelSize);
 			
 			String str = output==null ? "null" : output.toString();
 			
