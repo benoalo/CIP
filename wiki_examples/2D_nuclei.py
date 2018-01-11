@@ -27,5 +27,4 @@ cip.show(img_seg, 'glasbey')
 h = cip.show(img_dup)
 cip.show( h , regions, 'glasbey' )
 cip.show(measures)
-
-
+

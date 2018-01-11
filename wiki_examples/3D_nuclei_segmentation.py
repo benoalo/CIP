@@ -27,8 +27,4 @@ cip.show( img_nuc )
 cip.show( img_blur )
 cip.show( img_seg, 'glasbey_inverted' )
 cip.show( measures )
-
-
-
-
-
+
