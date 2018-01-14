@@ -1,7 +1,11 @@
 package invizio.cip;
 
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.scijava.display.DisplayService;
@@ -98,7 +102,8 @@ import net.imglib2.type.numeric.real.DoubleType;
 public class CIP extends AbstractNamespace{
 
 	int nThread; // if the function called can be multithreaded, this is the number of thread that will be used
-	
+	HashMap<String,String> docCategory;
+			
 	@Parameter
 	private CIPService cipService;
 	
@@ -118,6 +123,64 @@ public class CIP extends AbstractNamespace{
 	public CIP() {
 		super();
 		nThread = Runtime.getRuntime().availableProcessors();
+		
+		docCategory = new HashMap<String,String>();
+		
+		docCategory.put("watershed", 	"Segmentation");
+		docCategory.put("threshold", 	"Segmentation");
+		docCategory.put("label", 		"Segmentation");
+		docCategory.put("maxima", 		"Segmentation");
+		
+		docCategory.put("add", "Math");
+		docCategory.put("sub", "Math");
+		docCategory.put("mul", "Math");
+		docCategory.put("div", "Math");
+		docCategory.put("min", "Math");
+		docCategory.put("max", "Math");
+		docCategory.put("sin", "Math");
+		docCategory.put("cos", "Math");
+		docCategory.put("tan", "Math");
+		docCategory.put("asin", "Math");
+		docCategory.put("acos", "Math");
+		docCategory.put("atan", "Math");
+		docCategory.put("floor", "Math");
+		docCategory.put("ceil", "Math");
+		docCategory.put("round", "Math");
+		docCategory.put("abs", "Math");
+		docCategory.put("sign", "Math");
+		docCategory.put("pow", "Math");
+		docCategory.put("sqrt", "Math");
+		docCategory.put("log", "Math");
+		docCategory.put("exp", "Math");
+
+		docCategory.put("gauss", "Filter");
+		docCategory.put("median", "Filter");
+		docCategory.put("erosion", "Filter");
+		docCategory.put("dilation", "Filter");
+		docCategory.put("opening", "Filter");
+		docCategory.put("closing", "Filter");
+		docCategory.put("tophat", "Filter");
+		docCategory.put("distance", "Filter");
+		docCategory.put("invert", "Filter");
+		
+		docCategory.put("create", "Format");
+		docCategory.put("duplicate", "Format");
+		docCategory.put("slice", "Format");
+		docCategory.put("project", "Format");
+
+		docCategory.put("measure", "Utilities");
+		docCategory.put("show", "Utilities");
+		docCategory.put("region", "Utilities");
+		docCategory.put("toIJ1", "Utilities");
+		docCategory.put("toIJ2", "Utilities");
+		docCategory.put("spacing", "Utilities");
+		docCategory.put("unit", "Utilities");
+		docCategory.put("axes", "Utilities");
+		docCategory.put("list", "Utilities");
+		docCategory.put("measure", "Utilities");
+		docCategory.put("measure", "Utilities");
+		docCategory.put("measure", "Utilities");
+
 	}
 	
 	
@@ -836,10 +899,13 @@ public class CIP extends AbstractNamespace{
 		DefaultParameter2 inputImage = null;
   		if ( paramsImage.parseInput( args ) )
   		{
+  			
+  			cipService.adaptTypeForUnaryMath( paramsImage.get("param1"), operationType );
   			cipService.toRaiCIP( paramsImage.get("param1") );
+  			inputImage = paramsImage.get("param1");
   			parametersFinal[1] = paramsImage.get("param1").value ;
   			opName = "Image_"+opBaseName;
-  			inputImage = paramsImage.get("inputImage");
+  			
   		}
   		else if (  paramsNumber.parseInput( args )   )
   		{
@@ -1263,6 +1329,31 @@ public class CIP extends AbstractNamespace{
     	return result; 
     }
     
+    public void help()
+    {
+    	help("cip");
+    }
+    
+    public void help(String functionName)
+    {
+    	String url = null;
+    	if( functionName==null || functionName.toLowerCase().equals("cip") ||functionName.equals("") )
+    		url = "https://imagej.net/CIP";
+    	else if( functionName.toLowerCase().equals("parameter") || functionName.toLowerCase().equals("parameters") )
+    		url = "https://imagej.net/CIP_Parameters";
+    	else
+    		url = "https://imagej.net/CIP_" + docCategory.get(functionName) + "#" + functionName;
+    	
+    		
+    	try {
+    		Desktop.getDesktop().browse(java.net.URI.create(url));
+    	} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    }
+    
     /////////////////////////////////////////////////////////
     // helper to pass a list from jython             //
     /////////////////////////////////////////////////////////
@@ -1325,6 +1416,7 @@ public class CIP extends AbstractNamespace{
 		ImageJ ij = new ImageJ();
 		ij.ui().showUI();
 		
+		
 		//ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
 		ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs32.tif");
 		//ij.ui().show(imp);
@@ -1341,11 +1433,18 @@ public class CIP extends AbstractNamespace{
 //		ij.ui().show(distMap);
 		
 		String h1 = cip.show( imp , "red");
-		String h2 = cip.show( imp , "green");
+		Object impLog2 = cip.div(cip.log(imp) , cip.log(2));
+		
+		String h2 = cip.show( impLog2 , "green");
 		
 		System.out.println("h1 -> "+h1);
 		System.out.println("h2 -> "+h2);
 		System.out.println("done!");
+		
+		//cip.help();
+		
+		
+
 	}
 	
 	

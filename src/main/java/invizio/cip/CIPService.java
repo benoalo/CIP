@@ -146,7 +146,31 @@ public class CIPService extends AbstractService implements ImageJService {
 	}	
 	
 	
-	
+	public void adaptTypeForUnaryMath( DefaultParameter2 parameter, String optype )
+	{
+		toImglib2Object( parameter );
+		String type = getImgLib2ScalarType( parameter.value );
+		
+		if(optype.equals("log") || optype.equals("exp") || optype.equals("sqrt") || 
+				optype.equals("sin") || optype.equals("cos") || optype.equals("tan") || 
+				optype.equals("asin") || optype.equals("acos") || optype.equals("atan") ) 
+		{
+			String newType = null;
+			if( type.equals("DoubleType") )
+			{
+				newType = "DoubleType";
+			}
+			else if( type.equals("LongType") || type.equals("UnsignedLongType") )
+			{
+				newType = "DoubleType";
+			}
+			else {
+				newType = "FloatType";
+			}
+			if( !type.equals(newType))
+				updateImglib2Type( parameter , newType );
+		}
+	}
 	
 	public void convertToMajorType( DefaultParameter2 parameter1 , DefaultParameter2 parameter2, String operationType )
 	{
@@ -812,9 +836,9 @@ public class CIPService extends AbstractService implements ImageJService {
 			if( inputImage==null )
 				outputImage = toRaiCIP( outputImage );
 			else {
-				outputImage = toRaiCIP( outputImage, inputImage );
+				outputImage = toRaiCIP( outputImage, inputImage ); // assumes InputImage.value is RaiCIP2
 				if( outputImage instanceof RaiCIP2)
-					((RaiCIP2<?>) outputImage).name = str + inputImage.name ;
+					((RaiCIP2<?>) outputImage).name = str + ((RaiCIP2<?>)inputImage.value).name ;
 			}
 			
 		}
