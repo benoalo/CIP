@@ -1154,7 +1154,8 @@ public class CIP extends AbstractNamespace{
     	
     	FunctionParameters2 paramsImg = new FunctionParameters2("showImage");
     	paramsImg.addRequired("inputImage", 	Type.image				);
-    	paramsImg.addOptional("lut", 			Type.strings, 	"grays"	);
+    	paramsImg.addOptional("color", 			Type.strings, 	"grays"	);
+    	paramsImg.get( "color" ).aliases.add( "lut" );
     	// params.addOptional("channelDim", 	Type.scalar	, null		);  //if ch dim exist , swap with requested dim, else overwrite the proposed dim 
     	
     	
@@ -1162,6 +1163,7 @@ public class CIP extends AbstractNamespace{
     	paramsReg.addRequired("imageHandle", 	Type.string				);
     	paramsReg.addRequired("region", 		Type.region 			); // should also handle the case of roi, list<roi>, and list<list<roi>>
     	paramsReg.addOptional("color", 			Type.string,  "lila" 	);
+    	paramsReg.get( "color" ).aliases.add( "lut" );
     	paramsReg.addOptional("width", 			Type.scalar,   1.0 		);
     	paramsReg.addOptional("scalars", 		Type.scalars,  null 	);
     	paramsReg.addOptional("reset", 			Type.logic,    new Boolean(false) ); // whether one should reset the overlay or not
@@ -1432,7 +1434,8 @@ public class CIP extends AbstractNamespace{
 //		
 //		ij.ui().show(distMap);
 		
-		String h1 = cip.show( imp , "red");
+		String h1 = cip.show( imp , "3-3-2 RGB");
+		String h = cip.show( imp , "glasbey inverted");
 		Object impLog2 = cip.div(cip.log(imp) , cip.log(2));
 		
 		String h2 = cip.show( impLog2 , "green");
