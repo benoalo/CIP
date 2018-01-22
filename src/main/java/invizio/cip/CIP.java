@@ -965,14 +965,14 @@ public class CIP extends AbstractNamespace{
   			interval.dimensions(dimensions);
   			params1.get("inputImage").value = dimensions;
   			
-  			paramsFinal = params1.getParsedInput();
+  			paramsFinal = new Object[] {dimensions , params2.get("value").value , params2.get("type").value };//params1.getParsedInput();
   			
   			inputImage =  params1.get("inputImage");
   			name = (String) params1.get("name").value;
   		}
   		else if(  params2.parseInput( args ) )
   		{
-  			paramsFinal = params2.getParsedInput();
+  			paramsFinal = new Object[] {params2.get("size").value , params2.get("value").value , params2.get("type").value };//params2.getParsedInput();
   			name = (String) params2.get("name").value;
   		}
   		else {
@@ -1437,15 +1437,18 @@ public class CIP extends AbstractNamespace{
 //		
 //		ij.ui().show(distMap);
 		
-		String h1 = cip.show( imp , "3-3-2 RGB");
-		String h = cip.show( imp , "glasbey inverted");
-		Object impLog2 = cip.div(cip.log(imp) , cip.log(2));
+		//String h1 = cip.show( imp , "3-3-2 RGB");
+		//String h = cip.show( imp , "glasbey inverted");
+		//Object impLog2 = cip.div(cip.log(imp) , cip.log(2));
 		
-		String h2 = cip.show( impLog2 , "green");
+		Object imgNew = cip.create(cip.list(100,100,10), "name", "test image");
+		cip.show( imgNew );
 		
-		System.out.println("h1 -> "+h1);
-		System.out.println("h2 -> "+h2);
-		System.out.println("done!");
+		//String h2 = cip.show( impLog2 , "green");
+		
+		//System.out.println("h1 -> "+h1);
+		//System.out.println("h2 -> "+h2);
+	//System.out.println("done!");
 		
 		//cip.help();
 		
