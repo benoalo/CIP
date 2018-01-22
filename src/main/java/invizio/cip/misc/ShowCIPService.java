@@ -197,7 +197,7 @@ public class ShowCIPService extends AbstractService implements ImageJService {
     	imgPlus.initializeColorTables(nCh);
 		
     	List<String> lutNames;
-    	Object lutNamesObj = params.get("lut").value;
+    	Object lutNamesObj = params.get("color").value;
     	if ( lutNamesObj instanceof String) {
     		lutNames = new ArrayList<String>();
     		lutNames.add( (String) lutNamesObj );
@@ -367,7 +367,10 @@ public class ShowCIPService extends AbstractService implements ImageJService {
 	Map<String,ColorTable> cachedLut;
 	
 	public ColorTable lut( String lutString ) 
-	{		
+	{	
+		lutString = lutString.replace("_", " ");
+		lutString = lutString.toLowerCase();
+		
 		if( lutsURL == null )
 			initLutURL();
 		
@@ -415,6 +418,8 @@ public class ShowCIPService extends AbstractService implements ImageJService {
 			String key = e.getKey();
 			String key2 = key.replaceAll( ".lut$", "");
 			key2 = (new File(key2)).getName();
+			key2 = key2.toLowerCase();
+			key2 = key2.replace("_", " ");
 			lutsURL.put(key2.toLowerCase(), e.getValue() );
 		}
 		
