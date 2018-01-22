@@ -941,8 +941,9 @@ public class CIP extends AbstractNamespace{
 		params1.addOptional("name", 		Type.string , 	"new_"+count	);
 		  		
    		FunctionParameters2 params2 = new FunctionParameters2("create2");
-		params2.addRequired("extent", 		Type.scalars	);
-		params2.addOptional("value", 		Type.scalar , 	0	);
+		params2.addRequired("size", 		Type.scalars	);
+		params2.get( "size" ).aliases.add( "extent" );
+    	params2.addOptional("value", 		Type.scalar , 	0	);
 		params2.addOptional("type", 		Type.string , 	"float"	);
 		params2.addOptional("name", 		Type.string , 	"new_"+count	);
 		 
@@ -994,8 +995,9 @@ public class CIP extends AbstractNamespace{
    		
    		FunctionParameters2 params = new FunctionParameters2("sliceCIP");
 		params.addRequired("inputImage", 	Type.image	);
-		params.addOptional("dimensions", 	Type.scalars,	null	);
-		params.addOptional("position",		Type.scalars, 	null	);
+		params.addOptional("dimension", 	Type.scalars,	null	);
+		params.get( "dimension" ).aliases.add( "dimensions" );
+    	params.addOptional("position",		Type.scalars, 	null	);
 		params.addOptional("method",		Type.string, 	"shallow"	);
 		
 		if ( params.parseInput( args ) )
@@ -1024,7 +1026,8 @@ public class CIP extends AbstractNamespace{
 		params.addRequired("inputImage", 	Type.image	);
 		params.addOptional("origin", 		Type.scalars,	null	);
 		params.addOptional("size",			Type.scalars, 	null	);
-		params.addOptional("method",		Type.string, 	"shallow"	);
+		params.get( "size" ).aliases.add( "extent" );
+    	params.addOptional("method",		Type.string, 	"shallow"	);
 
 		if ( params.parseInput( args ) )
 		{
