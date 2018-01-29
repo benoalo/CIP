@@ -46,7 +46,7 @@ import net.imglib2.view.Views;
 		private Float threshold;
 		
 		@Parameter( label="Pixel size", persist=false, required=false ) // with persist and required set to false the parameter become optional
-		private Float[] pixelSize;
+		private Double[] pixelSize;
 		
 		@Parameter (type = ItemIO.OUTPUT)
 		private	RandomAccessibleInterval<IntType> distanceMap;
@@ -83,15 +83,15 @@ import net.imglib2.view.Views;
 
 			int nDim = inputImage.numDimensions();
 			if( pixelSize == null ) {
-				pixelSize = new Float[nDim];
+				pixelSize = new Double[nDim];
 				for(int d=0 ; d<nDim ; d++) {
-					pixelSize[d] = 1f;
+					pixelSize[d] = 1d;
 				}
 			}
 			else if( pixelSize.length == 1 )
 			{
-				Float pixelSize0 = pixelSize[0];
-				pixelSize = new Float[nDim];
+				Double pixelSize0 = pixelSize[0];
+				pixelSize = new Double[nDim];
 				for(int d=0 ; d<nDim ; d++) {
 					pixelSize[d] = pixelSize0;
 				}
@@ -102,8 +102,8 @@ import net.imglib2.view.Views;
 			}
 			else if( pixelSize.length > nDim )
 			{
-				Float[] pixelSize0 = pixelSize;
-				pixelSize = new Float[nDim];
+				Double[] pixelSize0 = pixelSize;
+				pixelSize = new Double[nDim];
 				for(int d=0 ; d<nDim ; d++) {
 					pixelSize[d] = pixelSize0[d];
 				}
