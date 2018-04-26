@@ -13,7 +13,7 @@
     </parent>
 
 	<groupId>invizio</groupId>
-	<artifactId>CIP</artifactId>
+	<artifactId>CIP_EXP</artifactId>
 	<version>0.1.1</version>
 
 	<name>Classic Image Processing</name>

@@ -157,6 +157,23 @@ public class Checks {
 	}
 	
 	
+	public static boolean isImages( Object value)
+	{
+		if( isImage( value ) )
+			return true;
+		else {
+			if ( isList(value) ){
+				List<?> list = (List<?>) value;
+				for( Object obj : list ) {
+					return isImage( obj ); // only the 1st item of the list is checked
+				}
+			}
+			
+		}
+		return false;
+	}
+	
+	
 	
 	public static boolean isImage( Object value)
 	{

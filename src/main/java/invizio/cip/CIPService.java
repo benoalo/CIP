@@ -541,6 +541,8 @@ public class CIPService extends AbstractService implements ImageJService {
 		parameter.value = toRaiCIP( parameter.value ); 
 	}
 	
+	
+	
 	@SuppressWarnings("unchecked")
 	public <T extends RealType<T> > RaiCIP2<T> toRaiCIP(Object input)
 	{
@@ -601,6 +603,19 @@ public class CIPService extends AbstractService implements ImageJService {
 		
 		return outputCIP;
 	}
+	
+	
+	public <T extends RealType<T> > List<RaiCIP2<T>> toRaiCIPs(Object inputs)
+	{
+		List<RaiCIP2<T>> output_list = new ArrayList<RaiCIP2<T>>(); 
+		@SuppressWarnings("unchecked")
+		List<Object> input_list = (List<Object>) inputs;
+		for(Object image : input_list )
+			output_list.add( toRaiCIP(image) );
+		
+		return output_list;
+	}
+	
 	
 	
 	public List<Double> spacing( Object input ) {

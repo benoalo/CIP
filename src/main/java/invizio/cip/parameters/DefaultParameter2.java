@@ -40,6 +40,7 @@ public class DefaultParameter2 implements Parameter{
 	public enum Type{
 		
 		image("Image"),
+		images("Images"),
 		logic("Boolean"),
 		scalar("Scalar"),
 		scalars("Scalars"),
@@ -62,6 +63,9 @@ public class DefaultParameter2 implements Parameter{
 			switch( this ) {
 			case image :
 				return Checks.isImage(obj);
+				
+			case images :
+				return Checks.isImages(obj);
 				
 			case logic :
 				return Checks.isLogic(obj);

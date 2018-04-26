@@ -11,8 +11,10 @@ import java.util.List;
 import org.scijava.display.DisplayService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.service.AbstractService;
 import org.scijava.ui.UIService;
 
+import fiji.plugin.trackmate.Model;
 import ij.IJ;
 import ij.ImagePlus;
 import invizio.cip.measure.MeasureCIP;
@@ -23,6 +25,7 @@ import invizio.cip.parameters.DefaultParameter2.Type;
 import net.imagej.Dataset;
 import net.imagej.DefaultDataset;
 import net.imagej.ImageJ;
+import net.imagej.ImageJService;
 import net.imagej.ops.AbstractNamespace;
 import net.imagej.ops.Namespace;
 import net.imagej.ops.Op;
@@ -99,7 +102,9 @@ import net.imglib2.type.numeric.real.DoubleType;
  * 
  */
 @Plugin(type = Namespace.class)
-public class CIP extends AbstractNamespace{
+public class CIP extends AbstractNamespace
+//public class CIP extends AbstractService implements ImageJService
+{
 
 	int nThread; // if the function called can be multithreaded, this is the number of thread that will be used
 	HashMap<String,String> docCategory;
@@ -1075,6 +1080,38 @@ public class CIP extends AbstractNamespace{
 
     
     
+    @OpMethod(op = invizio.cip.exp.TrackCIP.class)
+    public Object track( final Object... args ) {
+   		
+   		Object results = null;
+   	
+   		FunctionParameters2 params = new FunctionParameters2("trackCIP");
+		params.addRequired("inputImages", 	Type.images	);
+		params.addRequired("radius", 		Type.scalar	);
+		params.addOptional("gap frame", 	Type.scalar,	new Integer(0)		);
+		params.addOptional("gap radius", 	Type.scalar,	null				);
+		params.addOptional("split", 		Type.logic,		new Boolean(false)	);
+		params.addOptional("merge", 		Type.logic,		new Boolean(false)	);
+		params.addOptional("output",		Type.string, 	"measure"		);
+		
+		if ( params.parseInput( args ) )
+		{
+			params.get("inputImages").value = cipService.toRaiCIPs( params.get("inputImages").value );
+			
+			List<Object> resultsTemp = (List<Object>) ops().run( invizio.cip.exp.TrackCIP.class , params.getParsedInput() );
+			
+			// check if one of the output is null and discard it from the results list
+			results = cipService.discardNullValue(resultsTemp);
+		}
+		else 
+		{
+			// TODO: send an error message
+		}
+   		
+   		return results;
+    }
+    
+    
     /**
      * 
      * @param args an image   
@@ -1177,6 +1214,33 @@ public class CIP extends AbstractNamespace{
     	FunctionParameters2 paramsLog = new FunctionParameters2("showLog");
     	paramsLog.addRequired("message", 		Type.strings						);
     	
+    	Model trackmateModel= null;
+    	if( args[0] instanceof Model ) {
+    		trackmateModel = (Model) args[0]; 
+    		Object[] args0 = args;
+    		int n = args.length - 1;
+    		if( n>=1 ) {
+    			args = new Object[n];
+    			for( int i=0; i<n; i++)
+    				args[i] = args0[i+1];
+    		}
+    		
+    		FunctionParameters2 paramsTrack = new FunctionParameters2("showTracks");
+        	paramsTrack.addOptional("image",		Type.image,		null);
+        	paramsTrack.addOptional("mode",			Type.string,	null);
+        	paramsTrack.addOptional("track style",	Type.string,	null);
+        	paramsTrack.addOptional("track depth",	Type.scalar,	null);
+        	
+        	if ( paramsTrack.parseInput( args ))
+        	{
+        		showCipService.showTrack(trackmateModel, paramsTrack);
+        	}
+        	
+        	return null;
+    	}
+    	
+    	
+    	
     	
     	String name = null;
     	
@@ -1196,6 +1260,10 @@ public class CIP extends AbstractNamespace{
     	{
     		showCipService.showLog(paramsLog);
     	}
+    	else {
+			// TODO: send an error message
+		}
+    	
     	return name;
     }
 	
