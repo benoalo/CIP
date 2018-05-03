@@ -1162,7 +1162,7 @@ public class CIP extends AbstractNamespace{
     	// params.addOptional("channelDim", 	Type.scalar	, null		);  //if ch dim exist , swap with requested dim, else overwrite the proposed dim 
     	
     	
-    	FunctionParameters2 paramsReg = new FunctionParameters2("showRegion");
+    	FunctionParameters2 paramsReg = new FunctionParameters2("showRegion"); // this signature should deprecated and throw a warning message
     	paramsReg.addRequired("imageHandle", 	Type.string				);
     	paramsReg.addRequired("region", 		Type.region 			); // should also handle the case of roi, list<roi>, and list<list<roi>>
     	paramsReg.addOptional("color", 			Type.string,  "lila" 	);
@@ -1171,6 +1171,15 @@ public class CIP extends AbstractNamespace{
     	paramsReg.addOptional("scalars", 		Type.scalars,  null 	);
     	paramsReg.addOptional("reset", 			Type.logic,    new Boolean(false) ); // whether one should reset the overlay or not
     	// also fill for fill color and style for the stroke type
+
+    	FunctionParameters2 paramsReg2 = new FunctionParameters2("showRegion2");
+    	paramsReg2.addRequired("region", 		Type.region 			); // should also handle the case of roi, list<roi>, and list<list<roi>>
+    	paramsReg2.addOptional("imageHandle", 	Type.string,  null		);
+    	paramsReg2.addOptional("color", 		Type.string,  "lila" 	);
+    	paramsReg2.get( "color" ).aliases.add( "lut" );
+    	paramsReg2.addOptional("width", 		Type.scalar,   1.0 		);
+    	paramsReg2.addOptional("scalars", 		Type.scalars,  null 	);
+    	paramsReg2.addOptional("reset", 		Type.logic,    new Boolean(false) ); // whether one should reset the overlay or not
     	
     	
     	FunctionParameters2 paramsMeas = new FunctionParameters2("showMeasure");
@@ -1192,6 +1201,10 @@ public class CIP extends AbstractNamespace{
     	else if ( paramsReg.parseInput( args ) )
 		{
     		showCipService.showRegion(paramsReg);
+		}
+    	else if ( paramsReg2.parseInput( args ) )
+		{
+    		showCipService.showRegion(paramsReg2);
 		}
     	else if ( paramsMeas.parseInput( args ) )
 		{

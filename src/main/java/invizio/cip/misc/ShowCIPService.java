@@ -81,7 +81,7 @@ public class ShowCIPService extends AbstractService implements ImageJService {
 		
 		// grab the imagePlus corresponding to the imageHandle
 		String imageHandle = (String) params.get("imageHandle").value;
-		if ( imageHandle.toLowerCase().equals("current") )
+		if ( imageHandle==null || imageHandle.toLowerCase().equals("current") )
 			imp = WindowManager.getCurrentImage();
 		else	
 			imp = WindowManager.getImage( imageHandle );
