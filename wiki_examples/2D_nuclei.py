@@ -24,7 +24,7 @@ cip.show(img_filt)
 cip.show(img_seg, 'glasbey')
 
 # visualize results 
-h = cip.show(img_dup)
-cip.show( h , regions, 'glasbey' )
+cip.show(img_dup)
+cip.show( regions, 'color', 'glasbey' ) # show the region on current image
 cip.show(measures)
 
