@@ -941,8 +941,9 @@ public class CIP extends AbstractNamespace{
 		params1.addOptional("name", 		Type.string , 	"new_"+count	);
 		  		
    		FunctionParameters2 params2 = new FunctionParameters2("create2");
-		params2.addRequired("extent", 		Type.scalars	);
-		params2.addOptional("value", 		Type.scalar , 	0	);
+		params2.addRequired("size", 		Type.scalars	);
+		params2.get( "size" ).aliases.add( "extent" );
+    	params2.addOptional("value", 		Type.scalar , 	0	);
 		params2.addOptional("type", 		Type.string , 	"float"	);
 		params2.addOptional("name", 		Type.string , 	"new_"+count	);
 		 
@@ -964,14 +965,14 @@ public class CIP extends AbstractNamespace{
   			interval.dimensions(dimensions);
   			params1.get("inputImage").value = dimensions;
   			
-  			paramsFinal = params1.getParsedInput();
+  			paramsFinal = new Object[] {dimensions , params2.get("value").value , params2.get("type").value };//params1.getParsedInput();
   			
   			inputImage =  params1.get("inputImage");
   			name = (String) params1.get("name").value;
   		}
   		else if(  params2.parseInput( args ) )
   		{
-  			paramsFinal = params2.getParsedInput();
+  			paramsFinal = new Object[] {params2.get("size").value , params2.get("value").value , params2.get("type").value };//params2.getParsedInput();
   			name = (String) params2.get("name").value;
   		}
   		else {
@@ -994,8 +995,9 @@ public class CIP extends AbstractNamespace{
    		
    		FunctionParameters2 params = new FunctionParameters2("sliceCIP");
 		params.addRequired("inputImage", 	Type.image	);
-		params.addOptional("dimensions", 	Type.scalars,	null	);
-		params.addOptional("position",		Type.scalars, 	null	);
+		params.addOptional("dimension", 	Type.scalars,	null	);
+		params.get( "dimension" ).aliases.add( "dimensions" );
+    	params.addOptional("position",		Type.scalars, 	null	);
 		params.addOptional("method",		Type.string, 	"shallow"	);
 		
 		if ( params.parseInput( args ) )
@@ -1024,7 +1026,8 @@ public class CIP extends AbstractNamespace{
 		params.addRequired("inputImage", 	Type.image	);
 		params.addOptional("origin", 		Type.scalars,	null	);
 		params.addOptional("size",			Type.scalars, 	null	);
-		params.addOptional("method",		Type.string, 	"shallow"	);
+		params.get( "size" ).aliases.add( "extent" );
+    	params.addOptional("method",		Type.string, 	"shallow"	);
 
 		if ( params.parseInput( args ) )
 		{
@@ -1154,18 +1157,29 @@ public class CIP extends AbstractNamespace{
     	
     	FunctionParameters2 paramsImg = new FunctionParameters2("showImage");
     	paramsImg.addRequired("inputImage", 	Type.image				);
-    	paramsImg.addOptional("lut", 			Type.strings, 	"grays"	);
+    	paramsImg.addOptional("color", 			Type.strings, 	"grays"	);
+    	paramsImg.get( "color" ).aliases.add( "lut" );
     	// params.addOptional("channelDim", 	Type.scalar	, null		);  //if ch dim exist , swap with requested dim, else overwrite the proposed dim 
     	
     	
-    	FunctionParameters2 paramsReg = new FunctionParameters2("showRegion");
+    	FunctionParameters2 paramsReg = new FunctionParameters2("showRegion"); // this signature should deprecated and throw a warning message
     	paramsReg.addRequired("imageHandle", 	Type.string				);
     	paramsReg.addRequired("region", 		Type.region 			); // should also handle the case of roi, list<roi>, and list<list<roi>>
     	paramsReg.addOptional("color", 			Type.string,  "lila" 	);
+    	paramsReg.get( "color" ).aliases.add( "lut" );
     	paramsReg.addOptional("width", 			Type.scalar,   1.0 		);
     	paramsReg.addOptional("scalars", 		Type.scalars,  null 	);
     	paramsReg.addOptional("reset", 			Type.logic,    new Boolean(false) ); // whether one should reset the overlay or not
     	// also fill for fill color and style for the stroke type
+
+    	FunctionParameters2 paramsReg2 = new FunctionParameters2("showRegion2");
+    	paramsReg2.addRequired("region", 		Type.region 			); // should also handle the case of roi, list<roi>, and list<list<roi>>
+    	paramsReg2.addOptional("imageHandle", 	Type.string,  null		);
+    	paramsReg2.addOptional("color", 		Type.string,  "lila" 	);
+    	paramsReg2.get( "color" ).aliases.add( "lut" );
+    	paramsReg2.addOptional("width", 		Type.scalar,   1.0 		);
+    	paramsReg2.addOptional("scalars", 		Type.scalars,  null 	);
+    	paramsReg2.addOptional("reset", 		Type.logic,    new Boolean(false) ); // whether one should reset the overlay or not
     	
     	
     	FunctionParameters2 paramsMeas = new FunctionParameters2("showMeasure");
@@ -1187,6 +1201,10 @@ public class CIP extends AbstractNamespace{
     	else if ( paramsReg.parseInput( args ) )
 		{
     		showCipService.showRegion(paramsReg);
+		}
+    	else if ( paramsReg2.parseInput( args ) )
+		{
+    		showCipService.showRegion(paramsReg2);
 		}
     	else if ( paramsMeas.parseInput( args ) )
 		{
@@ -1432,14 +1450,18 @@ public class CIP extends AbstractNamespace{
 //		
 //		ij.ui().show(distMap);
 		
-		String h1 = cip.show( imp , "red");
-		Object impLog2 = cip.div(cip.log(imp) , cip.log(2));
+		//String h1 = cip.show( imp , "3-3-2 RGB");
+		//String h = cip.show( imp , "glasbey inverted");
+		//Object impLog2 = cip.div(cip.log(imp) , cip.log(2));
 		
-		String h2 = cip.show( impLog2 , "green");
+		Object imgNew = cip.create(cip.list(100,100,10), "name", "test image");
+		cip.show( imgNew );
 		
-		System.out.println("h1 -> "+h1);
-		System.out.println("h2 -> "+h2);
-		System.out.println("done!");
+		//String h2 = cip.show( impLog2 , "green");
+		
+		//System.out.println("h1 -> "+h1);
+		//System.out.println("h2 -> "+h2);
+	//System.out.println("done!");
 		
 		//cip.help();
 		

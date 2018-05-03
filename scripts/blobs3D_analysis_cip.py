@@ -20,7 +20,7 @@ measures_noUnit = cip.measure(regions, cip.list('mean','size'), imp, 'unit', Fal
 
 # visualisation of the segmentation and measures
 h = cip.show(imp)
-cip.show( h, regions, 'spectrum', 'width', 2)
+cip.show( regions, h, 'spectrum', 'width', 2)
 cip.show( measures )
 cip.show( measures_noUnit )
 

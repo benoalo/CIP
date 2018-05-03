@@ -22,7 +22,7 @@ nSpots = len(spotsInNuc)
 
 # visualize the results
 h = cip.show(img)
-cip.show( h , nucleus ,'white', 'width',2 )
-cip.show( h , spotsInNuc ,'spectrum' )
+cip.show( nucleus, 'color' ,'white', 'width',2 )
+cip.show( spotsInNuc, 'color' ,'spectrum' )
 
 cip.show('the number of spot is ' + str(nSpots) )

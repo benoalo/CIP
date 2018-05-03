@@ -17,7 +17,7 @@ measures = cip.measure(regions, cip.list('mean','size'), imp )
 
 # visualisation of the segmentation and measures
 h = cip.show(imp)
-cip.show( h, regions, 'fire', 'width', 2)
+cip.show( regions, h, 'fire', 'width', 2)
 cip.show( measures )
 
 
