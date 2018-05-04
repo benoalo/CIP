@@ -35,6 +35,7 @@ import net.imglib2.roi.IterableRegion;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
+import net.imglib2.view.Views;
 
 
 
@@ -886,7 +887,7 @@ public class CIP extends AbstractNamespace{
    		
    		FunctionParameters2 params = new FunctionParameters2("sliceCIP");
 		params.addRequired("inputImage", 	Type.image	);
-		params.addOptional("dimension", 	Type.scalars,	null	);
+		params.addOptional("dimension", 	Type.scalarsorstrings,	null	);
 		params.get( "dimension" ).aliases.add( "dimensions" );
     	params.addOptional("position",		Type.scalars, 	null	);
 		params.addOptional("method",		Type.string, 	"shallow"	);
@@ -894,11 +895,14 @@ public class CIP extends AbstractNamespace{
 		if ( params.parseInput( args ) )
 		{
 			cipService.toRaiCIP( params.get("inputImage") );
+			List<Integer> axesIndex = cipService.axesNametoIndex( params.get("inputImage").value, params.get("dimension").value );
+			params.get("dimension").value = axesIndex; 
 			results = ops().run( invizio.cip.misc.SliceCIP.class , params.getParsedInput() );
 			
 			((RaiCIP2<?>) results).name = "slice_" + ((RaiCIP2<?>) params.get("inputImage").value ).name;
 			// metadata handling is done in the SliceCIP class
 		}
+		
 		else 
 		{
 			// TODO: send an error message
@@ -942,20 +946,20 @@ public class CIP extends AbstractNamespace{
    	
    		FunctionParameters2 params = new FunctionParameters2("projectCIP");
 		params.addRequired("inputImage", 	Type.image	);
-		params.addRequired("dimension", 	Type.scalar	);
+		params.addRequired("dimension", 	Type.scalarorstring	);
 		params.addOptional("method",		Type.string, 	"max"		);
 		params.addOptional("outputType",	Type.string, 	"projection");
 		
 		if ( params.parseInput( args ) )
 		{
 			cipService.toRaiCIP( params.get("inputImage") );
+			List<Integer> axesIndex = cipService.axesNametoIndex( params.get("inputImage").value, params.get("dimension").value );
+			params.get("dimension").value = axesIndex.get(0); 
 			List<Object> resultsTemp = (List<Object>) ops().run( invizio.cip.misc.Project2CIP.class , params.getParsedInput() );
 			
-			///////////////////////////////////////////////////////////////////////////////
 			// check if one of the output is null and discard it from the results list
 			results = cipService.discardNullValue(resultsTemp);
-			((RaiCIP2<?>) results).name = (String) params.get("method").value + "proj_" + ((RaiCIP2<?>) params.get("inputImage").value ).name;
-			
+			((RaiCIP2<?>) results).name = (String) params.get("method").value + "proj_" + ((RaiCIP2<?>) params.get("inputImage").value ).name;	
 		}
 		else 
 		{
@@ -966,27 +970,60 @@ public class CIP extends AbstractNamespace{
     }
 
 
-    public Long[] origin( Object... args )
+    public Object origin( Object... args )
     {
-    	
-    	// TODO: cf spacing
     	
     	FunctionParameters2 params = new FunctionParameters2("getOrigin");
 		params.addRequired("inputImage", 	Type.image	);
 		
-		Long[] origin = null;
+		FunctionParameters2 params2 = new FunctionParameters2("getOrigin2");
+		params2.addRequired("inputImage", 	Type.image	);
+		params2.addRequired("dimension", 	Type.scalarorstring	);
+		
+		FunctionParameters2 params3 = new FunctionParameters2("setOrigin");
+		params3.addRequired("inputImage", 	Type.image	);
+		params3.addRequired("dimension", 	Type.scalarorstring	);
+		params3.addRequired("value", 		Type.scalar	);
+		
+		Object origin = null;
 		if ( params.parseInput( args ) )
 		{	
 			DefaultParameter2 image = params.get("inputImage");
 			cipService.toRaiCIP( image );
 			Interval interval = (Interval) image;
-			origin = new Long[interval.numDimensions()];
+			origin = new ArrayList<Long>();
 			for(int d=0; d< interval.numDimensions(); d++)
-				origin[d] = interval.min(d);
+				((List<Long>)origin).add( interval.min(d) );
 		}
+		else if ( params2.parseInput( args ) )
+		{	
+			DefaultParameter2 image = params2.get("inputImage");
+			cipService.toRaiCIP( image );
+			Interval interval = (Interval) image.value;
+			int d = cipService.axesNametoIndex( params2.get("inputImage").value , params2.get("dimension").value ).get(0);
+			origin = new Long( interval.min(d) );
+		}
+		else if ( params3.parseInput( args ) )
+		{
+			// set origin value
+			DefaultParameter2 imageParam = params3.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			Interval interval = (Interval) imageParam.value;
+			int d = cipService.axesNametoIndex( params3.get("inputImage").value , params3.get("dimension").value ).get(0);
+			long oldOrig = interval.min(d);
+			long newOrig = cipService.scalar( params3.get("value").value ).longValue();
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value; 
+			Views.offset( image , newOrig-oldOrig );
+			
+			image.metadata().get(d).origin = newOrig;
+			
+		}
+		
     	return origin;
     }
 
+   
+    
     public Long[] size( Object... args )
     {
     	FunctionParameters2 params = new FunctionParameters2("Image Size");
@@ -1000,7 +1037,7 @@ public class CIP extends AbstractNamespace{
 		{	
 			DefaultParameter2 image = params.get("inputImage");
 			cipService.toRaiCIP( image );
-			Interval interval = (Interval) image;
+			Interval interval = (Interval) image.value;
 			size = new Long[interval.numDimensions()];
 			for(int d=0; d< interval.numDimensions(); d++)
 				size[d] = interval.dimension(d);

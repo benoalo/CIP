@@ -54,13 +54,10 @@ public class Checks {
 		if( isScalar( value ) )
 			return true;
 		else {
-			//if( isArray(value) ){
-			//	return isScalar( ((Object[]) value)[0] );  // won't work if value is a primitive array
-			//}
 			if ( isList(value) ){
 				List<?> list = (List<?>) value;
 				for( Object obj : list ) {
-					return isScalar( obj ); // in all item should here only the first one if it exist
+					return isScalar( obj ); // lazy check only on the first item
 				}
 			}
 		}
@@ -79,24 +76,6 @@ public class Checks {
 		return false;
 	}
 
-	
-//	public static boolean isRegion( Object value)
-//	{
-//		if( isOneRegion( value ) )
-//			return true;
-//		else {
-//			//if( isArray(value) ){
-//			//	return isOneRegion( ((Object[]) value)[0] );  // won't work if value is a primitive array
-//			//}
-//			if ( isList(value) ){
-//				List<?> iterable = (List<?>) value;
-//				for( Object obj : iterable ) {
-//					return isOneRegion( obj ); // in principle all items would have to be checked
-//				}
-//			}
-//		}
-//		return false;
-//	}
 	
 
 	public static boolean isRegion2( Object value)
@@ -142,13 +121,10 @@ public class Checks {
 		if( isString( value ) )
 			return true;
 		else {
-			//if( isArray(value) ){
-			//	return isString( ((Object[]) value)[0] );  // won't work if value is a primitive array
-			//}
 			if ( isList(value) ){
 				List<?> list = (List<?>) value;
 				for( Object obj : list ) {
-					return isString( obj ); // in all item should here only the first one if it exist
+					return isString( obj ); // lazy check only on the first item
 				}
 			}
 			
@@ -156,6 +132,31 @@ public class Checks {
 		return false;
 	}
 	
+	
+	public static boolean isScalarOrString( Object value ) {
+		
+		if (isString(value) || isScalar(value) )
+			return true;
+		
+		return false;
+	}
+	
+	
+	public static boolean isScalarsOrStrings( Object value)
+	{
+		if( isScalarOrString( value ) )
+			return true;
+		else {
+			if ( isList(value) ){
+				List<?> list = (List<?>) value;
+				for( Object obj : list ) {
+					return isScalarOrString( obj ); // lazy check only on the first item
+				}
+			}
+			
+		}
+		return false;
+	}
 	
 	
 	public static boolean isImage( Object value)

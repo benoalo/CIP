@@ -1067,4 +1067,32 @@ public class CIPService extends AbstractService implements ImageJService {
 		return strings;
 	}
 	
+	public List<Integer> axesNametoIndex(Object image, Object axesId )
+	{
+		
+		MetadataCIP2 metadata = ((RaiCIP2<?>)image).metadata();
+		List<Integer> axesIndex = null;
+		
+		if( Checks.isScalars(axesId) ) {
+			// convert axes names to axes index
+			List<Double> axesIndexDouble = scalars( axesId );
+			axesIndex = new ArrayList<Integer>();
+			for(Double index : axesIndexDouble )
+				axesIndex.add(  index.intValue()  );
+		}
+		else if(  Checks.isStrings(axesId) )
+		{
+			// convert axes names to axes index
+			List<String> axesNames = strings( axesId );
+			axesIndex = new ArrayList<Integer>();
+			for(String axName : axesNames )
+				axesIndex.add(  metadata.axesIndex(axName)  );
+		}
+		
+		
+		return axesIndex;
+	}
+	
+	
+	
 }

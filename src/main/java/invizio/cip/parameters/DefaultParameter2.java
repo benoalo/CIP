@@ -46,7 +46,9 @@ public class DefaultParameter2 implements Parameter{
 		string("String"),
 		strings("Strings"),
 		region("Region"),
-		measure("Measure");
+		measure("Measure"),
+		scalarorstring("scalarorstring"),
+		scalarsorstrings("scalarsorstrings");
 		
 		String str;
 		Type(String str){
@@ -83,6 +85,12 @@ public class DefaultParameter2 implements Parameter{
 				
 			case measure :
 				return Checks.isMeasure(obj);
+				
+			case scalarorstring :
+				return Checks.isScalarOrString(obj);
+				
+			case scalarsorstrings :
+				return Checks.isScalarsOrStrings(obj);
 				
 			default : // text :
 				return Checks.isStrings(obj);
