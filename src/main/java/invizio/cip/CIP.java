@@ -41,50 +41,17 @@ import net.imglib2.type.numeric.real.DoubleType;
 /*
  * The goal of that class is to provide access to classic image processing algorithms
  * with minimal hassle (no import, no conversion, 2D/3D) and maximum ease of use in scripts
- * 
  * Remarks: function should never modify the input !
- *   
- *  
- *  TODO:
- *  	
- *  	[-] check what is happening if a dataset or an ImagePlus are passed to the cip functions
- *  		do the necessary conversion if it does not work from scratch
- *  
- *		[x] HWatershed
- *  	[x] SeededWatershed
- *  	[x] Binary watershed (with binary input)
- *  	[x] implement maxima
- *  	[x] implement label
- *  	[x] implement threshold
+ *
+ *  TODO:  
  *  	[-] implement skeleton
  *  	[-] implement edge detector
- *  	[-] implement filters (adding a 'valid' option for output type could be nice )
- *  		[x] implement distance
- *  		[x] implement gauss
- *  		[x] implement dilation
- *  		[x] implement erosion
- *  		[x] implement opening
- *  		[x] implement closing
- *  		[x] implement tophat
- *  		[x] implement invert
- *  		[x] implement median
- *  		[-] implement gradient
- *  		[-] implement laplacian
- *  		[-] implement hessian
- *  	[-] implement math operations
- *  		[x] binary operation (add, mul, div, sub, min, max)
- *  		[x] unary operations (trigo, log, exp, pow, sqrt, abs, round, floor, ceil  )
- *  		[-] and, or, not, logic sub, >, >=, ==, <, <=, !=
- *  	[-] implement miscellaneous
- *  		[x] create 
- *  		[x] duplicate/slice
- *			[x] projection ( min, max, sum )
- *  		[-] concat (repeat the same image along a dim, or concat image along a dim)
- *  		[-] resample
- *  
- *  	[-] implement toPoints
- *  	[-] implement toRegions
- *  	[-] study measures
+ *  	[-] implement gradient
+ *  	[-] implement laplacian
+ *  	[-] implement hessian
+ *  	[-] and, or, not, logic sub, >, >=, ==, <, <=, !=
+ *  	[-] concat (repeat the same image along a dim, or concat image along a dim)
+ *  	[-] resample
  */
 
 
@@ -131,6 +98,16 @@ public class CIP extends AbstractNamespace{
 		docCategory.put("label", 		"Segmentation");
 		docCategory.put("maxima", 		"Segmentation");
 		
+		docCategory.put("gauss", "Filter");
+		docCategory.put("median", "Filter");
+		docCategory.put("erosion", "Filter");
+		docCategory.put("dilation", "Filter");
+		docCategory.put("opening", "Filter");
+		docCategory.put("closing", "Filter");
+		docCategory.put("tophat", "Filter");
+		docCategory.put("distance", "Filter");
+		docCategory.put("invert", "Filter");
+		
 		docCategory.put("add", "Math");
 		docCategory.put("sub", "Math");
 		docCategory.put("mul", "Math");
@@ -152,16 +129,6 @@ public class CIP extends AbstractNamespace{
 		docCategory.put("sqrt", "Math");
 		docCategory.put("log", "Math");
 		docCategory.put("exp", "Math");
-
-		docCategory.put("gauss", "Filter");
-		docCategory.put("median", "Filter");
-		docCategory.put("erosion", "Filter");
-		docCategory.put("dilation", "Filter");
-		docCategory.put("opening", "Filter");
-		docCategory.put("closing", "Filter");
-		docCategory.put("tophat", "Filter");
-		docCategory.put("distance", "Filter");
-		docCategory.put("invert", "Filter");
 		
 		docCategory.put("create", "Format");
 		docCategory.put("duplicate", "Format");
@@ -183,27 +150,28 @@ public class CIP extends AbstractNamespace{
 
 	}
 	
-	
 	@Override
 	public String getName() {
 		return "CIP";
 	}
 	
-	public interface WATERSHED extends Op {
-		// Note that the name and aliases are prepended with Namespace.getName
-		String NAME = "watershed";
-		String ALIASES = "ws";
+	public void setNumberOfthread( int nThread)
+	{
+		nThread = Math.max(1 , nThread);
+		this.nThread = nThread;
 	}
 	
 	
 	
 	/********************************************************************************
-	 * 	Watershed interface															*
+	 * 	Watershed, Maxima, labeling, thresholding															*
 	 ********************************************************************************/
-	
-	// General Watershed Op methods, should have lowest priority
-	// should handle all HWatershed and SeededWatershed without conflict
-	// Binary Watershed is handled earlier with specific signatures
+
+	public interface WATERSHED extends Op {
+		// Note that the name and aliases are prepended with Namespace.getName
+		String NAME = "watershed";
+		String ALIASES = "ws";
+	}
 	
 	@OpMethod(op = invizio.cip.CIP.WATERSHED.class )
 	public Object watershed(final Object... args) {
@@ -254,53 +222,6 @@ public class CIP extends AbstractNamespace{
 	}
 	
 
-	
-	
-	/********************************************************************************
-	 * 	Distance map construction interface											*
-	 ********************************************************************************/
-	
-	
-	// distance method
-	@OpMethod(op = invizio.cip.filter.DistanceCIP.class)
-	public Object distance(final Object... args) {
-		
-		
-		Object results = null;
-		
-		FunctionParameters2 params = new FunctionParameters2("Distance");
-		params.addRequired("inputImage", 	Type.image 	);
-		params.addOptional("threshold", 	Type.scalar , 		null	);
-		params.addOptional("pixelSize", 	Type.scalars , 		1f		);
-		
-		if ( params.parseInput( args ) )
-		{
-			// convert image to RaiCIP 
-			cipService.toRaiCIP( params.get("inputImage") ); // similar as toImglib2Image but also collect spacing, axes name
-			results = ops().run(invizio.cip.filter.DistanceCIP.class, params.getParsedInput() );
-			results = cipService.setMetadata( results, params.get("inputImage"), "dist_");
-
-		}
-		return results; 
-	}
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	/********************************************************************************
-	 * 	Maxima detection interface													*
-	 ********************************************************************************/
-	
-	
-	// distance method
 	@OpMethod(op = invizio.cip.segment.MaximaCIP.class)
 	public Object maxima( final Object... args ) {
 		
@@ -331,21 +252,7 @@ public class CIP extends AbstractNamespace{
 		return results; 
 	}
 	
-		
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    /********************************************************************************
-	 * 	image labeling 													*
-	 ********************************************************************************/
- 	
+			
     @OpMethod(op = invizio.cip.segment.LabelCIP.class)
  	public Object label( final Object... args ) {
  		
@@ -363,21 +270,7 @@ public class CIP extends AbstractNamespace{
 		}
 		return results; 
 	}
-
-    
-    
-    
-    
-    
-    
-    
-    /********************************************************************************
-	 * 	image thresholding 													*
-	 ********************************************************************************/
-    
-    
-    // TODO: it would be nice to make the output parsing generic and put it in an independent class 
-    
+ 
     
     @OpMethod(ops = { 	invizio.cip.segment.ThresholdManualCIP.class 	,
     					invizio.cip.segment.ThresholdAutoCIP.class 	})
@@ -416,20 +309,15 @@ public class CIP extends AbstractNamespace{
     
 
     
-    
-    
-    
-    
-    
-    
-    
+ 
     
     /********************************************************************************
-   	 * 	gauss filtering																*
-   	 ********************************************************************************/
+   	 * 	gauss, median, invert, distance filter										*
+   	 *  erode, dilate, open, close, tophat											*
+  	*********************************************************************************/
     	
        @OpMethod(op = invizio.cip.filter.GaussCIP.class)
-    	public Object gauss( final Object... args ) {
+    public Object gauss( final Object... args ) {
     		
     		Object results = null;
     	
@@ -448,10 +336,9 @@ public class CIP extends AbstractNamespace{
    		return results; 
    	}
 
-    
-    
-   @OpMethod(op = invizio.cip.filter.MedianCIP.class)
-   public Object median( final Object... args ) {
+
+    @OpMethod(op = invizio.cip.filter.MedianCIP.class)
+    public Object median( final Object... args ) {
   		
   		Object results = null;
   	
@@ -472,10 +359,9 @@ public class CIP extends AbstractNamespace{
  		return results; 
  	}
     
-       
-       
-   @OpMethod(op = invizio.cip.filter.InvertCIP.class)
-   public Object invert( final Object... args ) {
+   
+    @OpMethod(op = invizio.cip.filter.InvertCIP.class)
+    public Object invert( final Object... args ) {
   		
   		Object results = null;
   	
@@ -492,16 +378,30 @@ public class CIP extends AbstractNamespace{
  		return results; 
  	}
        
-       
-       
-       
-       
-       
-       
-   /*********************************************************************************
-  	* basic  mathematical morphology : erode, dilate, open, close, tophat			*
-  	*********************************************************************************/
+
+	@OpMethod(op = invizio.cip.filter.DistanceCIP.class)
+	public Object distance(final Object... args) {
+		
+		
+		Object results = null;
+		
+		FunctionParameters2 params = new FunctionParameters2("Distance");
+		params.addRequired("inputImage", 	Type.image 	);
+		params.addOptional("threshold", 	Type.scalar , 		null	);
+		params.addOptional("pixelSize", 	Type.scalars , 		1f		);
+		
+		if ( params.parseInput( args ) )
+		{
+			// convert image to RaiCIP 
+			cipService.toRaiCIP( params.get("inputImage") ); // similar as toImglib2Image but also collect spacing, axes name
+			results = ops().run(invizio.cip.filter.DistanceCIP.class, params.getParsedInput() );
+			results = cipService.setMetadata( results, params.get("inputImage"), "dist_");
+
+		}
+		return results; 
+	}
    	
+	
     @OpMethod(op = invizio.cip.filter.DilationCIP.class)
    	public Object dilate( final Object... args ) {
    		
@@ -526,7 +426,6 @@ public class CIP extends AbstractNamespace{
   		return results; 
   	}
      
- 
     
     @OpMethod(op = invizio.cip.filter.ErosionCIP.class)
    	public Object erode( final Object... args ) {
@@ -575,9 +474,7 @@ public class CIP extends AbstractNamespace{
   		}
   		return results; 
   	}
-       
-       
-      
+        
        
     @OpMethod(op = invizio.cip.filter.OpeningCIP.class)
    	public Object closing( final Object... args ) {
@@ -602,8 +499,7 @@ public class CIP extends AbstractNamespace{
   		}
   		return results; 
   	}
-       
-       
+          
        
     @OpMethod(op = invizio.cip.filter.TophatCIP.class)
    	public Object tophat( final Object... args ) {
@@ -629,10 +525,16 @@ public class CIP extends AbstractNamespace{
   		return results; 
   	}
        
-       
+      
+    
+    
+    
        
     /********************************************************************************
-  	* math : add, mul, sub, div, min, max 											*
+  	* math :
+  	* 	binary: add, mul, sub, div, min, max, pow
+  	*	unary: cos, sin, tan, acos, asin, atan, log, exp, sqrt, abs, round, floor, ceil, sign
+  	*
   	*********************************************************************************/
    	
     public interface MathBinary extends Op {
@@ -661,8 +563,6 @@ public class CIP extends AbstractNamespace{
     	return math2Operation("divide", args );
     }
 
-    
-    
     @OpMethod(op = invizio.cip.CIP.MathBinary.class )
    	private Object math2Operation( String operationType , final Object[] args ) {
    		
@@ -720,12 +620,7 @@ public class CIP extends AbstractNamespace{
   		return results; 
   	}   
        
-    
-    
-    
-    
     //min and max op do not exist for images, so they are added in the math package here
-    
     public Object min( final Object... args ) {
     	
     	return moreMath2Operation("min", args );
@@ -741,7 +636,6 @@ public class CIP extends AbstractNamespace{
     	return moreMath2Operation("pow", args );
     }
 
-    
     @OpMethod(op = invizio.cip.CIP.MathBinary.class )
    	private Object moreMath2Operation( String operationType , final Object[] args ) {
    		
@@ -799,14 +693,11 @@ public class CIP extends AbstractNamespace{
   		return results; 
   	}
     
-    
-    
     public interface MathUnary extends Op {
 		// Note that the name and aliases are prepended with Namespace.getName
 		String NAME = "math unary";
 		
 	}
-    
     
     public Object cos( final Object... args ) {
     	
@@ -877,11 +768,7 @@ public class CIP extends AbstractNamespace{
     	
     	return math1Operation("sign", args );
     }
-    
-    
-    
-    
-    
+
     @OpMethod(op = invizio.cip.CIP.MathUnary.class )
    	private Object math1Operation( String operationType , final Object[] args ) {
    		
@@ -927,6 +814,11 @@ public class CIP extends AbstractNamespace{
     
     
     
+	/****************************************************
+	 * image formating operations:
+	 * 	- create, slice, duplicate, project
+	 *  - origin, size spacing, unit, axes
+	 ****************************************************/
     int count=0;
     
     @OpMethod(op = invizio.cip.misc.CreateCIP.class)
@@ -985,8 +877,7 @@ public class CIP extends AbstractNamespace{
 		
 		return results; 
   	}
-    
-    
+       
     
     @OpMethod(op = invizio.cip.misc.SliceCIP.class)
     public Object slice( final Object... args ) {
@@ -1042,9 +933,7 @@ public class CIP extends AbstractNamespace{
    		
    		return results;
     }
-    
 
-    
     
     @OpMethod(op = invizio.cip.misc.Project2CIP.class)
     public Object project( final Object... args ) {
@@ -1076,14 +965,7 @@ public class CIP extends AbstractNamespace{
    		return results;
     }
 
-    
-    
-    /**
-     * 
-     * @param args an image   
-     * @return an array containing the origin of the image
-     * 
-     */
+
     public Long[] origin( Object... args )
     {
     	
@@ -1105,7 +987,6 @@ public class CIP extends AbstractNamespace{
     	return origin;
     }
 
-    
     public Long[] size( Object... args )
     {
     	FunctionParameters2 params = new FunctionParameters2("Image Size");
@@ -1127,7 +1008,6 @@ public class CIP extends AbstractNamespace{
     	return size;
     }
 
-    
     // functions to collect luts, spacing, axes names
     public List<Double> spacing( Object input ) {
     	
@@ -1151,6 +1031,11 @@ public class CIP extends AbstractNamespace{
     
     
     
+    /***************************************************************
+     * Conversion and visualisation functions:
+     *  - show, measure, help
+     *  - region, toIJ1, toIJ2
+     ***************************************************************/
     
     public String show( Object ... args )
     {	
@@ -1217,93 +1102,7 @@ public class CIP extends AbstractNamespace{
     	return name;
     }
 	
-    
-    
-    
-    
-    
-    public Object toIJ2(Object ... args ) {
-    	
-    	Object result = null;
-    	
-    	FunctionParameters2 paramsImg = new FunctionParameters2("toIJ2_Image");
-    	paramsImg.addRequired("image", 	Type.image				);
 
-    	FunctionParameters2 paramsReg = new FunctionParameters2("toIJ2_Region");
-    	paramsReg.addRequired("region", 	Type.region				);
-
-    	if ( paramsImg.parseInput( args ) )
-		{	
-    		Object image = paramsImg.get("image").value;
-    		result = new DefaultDataset( this.context() , cipService.toImgPlus( image ) );
-		}
-    	else if ( paramsReg.parseInput( args ) )
-		{
-    		Object regions = paramsReg.get("region").value; // a region, list of region, roi, list<roi> (2d), List<List<Roi>> (3d)
-    		result = Regions.toIterableRegion(regions); // always return a list of iterable regions
-		}
-    	
-    	return result; 
-    	
-    }
-    
-    
-    
-    public Object toIJ1(Object ... args) {
-    	
-    	Object result = null;
-    	
-    	FunctionParameters2 paramsImg = new FunctionParameters2("toIJ1_Image");
-    	paramsImg.addRequired("image", 	Type.image				);
-
-    	FunctionParameters2 paramsReg = new FunctionParameters2("toIJ1_Region");
-    	paramsReg.addRequired("region", 	Type.region				);
-
-    	if ( paramsImg.parseInput( args ) )
-		{
-    		result = cipService.toImagegPlus( paramsImg.get("image").value );
-    	}
-    	else if ( paramsReg.parseInput( args ) )
-		{
-    		result = Regions.toIJ1ROI( paramsReg.get("region").value );
-		}
-    	
-    	return result; 
-    	
-    }
-    
-    
-    // return an iterable region or a list of iterable regions depending on the input
-    // to check: does a thresholded imagePlus converts to a BooleanType RaiCIP2 ?
-    // TODO: when RegionCIP are defined, this function should convert any mask, rois, Iterableregion to RegionsCIP 
-    public <T extends RealType<T>> Object region( Object ... args )
-    {
-    	Object result = null;
-    	
-    	FunctionParameters2 paramsImg = new FunctionParameters2("ImageToRegion");
-    	paramsImg.addRequired("image", 		Type.image					);
-    	paramsImg.addOptional("name", 		Type.string ,	"region"	);
-    	
-    	FunctionParameters2 paramsReg = new FunctionParameters2("regionToRegion");
-    	paramsReg.addRequired("regions", 	Type.region		);
-    	paramsReg.addOptional("name", 		Type.string ,	"region"	);
-    	
-    	if( paramsImg.parseInput( args ) ) {
-    		RaiCIP2<T> image = cipService.toRaiCIP( paramsImg.get("image").value );
-    		String name = (String) paramsImg.get("name").value;
-    		result = Regions.ImagetoRegionCIP( image, name );
-    	}
-    	else if( paramsReg.parseInput( args ) ) {
-    		Object regions = paramsReg.get("regions").value;
-    		String name = (String) paramsReg.get("name").value;
-    		result = Regions.toRegionCIP(regions , name );
-    	}
-    	
-    	return result;
-    }
-    
-    
-    
     public <T extends RealType<T>, B extends BooleanType<B>> Object measure( Object ...args )
     {
     	Object result = null;
@@ -1347,6 +1146,85 @@ public class CIP extends AbstractNamespace{
     	return result; 
     }
     
+    
+    public Object toIJ2(Object ... args ) {
+    	
+    	Object result = null;
+    	
+    	FunctionParameters2 paramsImg = new FunctionParameters2("toIJ2_Image");
+    	paramsImg.addRequired("image", 	Type.image				);
+
+    	FunctionParameters2 paramsReg = new FunctionParameters2("toIJ2_Region");
+    	paramsReg.addRequired("region", 	Type.region				);
+
+    	if ( paramsImg.parseInput( args ) )
+		{	
+    		Object image = paramsImg.get("image").value;
+    		result = new DefaultDataset( this.context() , cipService.toImgPlus( image ) );
+		}
+    	else if ( paramsReg.parseInput( args ) )
+		{
+    		Object regions = paramsReg.get("region").value; // a region, list of region, roi, list<roi> (2d), List<List<Roi>> (3d)
+    		result = Regions.toIterableRegion(regions); // always return a list of iterable regions
+		}
+    	
+    	return result; 
+    	
+    }
+    
+    
+    public Object toIJ1(Object ... args) {
+    	
+    	Object result = null;
+    	
+    	FunctionParameters2 paramsImg = new FunctionParameters2("toIJ1_Image");
+    	paramsImg.addRequired("image", 	Type.image				);
+
+    	FunctionParameters2 paramsReg = new FunctionParameters2("toIJ1_Region");
+    	paramsReg.addRequired("region", 	Type.region				);
+
+    	if ( paramsImg.parseInput( args ) )
+		{
+    		result = cipService.toImagegPlus( paramsImg.get("image").value );
+    	}
+    	else if ( paramsReg.parseInput( args ) )
+		{
+    		result = Regions.toIJ1ROI( paramsReg.get("region").value );
+		}
+    	
+    	return result; 
+    	
+    }
+    
+    // return an iterable region or a list of iterable regions depending on the input
+    // to check: does a thresholded imagePlus converts to a BooleanType RaiCIP2 ?
+    // TODO: when RegionCIP are defined, this function should convert any mask, rois, Iterableregion to RegionsCIP 
+    public <T extends RealType<T>> Object region( Object ... args )
+    {
+    	Object result = null;
+    	
+    	FunctionParameters2 paramsImg = new FunctionParameters2("ImageToRegion");
+    	paramsImg.addRequired("image", 		Type.image					);
+    	paramsImg.addOptional("name", 		Type.string ,	"region"	);
+    	
+    	FunctionParameters2 paramsReg = new FunctionParameters2("regionToRegion");
+    	paramsReg.addRequired("regions", 	Type.region		);
+    	paramsReg.addOptional("name", 		Type.string ,	"region"	);
+    	
+    	if( paramsImg.parseInput( args ) ) {
+    		RaiCIP2<T> image = cipService.toRaiCIP( paramsImg.get("image").value );
+    		String name = (String) paramsImg.get("name").value;
+    		result = Regions.ImagetoRegionCIP( image, name );
+    	}
+    	else if( paramsReg.parseInput( args ) ) {
+    		Object regions = paramsReg.get("regions").value;
+    		String name = (String) paramsReg.get("name").value;
+    		result = Regions.toRegionCIP(regions , name );
+    	}
+    	
+    	return result;
+    }
+    
     public void help()
     {
     	help("cip");
@@ -1372,18 +1250,12 @@ public class CIP extends AbstractNamespace{
     	
     }
     
-    /////////////////////////////////////////////////////////
-    // helper to pass a list from jython             //
-    /////////////////////////////////////////////////////////
     
-    // this way I only need to add list support in the input parsing
-//    public static List<Object> list( Object ... args ) {
-//		List<Object> list = new ArrayList<Object>();
-//		for ( Object obj : args ) {
-//			list.add( obj );
-//		}
-//		return list;
-//	}
+    
+    
+    /////////////////////////////////////////////////////////
+    // helper to pass a list from jython             
+    /////////////////////////////////////////////////////////
 	
     @SafeVarargs
 	public static <T> List<T> list( T ... args ) {
@@ -1394,6 +1266,7 @@ public class CIP extends AbstractNamespace{
 		return list;
 	}
     
+    // probably never used
     public static List<Double> list( Double ... args ) {
 		List<Double> list = new ArrayList<Double>();
 		for ( Double obj : args ) {
@@ -1402,8 +1275,7 @@ public class CIP extends AbstractNamespace{
 		return list;
 	}
 
-    
-    // would be awesome if all arrays and scalar would represented by RAIs (i.e. not only images)
+    // probably never used
 	@Deprecated
     public static Img<DoubleType> asimg( double ... ds )
 	{
@@ -1416,18 +1288,11 @@ public class CIP extends AbstractNamespace{
 		}
 		return array;
 	}
-    
-	
-	
-	public void setNumberOfthread( int nThread)
-	{
-		nThread = Math.max(1 , nThread);
-		this.nThread = nThread;
-	}
+
 	
 	
 	
-	
+
 	public static void main(final String... args) 
 	{
 		
