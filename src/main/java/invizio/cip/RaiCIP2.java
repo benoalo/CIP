@@ -1,5 +1,6 @@
 package invizio.cip;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -8,6 +9,7 @@ import net.imglib2.Positionable;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPositionable;
+import net.imglib2.view.Views;
 
 public class RaiCIP2<T> implements RandomAccessibleInterval<T> , Metadata {
 
@@ -22,6 +24,20 @@ public class RaiCIP2<T> implements RandomAccessibleInterval<T> , Metadata {
 		this.name = metadata.name;
 	}
 	
+	
+	public RaiCIP2( RandomAccessibleInterval<T> rai, List<Double> spacing, List<String> axesName, List<String> axesUnit, List<Long> origin)
+	{
+		metadata = new MetadataCIP2( spacing , axesName, axesUnit);
+		
+		// adapt interval origin
+		int nDim = rai.numDimensions();
+		long[] interval_translation = new long[nDim];
+		for(int d=0; d<nDim; d++)
+			interval_translation[d] = rai.min(d) - (long)(double)origin.get(d);
+		this.rai = Views.offset(rai,  interval_translation );
+		
+		this.name = metadata.name;
+	}
 	
 	public RaiCIP2( RandomAccessibleInterval<T> rai, List<Double> spacing, List<String> axesName, List<String> axesUnit)
 	{
@@ -168,6 +184,21 @@ public class RaiCIP2<T> implements RandomAccessibleInterval<T> , Metadata {
 		return metadata.spacing(axisName);
 	}
 
+	
+	
+	public List<Long> min() {
+		List<Long> origin = new ArrayList<Long>();
+		for( int d=0; d<this.numDimensions(); d++){
+			origin.add( this.min(d));
+		}
+		return origin;
+	}
+
+
+	public long min(String axisName) {
+		int d = metadata.axesDim.get(axisName);
+		return this.min(d);
+	}
 
 	@Override
 	public List<String> unit() {
@@ -181,8 +212,22 @@ public class RaiCIP2<T> implements RandomAccessibleInterval<T> , Metadata {
 	}
 
 	@Override
+	public String unit(String axisName) {
+		return metadata.unit(axisName);
+	}
+	
+	@Override
 	public String toString() {
 		return "Image: " + name;
 	}
 	
+	public void setMin(int d, long newOrigin)
+	{
+		long oldOrigin = rai.min(d);
+		long[] offset = new long[numDimensions()];
+		offset[d] = oldOrigin-newOrigin;
+		rai = Views.offset( rai , offset );
+	}
+
+
 }

@@ -580,7 +580,7 @@ public class CIPService extends AbstractService implements ImageJService {
 			return null;
 		}
 		
-		RaiCIP2<T> output = new RaiCIP2<T>( rai , spacing(input) , axes(input), unit(input));
+		RaiCIP2<T> output = new RaiCIP2<T>( rai , spacing(input) , axes(input), unit(input), origin(input));
 		output.name = name;
 		
 		return output;
@@ -596,7 +596,7 @@ public class CIPService extends AbstractService implements ImageJService {
 		{
 			RaiCIP2<?> input = (RaiCIP2<?>) parameter.value;
 			RandomAccessibleInterval<T> output = (RandomAccessibleInterval<T>) result;
-			outputCIP = new RaiCIP2<T>( output , input.spacing() , input.axes(), input.unit() );  
+			outputCIP = new RaiCIP2<T>( output , input.spacing() , input.axes(), input.unit(), input.min() );  
 		}
 		
 		return outputCIP;
@@ -782,6 +782,70 @@ public class CIPService extends AbstractService implements ImageJService {
 		return axesName;
 	}
 
+	
+	public List<Long> origin( Object input ) {
+		
+		List<Long> origin = null;
+		
+		if (	input instanceof RaiCIP2)
+		{ 
+			origin = ((RaiCIP2<?>) input).min();
+		}
+		else if (	input instanceof RandomAccessibleInterval )
+		{ 
+			RandomAccessibleInterval<?> rai = (RandomAccessibleInterval<?>) input;
+			int nDim = rai.numDimensions();
+			origin = new ArrayList<Long>();
+			for(int d=0; d<nDim; d++) {
+				origin.add( rai.min(d) );
+			}
+		}
+		else if (	input instanceof Dataset )
+		{
+			RandomAccessibleInterval<?> rai =  (RandomAccessibleInterval<?>)((Dataset) input).getImgPlus();
+			int nDim = rai.numDimensions();
+			origin = new ArrayList<Long>();
+			for(int d=0; d<nDim; d++){
+				origin.add( rai.min(d) ); 	// is it compatible with the underlying interval min value ?
+													// maybe one should get interval min then get the calibrated value at that min ?
+			}
+		}
+		else if (	input instanceof ImgPlus )
+		{
+			ImgPlus<?> imgPlus = (ImgPlus<?>) input;
+			int nDim = imgPlus.numDimensions();
+			origin = new ArrayList<Long>();
+			for(int d=0; d<nDim; d++){
+				origin.add( imgPlus.min(d) ); // is it compatible with the underlying interval min value ?
+			}
+		}
+		else if (	input instanceof ImagePlus )
+		{
+			ImagePlus imp = (ImagePlus) input;
+			int[] dims = imp.getDimensions();
+			Calibration cal = imp.getCalibration();
+			long[] impOrig = new long[5];
+			impOrig[0] = (long)(cal.xOrigin / cal.pixelWidth);
+			impOrig[1] = (long)(cal.yOrigin / cal.pixelHeight);
+			impOrig[2] = 0l;
+			impOrig[3] = (long)(cal.zOrigin / cal.pixelDepth);
+			impOrig[4] = 0l;
+			origin = new ArrayList<Long>();
+			
+			for( int d=0; d<5; d++ ) {
+				if( dims[d] > 1 ) {
+					origin.add( impOrig[d] );
+				}
+			}
+		}
+		else {
+			System.err.println("Unknown image type:" + input.getClass().getName() );
+		}
+		
+		return origin;
+	}
+	
+	
 	/*
 	public List<LUT> lut(Object input)
 	{
@@ -1001,7 +1065,7 @@ public class CIPService extends AbstractService implements ImageJService {
 		List<Double> list2 = new ArrayList<Double>();
 		
 		if ( Checks.isScalar(value) ) {
-			list2.add( (double) value );
+			list2.add( scalar(value) );
 		}
 		else if ( value instanceof List ) {
 			List<?> list = (List<?>) value;
@@ -1011,31 +1075,31 @@ public class CIPService extends AbstractService implements ImageJService {
 				item = list.get(0);
 			if( item!=null ) {
 				
-				if( 	value instanceof Byte		) {
+				if( 	item instanceof Byte		) {
 					for( int i=0; i<n ; i++) {
 						list2.add( (double) (byte) list.get(i) );
 					}
 				}
 				
-				else if( 	value instanceof Short	) {
+				else if( 	item instanceof Short	) {
 					for( int i=0; i<n ; i++) {
 						list2.add( (double) (short) list.get(i) );
 					}
 				}
 				
-				else if( 	value instanceof Integer	) {
+				else if( 	item instanceof Integer	) {
 					for( int i=0; i<n ; i++) {
 						list2.add( (double) (int) list.get(i) );
 					}
 				}
 				
-				else if( 	value instanceof Float	) {
+				else if( 	item instanceof Float	) {
 					for( int i=0; i<n ; i++) {
 						list2.add( (double) (float) list.get(i) );
 					}
 				}
 				
-				else if( 	value instanceof Double	) {
+				else if( 	item instanceof Double	) {
 					list2 = (List<Double>) list;
 				}
 

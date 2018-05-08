@@ -1,5 +1,6 @@
 package invizio.cip;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -9,7 +10,9 @@ import net.imglib2.Positionable;
 import net.imglib2.RandomAccess;
 import net.imglib2.RealPositionable;
 import net.imglib2.roi.IterableRegion;
+import net.imglib2.roi.util.IterableRandomAccessibleRegion;
 import net.imglib2.type.BooleanType;
+import net.imglib2.view.Views;
 
 public class RegionCIP<B extends BooleanType<B>> implements IterableRegion<B>, Metadata {
 
@@ -20,6 +23,23 @@ public class RegionCIP<B extends BooleanType<B>> implements IterableRegion<B>, M
 	public RegionCIP( IterableRegion<B> region )
 	{
 		metadata = new MetadataCIP2( region.numDimensions() );
+		this.region = region;
+		name = metadata.name;
+	}
+	
+	
+	public RegionCIP( IterableRegion<B> region, List<Double> spacing, List<String> axesName, List<String> axesUnit, List<Long> origin)
+	{
+		metadata = new MetadataCIP2( spacing , axesName, axesUnit);
+		
+		// adapt interval origin
+		int nDim = region.numDimensions();
+		long[] translation = new long[nDim];
+		for(int d=0; d<nDim; d++)
+			translation[d] = region.min(d) - (long)(double)origin.get(d);
+		this.region = IterableRandomAccessibleRegion.create(  Views.offset(region,  translation )  );
+		
+		
 		this.region = region;
 		name = metadata.name;
 	}
@@ -219,7 +239,20 @@ public class RegionCIP<B extends BooleanType<B>> implements IterableRegion<B>, M
 		return metadata.spacing(axisName);
 	}
 
+	public List<Long> min() {
+		List<Long> origin = new ArrayList<Long>();
+		for( int d=0; d<this.numDimensions(); d++){
+			origin.add( this.min(d));
+		}
+		return origin;
+	}
 
+
+	public long min(String axisName) {
+		int d = metadata.axesDim.get(axisName);
+		return this.min(d);
+	}
+	
 	@Override
 	public List<String> unit() {
 		return metadata.unit();
@@ -229,6 +262,11 @@ public class RegionCIP<B extends BooleanType<B>> implements IterableRegion<B>, M
 	@Override
 	public String unit(int d) {
 		return metadata.unit(d);
+	}
+	
+	@Override
+	public String unit(String axisName) {
+		return metadata.unit(axisName);
 	}
 	
 	@Override
