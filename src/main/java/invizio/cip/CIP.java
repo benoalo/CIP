@@ -970,30 +970,38 @@ public class CIP extends AbstractNamespace{
     }
 
 
-    public Object origin( Object... args )
+    @SuppressWarnings("unchecked")
+	public Object origin( Object... args )
     {
     	
-    	FunctionParameters2 params = new FunctionParameters2("getOrigin");
-		params.addRequired("inputImage", 	Type.image	);
+		FunctionParameters2 params3 = new FunctionParameters2("setOrigin"); // only work if the input image is of type raicip2
+		params3.addRequired("inputImage", 	Type.image	);
+		params3.addRequired("dimension", 	Type.scalarorstring	);
+		params3.addRequired("value", 		Type.scalar	);
 		
 		FunctionParameters2 params2 = new FunctionParameters2("getOrigin2");
 		params2.addRequired("inputImage", 	Type.image	);
 		params2.addRequired("dimension", 	Type.scalarorstring	);
 		
-		FunctionParameters2 params3 = new FunctionParameters2("setOrigin");
-		params3.addRequired("inputImage", 	Type.image	);
-		params3.addRequired("dimension", 	Type.scalarorstring	);
-		params3.addRequired("value", 		Type.scalar	);
+		FunctionParameters2 params4 = new FunctionParameters2("setOrigin2"); // should be tested after getOrigin2
+		params4.addRequired("inputImage", 	Type.image	);
+		params4.addRequired("value", 		Type.scalars);
+		
+		FunctionParameters2 params = new FunctionParameters2("getOrigin");
+		params.addRequired("inputImage", 	Type.image	);
+		
 		
 		Object origin = null;
-		if ( params.parseInput( args ) )
-		{	
-			DefaultParameter2 image = params.get("inputImage");
-			cipService.toRaiCIP( image );
-			Interval interval = (Interval) image;
-			origin = new ArrayList<Long>();
-			for(int d=0; d< interval.numDimensions(); d++)
-				((List<Long>)origin).add( interval.min(d) );
+		if ( params3.parseInput( args ) )
+		{
+			// set origin value
+			DefaultParameter2 imageParam = params3.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			int d = cipService.axesNametoIndex( params3.get("inputImage").value , params3.get("dimension").value ).get(0);
+			long newOrigin = cipService.scalar( params3.get("value").value ).longValue();
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			image.setMin(d, newOrigin);
+			
 		}
 		else if ( params2.parseInput( args ) )
 		{	
@@ -1003,67 +1011,264 @@ public class CIP extends AbstractNamespace{
 			int d = cipService.axesNametoIndex( params2.get("inputImage").value , params2.get("dimension").value ).get(0);
 			origin = new Long( interval.min(d) );
 		}
-		else if ( params3.parseInput( args ) )
+		else if ( params4.parseInput( args ) )
 		{
 			// set origin value
-			DefaultParameter2 imageParam = params3.get("inputImage");
+			DefaultParameter2 imageParam = params4.get("inputImage");
 			cipService.toRaiCIP( imageParam );
-			Interval interval = (Interval) imageParam.value;
-			int d = cipService.axesNametoIndex( params3.get("inputImage").value , params3.get("dimension").value ).get(0);
-			long oldOrig = interval.min(d);
-			long newOrig = cipService.scalar( params3.get("value").value ).longValue();
-			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value; 
-			Views.offset( image , newOrig-oldOrig );
-			
-			image.metadata().get(d).origin = newOrig;
+			List<Double> newOrigin = cipService.scalars( params4.get("value").value );
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			for(int d=0; d<image.numDimensions(); d++)
+				image.setMin( d , newOrigin.get(d).longValue() );
+		}
+		else if ( params.parseInput( args ) )
+		{	
+			DefaultParameter2 image = params.get("inputImage");
+			cipService.toRaiCIP( image );
+			Interval interval = (Interval) image.value;
+			origin = new ArrayList<Long>();
+			for(int d=0; d< interval.numDimensions(); d++)
+				((List<Long>)origin).add( interval.min(d) );
+		}
+		else 
+		{
 			
 		}
-		
+			
     	return origin;
     }
 
-   
     
-    public Long[] size( Object... args )
+    @SuppressWarnings("unchecked")
+	public Object size( Object... args )
     {
+    	
+    	FunctionParameters2 params2 = new FunctionParameters2("getSize2");
+		params2.addRequired("inputImage", 	Type.image	);
+		params2.addRequired("dimension", 	Type.scalarorstring	);
+		
     	FunctionParameters2 params = new FunctionParameters2("Image Size");
 		params.addRequired("inputImage", 	Type.image	);
 		
 		//FunctionParameters2 params2 = new FunctionParameters2("Region Size");
 		//params2.addRequired("region", 	Type.region	);
 		
-		Long[] size = null;
-		if ( params.parseInput( args ) )
+		Object size = null;
+		if ( params2.parseInput( args ) )
+		{	
+			DefaultParameter2 imageParam = params2.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			Interval interval = (Interval) imageParam.value;
+			int d = cipService.axesNametoIndex( params2.get("inputImage").value , params2.get("dimension").value ).get(0);
+			size =  interval.dimension(d);
+		}
+		else if ( params.parseInput( args ) )
 		{	
 			DefaultParameter2 image = params.get("inputImage");
 			cipService.toRaiCIP( image );
 			Interval interval = (Interval) image.value;
-			size = new Long[interval.numDimensions()];
+			size = new ArrayList<Long>();
 			for(int d=0; d< interval.numDimensions(); d++)
-				size[d] = interval.dimension(d);
+				((List<Long>) size).add( interval.dimension(d) );
 		}
     	return size;
     }
 
     // functions to collect luts, spacing, axes names
-    public List<Double> spacing( Object input ) {
+    public Object spacing( Object...args ) {
     	
-    	// TODO:
-    	//		signature 1: if input is an image return the image spacing
-    	//		signature 2: if input is a list of double set these as the new image spacing
-    	//					 if input is a list of Axes name and a list of spacing adjust only these
     	
-    	return cipService.spacing( input );
+    	FunctionParameters2 params3 = new FunctionParameters2("setSpacing"); // only work if the input image is of type raicip2
+		params3.addRequired("inputImage", 	Type.image	);
+		params3.addRequired("dimension", 	Type.scalarorstring	);
+		params3.addRequired("value", 		Type.scalar	);
+		
+		FunctionParameters2 params2 = new FunctionParameters2("getSpacing");
+		params2.addRequired("inputImage", 	Type.image	);
+		params2.addRequired("dimension", 	Type.scalarorstring	); 
+		
+		FunctionParameters2 params4 = new FunctionParameters2("setSpacing"); // should be tested after getOrigin2
+		params4.addRequired("inputImage", 	Type.image	);
+		params4.addRequired("value", 		Type.scalars);
+		
+		FunctionParameters2 params = new FunctionParameters2("getSpacing");
+		params.addRequired("inputImage", 	Type.image	);
+    	
+		
+		Object spacing = null;
+		if ( params3.parseInput( args ) )
+		{
+			// set axes name value
+			DefaultParameter2 imageParam = params3.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			int d = cipService.axesNametoIndex( params3.get("inputImage").value , params3.get("dimension").value ).get(0);
+			Double newSpacing = cipService.scalar(params3.get("value").value);
+			image.metadata().get(d).spacing = newSpacing ;
+			
+		}
+		else if ( params2.parseInput( args ) )
+		{	
+			DefaultParameter2 imageParam = params2.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			int d = cipService.axesNametoIndex( params2.get("inputImage").value , params2.get("dimension").value ).get(0);
+			spacing = image.spacing(d) ;
+		}
+		else if ( params4.parseInput( args ) )
+		{
+			DefaultParameter2 imageParam = params4.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			List<Double> newSpacings = cipService.scalars( params4.get("value").value );
+			for(int d=0; d<image.numDimensions(); d++ ) 
+				image.metadata().get(d).spacing = newSpacings.get(d) ;
+
+		}
+		else if ( params.parseInput( args ) )
+		{	
+			DefaultParameter2 imageParam = params.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			spacing = image.spacing();
+		}
+		else 
+		{
+			
+		}
+    	
+    	return spacing;
     }
     
-    public List<String> unit( Object input ) {
+    public Object unit( Object... args ) {
     	
-    	return cipService.unit( input );
+    	FunctionParameters2 params3 = new FunctionParameters2("setUnit"); // only work if the input image is of type raicip2
+		params3.addRequired("inputImage", 	Type.image	);
+		params3.addRequired("dimension", 	Type.scalarorstring	);
+		params3.addRequired("value", 		Type.string	);
+		
+		FunctionParameters2 params2 = new FunctionParameters2("getUnit2");
+		params2.addRequired("inputImage", 	Type.image	);
+		params2.addRequired("dimension", 	Type.scalarorstring	); 
+		
+		FunctionParameters2 params4 = new FunctionParameters2("setUnit2"); // should be tested after getOrigin2
+		params4.addRequired("inputImage", 	Type.image	);
+		params4.addRequired("value", 		Type.strings);
+		
+		FunctionParameters2 params = new FunctionParameters2("getUnit");
+		params.addRequired("inputImage", 	Type.image	);
+    	
+		
+		Object unit = null;
+		if ( params3.parseInput( args ) )
+		{
+			// set axes name value
+			DefaultParameter2 imageParam = params3.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			int d = cipService.axesNametoIndex( params3.get("inputImage").value , params3.get("dimension").value ).get(0);
+			String newUnit = cipService.strings(params3.get("value").value).get(0);
+			image.metadata().get(d).unit = newUnit ;
+			
+		}
+		else if ( params2.parseInput( args ) )
+		{	
+			DefaultParameter2 imageParam = params2.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			int d = cipService.axesNametoIndex( params2.get("inputImage").value , params2.get("dimension").value ).get(0);
+			unit = image.unit(d);
+		}
+		else if ( params4.parseInput( args ) )
+		{
+			DefaultParameter2 imageParam = params4.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			List<String> newUnits = cipService.strings( params4.get("value").value );
+			for(int d=0; d<image.numDimensions(); d++ ) 
+				image.metadata().get(d).unit = newUnits.get(d) ;
+
+		}
+		else if ( params.parseInput( args ) )
+		{	
+			DefaultParameter2 imageParam = params.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			unit = image.unit();
+		}
+		else 
+		{
+			
+		}
+    	
+    	return unit;
     }
 
-    public List<String> axes( Object input ) {
+    public Object axes( Object... args ) {
     	
-    	return cipService.axes( input );
+    	FunctionParameters2 params3 = new FunctionParameters2("setAxesName"); // only work if the input image is of type raicip2
+		params3.addRequired("inputImage", 	Type.image	);
+		params3.addRequired("dimension", 	Type.scalarorstring	);
+		params3.addRequired("value", 		Type.string	);
+		
+		FunctionParameters2 params2 = new FunctionParameters2("getAxesName");
+		params2.addRequired("inputImage", 	Type.image	);
+		params2.addRequired("dimension", 	Type.scalar	); // string does not make sense here
+		
+		FunctionParameters2 params4 = new FunctionParameters2("setAxesName"); // should be tested after getOrigin2
+		params4.addRequired("inputImage", 	Type.image	);
+		params4.addRequired("value", 		Type.strings);
+		
+		FunctionParameters2 params = new FunctionParameters2("getAxesName");
+		params.addRequired("inputImage", 	Type.image	);
+    	
+		
+		Object axes = null;
+		if ( params3.parseInput( args ) )
+		{
+			// set axes name value
+			DefaultParameter2 imageParam = params3.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			int d = cipService.axesNametoIndex( params3.get("inputImage").value , params3.get("dimension").value ).get(0);
+			String name = cipService.strings(params3.get("value").value).get(0);
+			image.metadata().get(d).name = name ;
+			
+		}
+		else if ( params2.parseInput( args ) )
+		{	
+			DefaultParameter2 imageParam = params2.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			int d = (int)(double)cipService.scalar( params2.get("dimension").value );
+			axes = image.axes(d) ;
+		}
+		else if ( params4.parseInput( args ) )
+		{
+			DefaultParameter2 imageParam = params4.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			List<String> axesName = cipService.strings( params4.get("value").value );
+			int count = 0;
+			for(AxisCIP axis : image.metadata())
+			{	
+				axis.name = axesName.get(count) ;
+				count++;
+			}
+		}
+		else if ( params.parseInput( args ) )
+		{	
+			DefaultParameter2 imageParam = params.get("inputImage");
+			cipService.toRaiCIP( imageParam );
+			RaiCIP2<?> image = (RaiCIP2<?>) imageParam.value;
+			axes = image.axes();
+		}
+		else 
+		{
+			
+		}
+			
+    	return axes;
     }
     
     
@@ -1337,8 +1542,8 @@ public class CIP extends AbstractNamespace{
 		ij.ui().showUI();
 		
 		
-		//ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
-		ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs32.tif");
+		ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
+		//ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs32.tif");
 		//ij.ui().show(imp);
 //		Img<FloatType> img = ImageJFunctions.wrap(imp);
 //		float threshold = 100;
@@ -1356,9 +1561,52 @@ public class CIP extends AbstractNamespace{
 		//String h = cip.show( imp , "glasbey inverted");
 		//Object impLog2 = cip.div(cip.log(imp) , cip.log(2));
 		
-		Object imgNew = cip.create(cip.list(100,100,10), "name", "test image");
-		cip.show( imgNew );
+		//Object imgNew = cip.create(cip.list(100,100,10), "name", "test image");
+		//cip.show( imgNew );
 		
+
+//		Object img = cip.add(imp, 0); 
+//		System.out.println( cip.axes(img) );
+//		cip.axes(img,"X","X1");
+//		System.out.println( cip.axes(img,0) );
+//		System.out.println( cip.axes(img,1) );
+//		
+//		cip.axes(img, CIP.list("A","B"));
+//		System.out.println( cip.axes(img) );
+		
+//		Object img = cip.add(imp, 0); 
+//		System.out.println( cip.origin(img) );
+//		cip.origin(img,"X",10);
+//		cip.origin(img,"Y",20);
+//		System.out.println( cip.origin(img,0) );
+//		System.out.println( cip.origin(img,1) );
+//		
+//		cip.origin(img, CIP.list(30,40));
+//		System.out.println( cip.origin(img) );
+//		Object img = cip.add(imp, 0); 
+//		System.out.println( cip.size(img) );
+//		System.out.println( cip.size(img,"X") );
+//		System.out.println( cip.size(img,1) );
+
+//		Object img = cip.add(imp, 0); 
+//		System.out.println( cip.spacing(img) );
+//		cip.spacing(img,"X",2);
+//		cip.spacing(img,1,3);
+//		System.out.println( cip.spacing(img,0) );
+//		System.out.println( cip.spacing(img,"Y") );
+//		cip.spacing(img, CIP.list(4,5));
+//		System.out.println( cip.spacing(img) );
+
+		
+		Object img = cip.add(imp, 0); 
+		System.out.println( cip.unit(img) );
+		cip.unit(img,"X","mm");
+		cip.unit(img,1,"cm");
+		System.out.println( cip.unit(img,0) );
+		System.out.println( cip.unit(img,"Y") );
+		
+		cip.unit(img, CIP.list("km","m"));
+		System.out.println( cip.unit(img) );
 		//String h2 = cip.show( impLog2 , "green");
 		
 		//System.out.println("h1 -> "+h1);
