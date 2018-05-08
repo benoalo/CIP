@@ -106,6 +106,9 @@ public class FunctionParameters2 extends LinkedHashMap< String , DefaultParamete
 		int nth = -1;
 		for( int i=0; i<args.length ; i++ )
 		{
+			if ( ! pIterator.hasNext())
+				break;
+			
 			DefaultParameter2 p = pIterator.next();
 			nth=i;
 			Object arg = args[nth];
