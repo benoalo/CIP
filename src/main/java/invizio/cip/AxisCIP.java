@@ -2,8 +2,10 @@ package invizio.cip;
 
 public class AxisCIP {
 	
-	public double origin;
-	public double spacing;
+	@Deprecated
+	public double origin; // the physical origin of the axis
+	
+	public double spacing; // the physical spacing between 2 sample
 	public String unit;
 	public String name;
 	
