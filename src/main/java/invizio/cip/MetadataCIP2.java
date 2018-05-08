@@ -117,6 +117,11 @@ public class MetadataCIP2 extends ArrayList<AxisCIP> implements Metadata{
 		return new String( get(d).unit );
 	}
 
+	public String unit(String axisName) {
+		int d = axesDim.get(axisName);
+		return unit(d);
+	}
+	
 	public List<String> unit(){
 		List<String> units = new ArrayList<String>();
 		for( AxisCIP axis : this ) {
