@@ -1,8 +1,11 @@
 package invizio.cip;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import net.imglib2.Cursor;
 import net.imglib2.Interval;
@@ -14,7 +17,7 @@ import net.imglib2.roi.util.IterableRandomAccessibleRegion;
 import net.imglib2.type.BooleanType;
 import net.imglib2.view.Views;
 
-public class RegionCIP<B extends BooleanType<B>> implements IterableRegion<B>, Metadata {
+public class RegionCIP<B extends BooleanType<B>> implements IterableRegion<B>, Metadata, FreeDimensionPositionable {
 
 	IterableRegion<B> region;
 	MetadataCIP2 metadata;
@@ -272,6 +275,43 @@ public class RegionCIP<B extends BooleanType<B>> implements IterableRegion<B>, M
 	@Override
 	public String toString() {
 		return "Region: " + name;
+	}
+	
+	
+	private Map<String,Long> freeDimensionPosition = new HashMap<String,Long>(); 
+
+	@Override
+	public void setPosition(String axisName, Long position) {	
+		freeDimensionPosition.put( axisName, new Long(position) );
+	}
+
+	@Override
+	public void setPosition( Map<String,Long> newfreeDimPosition ) {	
+		freeDimensionPosition = new HashMap<String,Long>();
+		for (Entry<String,Long> e : newfreeDimPosition.entrySet() )
+		{
+			freeDimensionPosition.put(  e.getKey(), new Long( e.getValue() )  );
+		}
+	}
+	
+	@Override
+	public Map<String,Long> getPosition() {	
+		
+		Map<String,Long> newfreeDimPos = new HashMap<String,Long>();
+		for (Entry<String,Long> e : freeDimensionPosition.entrySet() )
+		{
+			newfreeDimPos.put(  e.getKey(), new Long( e.getValue() )  );
+		}
+		return newfreeDimPos;
+	}
+
+	
+	@Override
+	public Long getPosition(String axisName) {
+		
+		if( freeDimensionPosition.containsKey( axisName ) )
+			return new Long(freeDimensionPosition.get( axisName )) ;	
+		return null;
 	}
 	
 }

@@ -31,6 +31,7 @@ import net.imglib2.type.numeric.integer.UnsignedLongType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.Views;
 
 
 /**
@@ -50,7 +51,7 @@ import net.imglib2.type.numeric.real.FloatType;
 		
 		
 		
-		@Parameter (type = ItemIO.INPUT)
+		@Parameter (label="size", type = ItemIO.INPUT)
 		private Long[] dimensions;
 		
 		@Parameter( label="value", persist=false, required=false ) // with persist and required set to false the parameter become optional
@@ -58,6 +59,9 @@ import net.imglib2.type.numeric.real.FloatType;
 
 		@Parameter( label="type", persist=false, required=false ) // with persist and required set to false the parameter become optional
 		private String type;
+		
+		@Parameter (label="origin" , type = ItemIO.INPUT)
+		private Long[] origin;
 		
 		@Parameter (type = ItemIO.OUTPUT)
 		private	RandomAccessibleInterval<T> outputImage;
@@ -82,8 +86,9 @@ import net.imglib2.type.numeric.real.FloatType;
 			{	
 				dimensions = new Long[] {dimensions[0] , dimensions[0]};
 			}
-			long[] dims = new long[dimensions.length];
-			for(int d=0; d<dims.length; d++)
+			int nDim = dimensions.length;
+			long[] dims = new long[nDim];
+			for(int d=0; d<nDim; d++)
 				dims[d] = dimensions[d];
 			
 			if( type==null )
@@ -92,6 +97,24 @@ import net.imglib2.type.numeric.real.FloatType;
 			
 			if( value==null )
 				value = 0f;
+			
+			if( origin == null || origin.length<dimensions.length )
+			{
+				origin = new Long[nDim];
+				for(int d=0; d<nDim ; d++)
+					origin[d] = 0l;
+			}
+			long[] offset = new long[nDim];
+			long[] translation = new long[nDim];
+			long minOffset = Long.MAX_VALUE;
+			
+			for(int d=0; d<nDim ; d++)
+			{
+				offset[d] = -origin[d];
+				translation[d] = origin[d];
+				if( Math.abs(offset[d])>minOffset)
+					minOffset = Math.abs(offset[d]); 
+			}
 			
 			
 			T valueT = null;
@@ -169,6 +192,11 @@ import net.imglib2.type.numeric.real.FloatType;
 				outputImage = img;
 			}
 			
+			// translate the orgin if needed
+			if( minOffset>0 ) {
+				//outputImage = Views.offset(outputImage, offset);
+				outputImage = Views.translate(outputImage, translation);
+			}
 			
 			
 		}

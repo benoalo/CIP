@@ -74,6 +74,7 @@ public class Regions {
 			final RegionCIP<B> region = new RegionCIP<B>( iterableRegion , metadata );
 			region.name = prefix+count;
 			regions.add( region );
+			region.setPosition( labelMap.getPosition() );
 			count++;
 		}
 		
@@ -89,6 +90,7 @@ public class Regions {
 		final IterableRegion<B> iterableRegion = maskToIterableRegion( mask );
 		final MetadataCIP2 metadata = new MetadataCIP2(mask.metadata() );
 		final RegionCIP<B> region = new RegionCIP<B>( iterableRegion , metadata );
+		region.setPosition( mask.getPosition() );
 		region.name = name;
 		return  region;
 	}

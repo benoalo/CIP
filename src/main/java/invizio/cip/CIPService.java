@@ -901,8 +901,8 @@ public class CIPService extends AbstractService implements ImageJService {
 				outputImage = toRaiCIP( outputImage );
 			else {
 				outputImage = toRaiCIP( outputImage, inputImage ); // assumes InputImage.value is RaiCIP2
-				if( outputImage instanceof RaiCIP2)
-					((RaiCIP2<?>) outputImage).name = str + ((RaiCIP2<?>)inputImage.value).name ;
+				((RaiCIP2<?>) outputImage).name = str + ((RaiCIP2<?>)inputImage.value).name ;
+				((RaiCIP2<?>) outputImage).setPosition( ((RaiCIP2<?>)inputImage.value).getPosition() );	
 			}
 			
 		}

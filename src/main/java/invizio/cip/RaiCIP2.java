@@ -1,8 +1,10 @@
 package invizio.cip;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
+import java.util.Map.Entry;
 
 import net.imglib2.Interval;
 import net.imglib2.Positionable;
@@ -11,7 +13,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPositionable;
 import net.imglib2.view.Views;
 
-public class RaiCIP2<T> implements RandomAccessibleInterval<T> , Metadata {
+public class RaiCIP2<T> implements RandomAccessibleInterval<T> , Metadata, FreeDimensionPositionable {
 
 	RandomAccessibleInterval<T> rai;
 	MetadataCIP2 metadata;
@@ -221,13 +223,57 @@ public class RaiCIP2<T> implements RandomAccessibleInterval<T> , Metadata {
 		return "Image: " + name;
 	}
 	
+	@Deprecated
 	public void setMin(int d, long newOrigin)
 	{
 		long oldOrigin = rai.min(d);
 		long[] offset = new long[numDimensions()];
 		offset[d] = oldOrigin-newOrigin;
-		rai = Views.offset( rai , offset );
+		//RandomAccessibleInterval<T> raiTemp = Views.translate( rai , offset );
+		long[] dimensions = new long[this.numDimensions()];
+		this.dimensions(dimensions);
+		rai = Views.offset(rai, offset);
+		
+		//rai = new RandomAccessibleInterval
+		
+		
 	}
 
+	
+	private Map<String,Long> freeDimensionPosition = new HashMap<String,Long>(); 
+
+	@Override
+	public void setPosition(String axisName, Long position) {	
+		freeDimensionPosition.put( axisName, new Long(position) );
+	}
+
+	@Override
+	public void setPosition( Map<String,Long> newfreeDimPosition ) {	
+		freeDimensionPosition = new HashMap<String,Long>();
+		for (Entry<String,Long> e : newfreeDimPosition.entrySet() )
+		{
+			freeDimensionPosition.put(  e.getKey(), new Long( e.getValue() )  );
+		}
+	}
+	
+	@Override
+	public Map<String,Long> getPosition() {	
+		
+		Map<String,Long> newfreeDimPos = new HashMap<String,Long>();
+		for (Entry<String,Long> e : freeDimensionPosition.entrySet() )
+		{
+			newfreeDimPos.put(  e.getKey(), new Long( e.getValue() )  );
+		}
+		return newfreeDimPos;
+	}
+
+	
+	@Override
+	public Long getPosition(String axisName) {
+		
+		if( freeDimensionPosition.containsKey( axisName ) )
+			return new Long(freeDimensionPosition.get( axisName )) ;	
+		return null;
+	}
 
 }

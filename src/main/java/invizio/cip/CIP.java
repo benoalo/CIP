@@ -838,6 +838,7 @@ public class CIP extends AbstractNamespace{
 		params2.get( "size" ).aliases.add( "extent" );
     	params2.addOptional("value", 		Type.scalar , 	0	);
 		params2.addOptional("type", 		Type.string , 	"float"	);
+		params2.addOptional("origin", 		Type.scalar , 	null	);
 		params2.addOptional("name", 		Type.string , 	"new_"+count	);
 		 
 		count++;
@@ -855,17 +856,18 @@ public class CIP extends AbstractNamespace{
 
   			Interval interval = (Interval)params1.get("inputImage").value;
   			long[] dimensions = new long[interval.numDimensions()];
+  			long[] origin =  new long[interval.numDimensions()];
   			interval.dimensions(dimensions);
-  			params1.get("inputImage").value = dimensions;
+  			interval.min(origin);
   			
-  			paramsFinal = new Object[] {dimensions , params2.get("value").value , params2.get("type").value };//params1.getParsedInput();
+  			paramsFinal = new Object[] {dimensions , params1.get("value").value , params1.get("type").value, origin };//params1.getParsedInput();
   			
   			inputImage =  params1.get("inputImage");
   			name = (String) params1.get("name").value;
   		}
   		else if(  params2.parseInput( args ) )
   		{
-  			paramsFinal = new Object[] {params2.get("size").value , params2.get("value").value , params2.get("type").value };//params2.getParsedInput();
+  			paramsFinal = new Object[] {params2.get("size").value , params2.get("value").value , params2.get("type").value, params2.get("origin").value };//params2.getParsedInput();
   			name = (String) params2.get("name").value;
   		}
   		else {
@@ -1574,13 +1576,15 @@ public class CIP extends AbstractNamespace{
 //		cip.axes(img, CIP.list("A","B"));
 //		System.out.println( cip.axes(img) );
 		
-//		Object img = cip.add(imp, 0); 
+		Object img = cip.add(imp, 0); 
 //		System.out.println( cip.origin(img) );
 //		cip.origin(img,"X",10);
-//		cip.origin(img,"Y",20);
+//		cip.origin(img,"1",20);
 //		System.out.println( cip.origin(img,0) );
 //		System.out.println( cip.origin(img,1) );
-//		
+//		cip.origin(img, CIP.list(30,40));
+//		System.out.println( cip.origin(img) );
+		
 //		cip.origin(img, CIP.list(30,40));
 //		System.out.println( cip.origin(img) );
 //		Object img = cip.add(imp, 0); 
@@ -1596,22 +1600,34 @@ public class CIP extends AbstractNamespace{
 //		System.out.println( cip.spacing(img,"Y") );
 //		cip.spacing(img, CIP.list(4,5));
 //		System.out.println( cip.spacing(img) );
-
+	
+//		Object img = cip.add(imp, 0); 
+//		System.out.println( cip.unit(img) );
+//		cip.unit(img,"X","mm");
+//		cip.unit(img,1,"cm");
+//		System.out.println( cip.unit(img,0) );
+//		System.out.println( cip.unit(img,"Y") );	
+//		cip.unit(img, CIP.list("km","m"));
+//		System.out.println( cip.unit(img) );
 		
-		Object img = cip.add(imp, 0); 
-		System.out.println( cip.unit(img) );
-		cip.unit(img,"X","mm");
-		cip.unit(img,1,"cm");
-		System.out.println( cip.unit(img,0) );
-		System.out.println( cip.unit(img,"Y") );
+		cip.show(img);
 		
-		cip.unit(img, CIP.list("km","m"));
-		System.out.println( cip.unit(img) );
+		cip.origin(img, CIP.list(30,40));
+		System.out.println( "" );
+		Object img1 = cip.create(img, 15, "uint8" );
+		System.out.println( cip.axes(img1) + " , " +  cip.axes(img) );
+		System.out.println( cip.unit(img1) + " , " +  cip.unit(img) );
+		System.out.println( cip.spacing(img1) + " , " +  cip.spacing(img) );
+		System.out.println( cip.origin(img1) + " , " +  cip.origin(img) );
+		System.out.println( cip.size(img1) + " , " +  cip.size(img) );
+		cip.show(img);
+		cip.show(img1);
+		
 		//String h2 = cip.show( impLog2 , "green");
 		
 		//System.out.println("h1 -> "+h1);
 		//System.out.println("h2 -> "+h2);
-	//System.out.println("done!");
+		//System.out.println("done!");
 		
 		//cip.help();
 		
