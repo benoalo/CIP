@@ -240,14 +240,21 @@ public class CIP extends AbstractNamespace{
 		params.get( "ScaleMin" ).aliases.add( "smin" );
 		params.addOptional("ScaleMax",		Type.scalar , 	null 	);
 		params.get( "ScaleMax" ).aliases.add( "smax" );
+		params.addOptional("nScalePerOctave",	Type.scalar , 	3 	);
+		params.addOptional("anisotropy",		Type.scalar , 	10 	);
 		params.addOptional("Method", 		Type.string , 	null	);
 		params.addOptional("PixelSize", 	Type.scalars, 	null	);
+		params.addOptional("Output", 		Type.string, 	"image"	);
 		
 		if ( params.parseInput( args ) )
 		{
 			cipService.toRaiCIP( params.get("inputImage") );
-			results = ops().run( invizio.cip.segment.MaximaCIP.class, params.getParsedInput() );
-			results = cipService.setMetadata( results, params.get("inputImage"), "max_" );
+			List<Object> resultsTemp = (List<Object>) ops().run( invizio.cip.segment.MaximaCIP.class, params.getParsedInput() );
+			
+			Object image = cipService.setMetadata( resultsTemp.get(0), params.get("inputImage"), "max_" );
+			resultsTemp.set( 0, image );
+			
+			results = cipService.discardNullValue( resultsTemp );
 		}
 		return results; 
 	}
