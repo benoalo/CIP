@@ -20,6 +20,12 @@ import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 import org.scijava.ui.UIService;
 
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.ResultsTable;
@@ -259,6 +265,7 @@ public class ShowCIPService extends AbstractService implements ImageJService {
 		
 		
 		// get the results table
+		// TODO: if resultTableName==null resultTableName="Results" 
 		Window win = WindowManager.getWindow(resultTableName);
 		ResultsTable resultTable = null;
 		if ( (win!=null) && win instanceof TextWindow)
@@ -317,6 +324,108 @@ public class ShowCIPService extends AbstractService implements ImageJService {
 		return resultTableName;
 	}
 		
+	
+	
+	
+	
+	
+	static Map<String,Integer> trackDisplayMode;
+	static 
+	{
+		trackDisplayMode = new HashMap<String,Integer>();
+		// in { 0:all, 1:local, 2:backward, 3:forward, 4:selection }
+		trackDisplayMode.put("all",0);
+		trackDisplayMode.put("local",1);
+		trackDisplayMode.put("backward",2);
+		trackDisplayMode.put("forwad",3);
+		trackDisplayMode.put("selection",4);
+		
+	}
+	
+	
+	
+	
+	public void showTrack( Model trackmateModel, FunctionParameters2 params ) {
+		//Model trackmateModel, ImagePlus imp_display, String mode ){
+		
+		ImagePlus imp= null;
+		if( params.get("image").value != null )
+			imp = cipService.toImagegPlus( params.get("image").value );
+		
+		
+		String mode = ((String)params.get("mode").value);
+		if( mode == null )
+			mode = "image"; // in "image","trackscheme","all"
+		mode = mode.toLowerCase();
+		
+		String trackStyle = ((String)params.get("track style").value);
+		if( trackStyle == null )
+			trackStyle = "all";
+		trackStyle = trackStyle.toLowerCase();
+		
+		int trackDepth = 0;
+		if( params.get("track depth").value != null ) {
+			trackDepth = (int)(double) cipService.scalar( params.get("track depth").value );
+		}
+		if( trackDepth <= 0 )
+			trackDepth = 10;
+		
+		String displayColorMode = "TRACK_INDEX";
+		
+		
+		
+		SelectionModel selectionModel = new SelectionModel( trackmateModel );
+		TrackScheme trackscheme = null;
+		HyperStackDisplayer displayer = null;
+		
+		switch( mode ){
+		case "image" :
+			if( imp == null) 
+				displayer =  new HyperStackDisplayer(trackmateModel, selectionModel);
+			else
+				displayer =  new HyperStackDisplayer(trackmateModel, selectionModel, imp );
+			break;
+			
+		case "trackscheme" :
+			trackscheme = new TrackScheme(trackmateModel, selectionModel);
+			break;
+			
+		case "all":
+			if( imp == null) 
+				displayer =  new HyperStackDisplayer(trackmateModel, selectionModel);
+			else
+				displayer =  new HyperStackDisplayer(trackmateModel, selectionModel, imp );
+			trackscheme = new TrackScheme(trackmateModel, selectionModel);
+			break;
+			
+		default :
+			break;
+		}
+		
+		
+		if( trackscheme != null )
+		{
+			trackscheme.render();
+		}
+		
+		//PerTrackFeatureColorGenerator color = new PerTrackFeatureColorGenerator(trackmateModel, displayColorMode);
+		if( displayer != null )
+		{
+			displayer.setDisplaySettings("TrackDisplaymode", trackDisplayMode.get(trackStyle)); // in { 0:all, 1:local, 2:backward, 3:forward, 4:selection }
+			displayer.setDisplaySettings("TrackDisplayDepth", trackDepth);
+			//displayer.setDisplaySettings("TrackColoring", color);
+			if( imp != null )
+				imp.show();
+			displayer.render();
+			displayer.refresh();
+		}
+		
+		
+		
+	}
+	
+
+	
 	
 	
 	private <T> void addStringColumn(List<String> colValues, String colName, int rowOffset, ResultsTable resultTable, boolean isFirstColumn)
