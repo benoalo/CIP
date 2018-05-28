@@ -8,13 +8,13 @@
 	<parent>
         <groupId>org.scijava</groupId>
         <artifactId>pom-scijava</artifactId>
-        <version>19.2.0</version>
+        <version>22.0.0</version>
         <relativePath/>
     </parent>
 
 	<groupId>invizio</groupId>
 	<artifactId>CIP</artifactId>
-	<version>0.1.2</version>
+	<version>0.2.0</version>
 
 	<name>Classic Image Processing</name>
 	<description>A (subjective) list of essential image processing algorithm in an API steered toward scripting and workflow prototyping. </description>
@@ -99,7 +99,7 @@
 		<dependency>
 			<groupId>invizio</groupId>	
 			<artifactId>ImgAlgo</artifactId>
-			<version>0.1.1</version>
+			<version>0.1.2</version>
 		</dependency>
 		
 		<dependency>

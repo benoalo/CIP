@@ -15,11 +15,13 @@ import invizio.cip.RegionCIP;
 import invizio.cip.Regions;
 import invizio.cip.parameters.DefaultParameter2;
 import net.imagej.ops.OpService;
-import net.imagej.ops.geom.geom3d.mesh.DefaultMesh;
+import net.imagej.mesh.naive.NaiveDoubleMesh;//net.imagej.ops.geom.geom3d.mesh.DefaultMesh;
 import net.imagej.ops.geom.geom3d.mesh.Facet;
-import net.imagej.ops.geom.geom3d.mesh.Mesh;
-import net.imagej.ops.geom.geom3d.mesh.TriangularFacet;
-import net.imagej.ops.geom.geom3d.mesh.Vertex;
+import net.imagej.mesh.Mesh; // net.imagej.ops.geom.geom3d.mesh.Mesh;
+import net.imagej.mesh.Triangle;
+import net.imagej.mesh.Vertex;
+//import net.imagej.ops.geom.geom3d.mesh.TriangularFacet;
+//import net.imagej.ops.geom.geom3d.mesh.Vertex;
 import net.imglib2.RealLocalizable;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.numeric.real.DoubleType;
@@ -144,19 +146,20 @@ public class RegionCIPMeasureToolset<B extends BooleanType<B>> extends AbstractM
 				final double sy = spacing.get(1);
 				final double sz = spacing.get(2);
 				
-				DefaultMesh mesh2 = new DefaultMesh();
-				for( Facet facet : mesh.getFacets() ) {
-					final TriangularFacet tfacet = (TriangularFacet)facet;
-					final Vertex v0 = (Vertex) tfacet.getP0();
-					final Vertex v0new = new Vertex( v0.getX()*sx, v0.getY()*sy, v0.getZ()*sz );
-					final Vertex v1 = (Vertex) tfacet.getP1();
-					final Vertex v1new = new Vertex( v1.getX()*sx, v1.getY()*sy, v1.getZ()*sz );
-					final Vertex v2 = (Vertex) tfacet.getP2();
-					final Vertex v2new = new Vertex( v2.getX()*sx, v2.getY()*sy, v2.getZ()*sz );
+				NaiveDoubleMesh mesh2 = new NaiveDoubleMesh();
+				for( Triangle facet : mesh.triangles() ) {
+					mesh2.triangles().add( facet.v0x()*sx, facet.v0y()*sy, facet.v0y()*sz, facet.v1x()*sx, facet.v1y()*sy, facet.v1y()*sz, facet.v2x()*sx, facet.v2y()*sy, facet.v2y()*sz);
+					//final TriangularFacet tfacet = (TriangularFacet)facet;
+					//final Vertex v0 = (Vertex) tfacet.getP0();
+					//final Vertex v0new = new Vertex( v0.getX()*sx, v0.getY()*sy, v0.getZ()*sz );
+					//final Vertex v1 = (Vertex) tfacet.getP1();
+					//final Vertex v1new = new Vertex( v1.getX()*sx, v1.getY()*sy, v1.getZ()*sz );
+					//final Vertex v2 = (Vertex) tfacet.getP2();
+					//final Vertex v2new = new Vertex( v2.getX()*sx, v2.getY()*sy, v2.getZ()*sz );
 					
-					mesh2.addFace( new TriangularFacet(v0new, v1new, v2new ) );
+					//mesh2.addFace( new TriangularFacet(v0new, v1new, v2new ) );
 				}
-				value = mesh2.getSurfaceArea();//op.geom().boundarySize(mesh2).getRealDouble();
+				value = op.geom().boundarySize(mesh2).getRealDouble(); //mesh2.getSurfaceArea();
 			}
 			
 			// if one would need to take pixel size into account,

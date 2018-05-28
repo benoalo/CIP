@@ -10,12 +10,12 @@ import ij.gui.Roi;
 import invizio.cip.Regions;
 import invizio.cip.parameters.DefaultParameter2;
 import net.imagej.ops.OpService;
-import net.imagej.ops.geom.geom3d.mesh.Mesh;
+import net.imagej.mesh.Mesh;//net.imagej.ops.geom.geom3d.mesh.Mesh;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.IterableRegion;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.numeric.real.DoubleType;
-import net.imglib2.roi.geometric.Polygon;
+//import net.imglib2.roi.geom.real.Polygon2D; //net.imglib2.roi.geometric.Polygon;
 
 
 
