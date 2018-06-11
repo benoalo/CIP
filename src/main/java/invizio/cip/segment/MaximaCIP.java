@@ -80,12 +80,6 @@ public class MaximaCIP  < T extends RealType<T> & NativeType< T > > extends Abst
 	@Parameter( label="maximum peak Scale", persist=false, required=false ) // with persist and required set to false the parameter become optional
 	private Float sMax = null;
 	
-	@Parameter( label="n scale per octave", persist=false, required=false ) // with persist and required set to false the parameter become optional
-	private Integer nScalePerOctave = 3;
-	
-	@Parameter( label="anisotropy", persist=false, required=false ) // with persist and required set to false the parameter become optional
-	private Float anisotropy = 10f;
-	
 	@Parameter( label="Method", choices = {"classic","height","area","distance","multiScale"} , persist=false, required=false ) // with persist and required set to false the parameter become optional
 	private String method = null;
 	
@@ -95,6 +89,13 @@ public class MaximaCIP  < T extends RealType<T> & NativeType< T > > extends Abst
 	
 	@Parameter( label="Output", choices= {"image","measure","both"}, persist=false, required=false ) // with persist and required set to false the parameter become optional
 	private String output = null;
+	
+	@Parameter( label="n scale per octave", persist=false, required=false ) // with persist and required set to false the parameter become optional
+	private Integer nScalePerOctave = 3;
+	
+	@Parameter( label="anisotropy", persist=false, required=false ) // with persist and required set to false the parameter become optional
+	private Float anisotropy = 10f;
+	
 	
 	
 	@Parameter (type = ItemIO.OUTPUT)
