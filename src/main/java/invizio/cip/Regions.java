@@ -569,7 +569,7 @@ public class Regions {
 		
 		ImagePlus impReg = ImageJFunctions.wrap( region , "test"); // gives a virtual stack
 		
-		IJ.setThreshold(impReg, 0.5, 255);
+		IJ.setRawThreshold(impReg, 1, 255, null);
 		ThresholdToSelection roiMaker = new ThresholdToSelection();
 		
 		int x0 = (int)region.min(0); // region have no information on axes type so we default x,y to the 2 first axis
@@ -587,7 +587,9 @@ public class Regions {
 		
 		int nSlice = impReg.getStackSize();
 		
-		
+		//impReg.show();
+		//System.out.println( "min thresh : " + impReg.getProcessor().getMinThreshold() );
+		//System.out.println( "max thresh : " + impReg.getProcessor().getMaxThreshold() );
 		
 		if( nSlice==1 )
 		{
@@ -604,7 +606,9 @@ public class Regions {
 			ImageStack stack = impReg.getStack();
 			for(int i=1; i<=nSlice; i++)
 			{
-				Roi roi = roiMaker.convert( stack.getProcessor(i) );   // this could be slow, lets see
+				ImageProcessor ip  = stack.getProcessor(i);
+				ip.setThreshold(1.0, 255.0, 0);				// added on 2018-06-11 to correct a regression
+				Roi roi = roiMaker.convert( ip );   // this could be slow, lets see
 				if( roi!=null ) {
 					Rectangle rect  = roi.getBounds();
 					roi.setLocation( x0+rect.x , y0 + rect.y );
