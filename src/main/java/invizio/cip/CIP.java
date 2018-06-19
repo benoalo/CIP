@@ -956,17 +956,26 @@ public class CIP extends AbstractNamespace
 		params.addRequired("inputImage", 	Type.image	);
 		params.addRequired("dimension", 	Type.scalar	);
 		params.addOptional("method",		Type.string, 	"max"		);
-		params.addOptional("outputType",	Type.string, 	"projection");
+		params.addOptional("output",	Type.string, 	"projection");
+		params.get( "output" ).aliases.add( "outputType" );
+    	
 		
 		if ( params.parseInput( args ) )
 		{
 			cipService.toRaiCIP( params.get("inputImage") );
 			List<Object> resultsTemp = (List<Object>) ops().run( invizio.cip.misc.Project2CIP.class , params.getParsedInput() );
 			
+			
+			Object imageProj = cipService.setMetadata( resultsTemp.get(0), params.get("inputImage"), (String) params.get("method").value + "proj_" );
+			resultsTemp.set( 0, imageProj );
+			Object imageArg = cipService.setMetadata( resultsTemp.get(1), params.get("inputImage"), (String) params.get("method").value + "arg_" );
+			resultsTemp.set( 1, imageArg );
+			
+			results = cipService.discardNullValue( resultsTemp );
 			///////////////////////////////////////////////////////////////////////////////
 			// check if one of the output is null and discard it from the results list
-			results = cipService.discardNullValue(resultsTemp);
-			((RaiCIP2<?>) results).name = (String) params.get("method").value + "proj_" + ((RaiCIP2<?>) params.get("inputImage").value ).name;
+			//results = cipService.discardNullValue(resultsTemp);
+			//((RaiCIP2<?>) results).name = (String) params.get("method").value + "proj_" + ((RaiCIP2<?>) params.get("inputImage").value ).name;
 			
 		}
 		else 

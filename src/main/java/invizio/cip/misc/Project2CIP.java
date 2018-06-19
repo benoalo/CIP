@@ -275,9 +275,10 @@ import net.imglib2.view.Views;
 			ImageJ ij = new ImageJ();
 			ij.ui().showUI();
 			
-			//String file = CIP.class.getResource( "/mitosis_t1.tif" ).getFile(); 
-			ImagePlus imp = IJ.openImage(	"C:/Users/Ben/workspace/testImages/blobs32.tif" 	);
-			ImagePlus imp2 = IJ.openImage(	"C:/Users/Ben/workspace/testImages/mitosis_t1.tif" 	);
+			String file = CIP.class.getResource( "/mitosis_t1.tif" ).getFile(); 
+			ImagePlus imp = IJ.openImage(	file	);
+			//ImagePlus imp = IJ.openImage(	"C:/Users/Ben/workspace/testImages/blobs32.tif" 	);
+			//ImagePlus imp2 = IJ.openImage(	"C:/Users/Ben/workspace/testImages/mitosis_t1.tif" 	);
 			//ij.ui().show(imp);
 			
 			
@@ -287,64 +288,90 @@ import net.imglib2.view.Views;
 			cip.setContext( ij.getContext() );
 			cip.setEnvironment( ij.op() );
 			
-			//RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( imp, 3 , "max", "projection"  );
-			//RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( img1 , 2 , "max", "projection"  );
-					
+			List<Object> output = (List<Object>) cip.project( imp, 3 , "max", "output","both" );
+			cip.show(output.get(0));
+			cip.show(output.get(1));
 			
-			//String str = output==null ? "null" : output.toString();
+			Object output2 = cip.project( imp, 3 , "max" );
+			cip.show(output2);
 			
-			//System.out.println("hello projection:" + str );
-			//ij.ui().show(output);
-			
-			//Dataset dataset = (Dataset) ij.io().open("C:/Users/Ben/workspace/testImages/mitosis_t1.tif");
-			
-			//cip.toIJ1(output).show();
-			//System.out.println("hello toIJ2 " + cip.toIJ2(output) );
-			//ij.ui().show( cip.toIJ2(output) );
-			//cip.show(output, "gw");
+			Object output3 = cip.project( imp, 3 , "max", "output", "argument" );
+			cip.show(output3);
 			
 			
-			
-			
-			String rtName = "my measures";
-
-			// measures in an image
-			Object measNames = CIP.list( "test", "size", "boundary", "position");
-			Object measures = cip.measure(imp , measNames);
-			cip.show( measures , rtName);
-
-			Object measNames2 = CIP.list( "median", "size", "position");
-			Object measures2 = cip.measure(imp , measNames2);
-			cip.show( measures2 , rtName);
-			
-			
-			
-			// measure in a region
-			Object impSeg1 = cip.threshold( imp , 100 );
-			Object region1 = cip.region( impSeg1 );
-			Object measures1 = cip.measure(region1 , measNames, "prefix","thresh_");
-			
-			System.out.println("above threshold:");
-			System.out.println(measures1);
-			System.out.println("\n");
-			
-			
-			// measure in a region with a source image
-			Object measures11 = cip.measure(region1 , measNames, imp, "prefix","thresh_");
-			
-			System.out.println("above threshold, measure with source:");
-			System.out.println(measures11);
-			System.out.println("\n");
-			
-			
-			// measure of the cc
-			Object impSeg2 = cip.label( imp , 100 );
-			Object regions = cip.region( impSeg2 );
-			Object measures3 = cip.measure(regions , measNames, "prefix","reg_");
-			Object measures33 = cip.measure(regions , measNames, imp, true ,"reg_");
-			cip.show( measures33 , "region measures");
-			cip.show( measures3  , "region measures 2");
-			
+//			ImageJ ij = new ImageJ();
+//			ij.ui().showUI();
+//			
+//			//String file = CIP.class.getResource( "/mitosis_t1.tif" ).getFile(); 
+//			ImagePlus imp = IJ.openImage(	"C:/Users/Ben/workspace/testImages/blobs32.tif" 	);
+//			ImagePlus imp2 = IJ.openImage(	"C:/Users/Ben/workspace/testImages/mitosis_t1.tif" 	);
+//			//ij.ui().show(imp);
+//			
+//			
+//			
+//			
+//			CIP cip = new CIP();
+//			cip.setContext( ij.getContext() );
+//			cip.setEnvironment( ij.op() );
+//			
+//			//RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( imp, 3 , "max", "projection"  );
+//			//RandomAccessibleInterval<?> output = (RandomAccessibleInterval<?>) cip.project( img1 , 2 , "max", "projection"  );
+//					
+//			
+//			//String str = output==null ? "null" : output.toString();
+//			
+//			//System.out.println("hello projection:" + str );
+//			//ij.ui().show(output);
+//			
+//			//Dataset dataset = (Dataset) ij.io().open("C:/Users/Ben/workspace/testImages/mitosis_t1.tif");
+//			
+//			//cip.toIJ1(output).show();
+//			//System.out.println("hello toIJ2 " + cip.toIJ2(output) );
+//			//ij.ui().show( cip.toIJ2(output) );
+//			//cip.show(output, "gw");
+//			
+//			
+//			
+//			
+//			String rtName = "my measures";
+//
+//			// measures in an image
+//			Object measNames = CIP.list( "test", "size", "boundary", "position");
+//			Object measures = cip.measure(imp , measNames);
+//			cip.show( measures , rtName);
+//
+//			Object measNames2 = CIP.list( "median", "size", "position");
+//			Object measures2 = cip.measure(imp , measNames2);
+//			cip.show( measures2 , rtName);
+//			
+//			
+//			
+//			// measure in a region
+//			Object impSeg1 = cip.threshold( imp , 100 );
+//			Object region1 = cip.region( impSeg1 );
+//			Object measures1 = cip.measure(region1 , measNames, "prefix","thresh_");
+//			
+//			System.out.println("above threshold:");
+//			System.out.println(measures1);
+//			System.out.println("\n");
+//			
+//			
+//			// measure in a region with a source image
+//			Object measures11 = cip.measure(region1 , measNames, imp, "prefix","thresh_");
+//			
+//			System.out.println("above threshold, measure with source:");
+//			System.out.println(measures11);
+//			System.out.println("\n");
+//			
+//			
+//			// measure of the cc
+//			Object impSeg2 = cip.label( imp , 100 );
+//			Object regions = cip.region( impSeg2 );
+//			Object measures3 = cip.measure(regions , measNames, "prefix","reg_");
+//			Object measures33 = cip.measure(regions , measNames, imp, true ,"reg_");
+//			cip.show( measures33 , "region measures");
+//			cip.show( measures3  , "region measures 2");
+//			
 			//System.out.println("regions above threshold:");
 			//System.out.println(measures2);
 			//System.out.println("\n");
