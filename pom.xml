@@ -14,7 +14,7 @@
 
 	<groupId>invizio</groupId>
 	<artifactId>CIP</artifactId>
-	<version>0.2.1</version>
+	<version>0.2.2</version>
 
 	<name>Classic Image Processing</name>
 	<description>A (subjective) list of essential image processing algorithm in an API steered toward scripting and workflow prototyping. </description>
