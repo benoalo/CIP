@@ -107,7 +107,7 @@ public class IterableMeasureToolset<T extends RealType<T>> extends AbstractMeasu
 		
 		@Override
 		public Measure measure(N measurable) {
-			Double value = op.stats().stdDev( measurable ).getRealDouble();
+			Double value = op.stats().median( measurable ).getRealDouble();
 			return new Measure( name , outputType, value);
 		}		
 	}
