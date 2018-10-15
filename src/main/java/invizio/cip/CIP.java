@@ -1287,6 +1287,31 @@ public class CIP extends AbstractNamespace
     	
     }
     
+    
+    public Object toIJ1_(Object ... args) {
+    	
+    	Object result = null;
+    	
+    	FunctionParameters2 paramsImg = new FunctionParameters2("toIJ1_Image");
+    	paramsImg.addRequired("image", 	Type.image				);
+
+    	FunctionParameters2 paramsReg = new FunctionParameters2("toIJ1_Region");
+    	paramsReg.addRequired("region", 	Type.region				);
+
+    	if ( paramsImg.parseInput( args ) )
+		{
+    		result = cipService.toImagePlus( paramsImg.get("image").value );
+    	}
+    	else if ( paramsReg.parseInput( args ) )
+		{
+    		result = Regions.toIJ1ROI( paramsReg.get("region").value );
+		}
+    	
+    	return result; 
+    	
+    }
+
+    
     // return an iterable region or a list of iterable regions depending on the input
     // to check: does a thresholded imagePlus converts to a BooleanType RaiCIP2 ?
     // TODO: when RegionCIP are defined, this function should convert any mask, rois, Iterableregion to RegionsCIP 

@@ -34,6 +34,7 @@ import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgView;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
 import net.imglib2.type.logic.BitType;
@@ -208,6 +209,7 @@ public class CIPService extends AbstractService implements ImageJService {
 		return;
 	}
 	
+	/*
 	public void toImglib2Image(DefaultParameter2 parameter)
 	{
 		Object input = parameter.value;
@@ -232,7 +234,7 @@ public class CIPService extends AbstractService implements ImageJService {
 		
 		return;
 	}
-	
+	*/
 	
 	
 	
@@ -560,20 +562,20 @@ public class CIPService extends AbstractService implements ImageJService {
 		else if (	input instanceof Dataset )
 		{
 			Dataset dataset = (Dataset) input;
-			rai = (Img<T>) convertService.convert( dataset , Img.class );
+			rai = (Img<T>) dataset.getImgPlus();//convertService.convert( dataset , Img.class );
 			name = dataset.getName();
 		}
 		else if (	input instanceof ImgPlus )
 		{
 			ImgPlus<T> imgPlus = (ImgPlus<T>) input;
-			rai = (Img<T>) convertService.convert( imgPlus , Img.class );
+			rai = (RandomAccessibleInterval<T>) imgPlus;//convertService.convert( imgPlus , Img.class );
 			name = imgPlus.getName();
 		}
 		else if (	input instanceof ImagePlus )
 		{
 			ImagePlus imp = (ImagePlus) input;
-			Dataset dataset = (Dataset) convertService.convert( imp , Dataset.class );
-			rai = (Img<T>) dataset.getImgPlus().getImg();
+			//Dataset dataset = (Dataset) convertService.convert( imp , Dataset.class );
+			rai = (Img<T>) ImageJFunctions.wrap(imp);//dataset.getImgPlus().getImg();
 			name = imp.getTitle();
 		}
 		else
@@ -909,8 +911,16 @@ public class CIPService extends AbstractService implements ImageJService {
 		else if (	image instanceof ImagePlus )
 		{
 			ImagePlus imp = (ImagePlus) image;
-			Dataset dataset = (Dataset) convertService.convert( imp , Dataset.class );
-			imgPlus = (ImgPlus<T>) dataset.getImgPlus();
+			//Dataset dataset = (Dataset) convertService.convert( imp , Dataset.class );
+			RandomAccessibleInterval<T> rai = (RandomAccessibleInterval<T>) ImageJFunctions.wrap(imp);
+			Img<T> img = ImgView.wrap(  rai, Util.getSuitableImgFactory(rai, rai.randomAccess().get().createVariable() )  );
+			String name = imp.getTitle();
+			List<String> axesNames = axes(imp);
+			int nDim = axesNames.size();
+			AxisType[] axesType = new AxisType[nDim];
+			for( int i=0; i<nDim; i++)
+				axesType[i] = new DefaultAxisType(axesNames.get(i));
+			imgPlus = new ImgPlus<T>(img, name, axesType);
 		}
 		else
 		{
@@ -969,6 +979,33 @@ public class CIPService extends AbstractService implements ImageJService {
 	}
 	
 	
+	public <T extends RealType<T> & NativeType<T>> ImagePlus toImagePlus( Object image )
+	{
+		
+		RaiCIP2<T> raiCIP = null;
+		if ( image instanceof ImagePlus )
+		{
+			return (ImagePlus) image;
+		}
+		else {
+			raiCIP = this.toRaiCIP(image);
+		}
+		ImagePlus imagePlus = ImageJFunctions.wrap( raiCIP, raiCIP.name );
+		Calibration cal = imagePlus.getCalibration();
+		cal.pixelWidth = raiCIP.spacing(0);
+		cal.pixelHeight = raiCIP.spacing(1);
+		int nDim = raiCIP.numDimensions();
+		if( nDim>=3 )
+			cal.pixelDepth = raiCIP.spacing(2);
+		if( nDim==4 )
+			cal.frameInterval = raiCIP.spacing(3);
+		
+		// could use View to reorder dimension and make sure that  X,Y,C,Z,T match IJ order
+		// if nDIm > 2 
+		return imagePlus;
+	}
+
+	
 	public <T extends RealType<T> & NativeType<T>> ImagePlus toImagegPlus( Object image )
 	{
 		
@@ -984,7 +1021,7 @@ public class CIPService extends AbstractService implements ImageJService {
 		return imagePlus;
 	}
 
-
+	
 	public Double scalar( Object value)
 	{
 		//Double d = (double) value;
