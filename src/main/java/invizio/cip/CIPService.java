@@ -1063,31 +1063,31 @@ public class CIPService extends AbstractService implements ImageJService {
 				item = list.get(0);
 			if( item!=null ) {
 				
-				if( 	value instanceof Byte		) {
+				if( 	item instanceof Byte		) {
 					for( int i=0; i<n ; i++) {
 						list2.add( (double) (byte) list.get(i) );
 					}
 				}
 				
-				else if( 	value instanceof Short	) {
+				else if( 	item instanceof Short	) {
 					for( int i=0; i<n ; i++) {
 						list2.add( (double) (short) list.get(i) );
 					}
 				}
 				
-				else if( 	value instanceof Integer	) {
+				else if( 	item instanceof Integer	) {
 					for( int i=0; i<n ; i++) {
 						list2.add( (double) (int) list.get(i) );
 					}
 				}
 				
-				else if( 	value instanceof Float	) {
+				else if( 	item instanceof Float	) {
 					for( int i=0; i<n ; i++) {
 						list2.add( (double) (float) list.get(i) );
 					}
 				}
 				
-				else if( 	value instanceof Double	) {
+				else if( 	item instanceof Double	) {
 					list2 = (List<Double>) list;
 				}
 

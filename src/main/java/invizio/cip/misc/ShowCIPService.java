@@ -129,7 +129,7 @@ public class ShowCIPService extends AbstractService implements ImageJService {
     			mode = "lut";
     			double nReg = (double) roisPerRegion.size();
     			for(int i=0; i<nReg; i++)
-    				values.add( (double)i / nReg );
+    				values.add( (double)i / (nReg-1) );
     		}
     	}
     	
@@ -607,9 +607,9 @@ public class ShowCIPService extends AbstractService implements ImageJService {
 		
 		ColorTable colors = lut( lutString );
 		int nColors = colors.getLength();
-		int r = colors.get(0, (int)( index*nColors ) );
-		int g = colors.get(1, (int)( index*nColors ) );
-		int b = colors.get(2, (int)( index*nColors ) );
+		int r = colors.get(0, (int)( index*(nColors-1) ) );
+		int g = colors.get(1, (int)( index*(nColors-1) ) );
+		int b = colors.get(2, (int)( index*(nColors-1) ) );
 		
 		return new Color(r,g,b);
 	}
