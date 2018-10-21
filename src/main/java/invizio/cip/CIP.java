@@ -245,11 +245,11 @@ public class CIP extends AbstractNamespace
 		params.get( "ScaleMin" ).aliases.add( "smin" );
 		params.addOptional("ScaleMax",		Type.scalar , 	null 	);
 		params.get( "ScaleMax" ).aliases.add( "smax" );
-		params.addOptional("nScalePerOctave",	Type.scalar , 	3 	);
-		params.addOptional("anisotropy",		Type.scalar , 	10 	);
 		params.addOptional("Method", 		Type.string , 	null	);
 		params.addOptional("PixelSize", 	Type.scalars, 	null	);
 		params.addOptional("Output", 		Type.string, 	"image"	);
+		params.addOptional("nScalePerOctave",	Type.scalar , 	3 	);
+		params.addOptional("anisotropy",		Type.scalar , 	10 	);
 		
 		if ( params.parseInput( args ) )
 		{
@@ -1392,7 +1392,7 @@ public class CIP extends AbstractNamespace
 		
 		
 		//ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
-		ImagePlus imp = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs32.tif");
+		ImagePlus imp0 = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs32.tif");
 		//ij.ui().show(imp);
 //		Img<FloatType> img = ImageJFunctions.wrap(imp);
 //		float threshold = 100;
@@ -1410,8 +1410,8 @@ public class CIP extends AbstractNamespace
 		//String h = cip.show( imp , "glasbey inverted");
 		//Object impLog2 = cip.div(cip.log(imp) , cip.log(2));
 		
-		Object imgNew = cip.create(cip.list(100,100,10), "name", "test image");
-		cip.show( imgNew );
+		//Object imgNew = cip.create(cip.list(100,100,10), "name", "test image");
+		//cip.show( imgNew );
 		
 		//String h2 = cip.show( impLog2 , "green");
 		
@@ -1421,7 +1421,19 @@ public class CIP extends AbstractNamespace
 		
 		//cip.help();
 		
+		//Object labelmap = cip.label(imp0, 100);
+		//Object regions = cip.region(labelmap);
+		//Object h = cip.show(imp0);
+		//int n = ((List<?>) regions).size();
+		//List<Double> scalars = new ArrayList<Double>();
+		//for(int i=0; i<n; i++)
+		//	scalars.add( (double)(n-1-i) );
+		//cip.show(regions, h, "spectrum", 1, scalars);
 		
+		int threshold=100;
+		int hMin=10;
+		Object impMax = cip.maxima(imp0, threshold, hMin);
+		cip.show( impMax ,"color","glasbey");
 
 	}
 	
