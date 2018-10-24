@@ -272,12 +272,7 @@ public class MaximaCIP  < T extends RealType<T> & NativeType< T > > extends Abst
 			 
 			msLabeler.setMinScale(Math.max( sMin, msLabeler.getMinPhysicalScale() )  );
 			msLabeler.setMaxScale(Math.min( sMax, msLabeler.getMaxPhysicalScale() )  );
-			
-			//System.out.println("thresh: "+threshold);
-			//System.out.println("hMin: "+hMin);
-			//System.out.println("sMin: "+sMin);
-			//System.out.println("sMax: "+sMax);
-			
+						
 			break;
 		
 		default : // "classic"
@@ -322,7 +317,6 @@ public class MaximaCIP  < T extends RealType<T> & NativeType< T > > extends Abst
 					measures.get("anisotropy").add(anisotropyCriteria);
 					for( int d=0;d<nDim; d++)
 						measures.get(dimName[d]).add( pt.getDoublePosition(d) );
-					//System.out.println( pt.toString() + " , S="+scale+" , I="+intensity  );
 				}
 				if( output.equals("both") )
 				{

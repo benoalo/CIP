@@ -1417,7 +1417,7 @@ public class CIP extends AbstractNamespace
 		
 		
 		//ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
-		ImagePlus imp0 = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs32.tif");
+		ImagePlus imp0 = IJ.openImage("C:/Users/Ben/workspace/testImages/sampleNoise_std50_blur10.tif"); //blobs32.tif");
 		//ij.ui().show(imp);
 //		Img<FloatType> img = ImageJFunctions.wrap(imp);
 //		float threshold = 100;
@@ -1455,11 +1455,15 @@ public class CIP extends AbstractNamespace
 		//	scalars.add( (double)(n-1-i) );
 		//cip.show(regions, h, "spectrum", 1, scalars);
 		
-		int threshold=100;
-		int hMin=10;
+		float threshold=0.4f;
+		float hMin=0.4f;
 		Object impMax = cip.maxima(imp0, threshold, hMin);
-		cip.show( impMax ,"color","glasbey");
-
+		Object impWS  = cip.watershed(imp0, impMax, threshold); 
+		cip.show( impMax ,"color","spectrum");
+		cip.show( impWS ,"color","spectrum");
+		cip.show(imp0);
+		
+		// max is ok, hMax corrected, seeded watershed corrected , hWatershed seems ok
 	}
 	
 	
