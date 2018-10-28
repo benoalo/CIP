@@ -17,6 +17,7 @@ import org.scijava.service.Service;
 
 import ij.ImagePlus;
 import ij.measure.Calibration;
+import ij.plugin.HyperStackConverter;
 
 import invizio.cip.parameters.Checks;
 import invizio.cip.parameters.DefaultParameter2;
@@ -990,22 +991,89 @@ public class CIPService extends AbstractService implements ImageJService {
 		else {
 			raiCIP = this.toRaiCIP(image);
 		}
-		ImagePlus imagePlus = ImageJFunctions.wrap( raiCIP, raiCIP.name );
-		Calibration cal = imagePlus.getCalibration();
-		cal.pixelWidth = raiCIP.spacing(0);
-		cal.pixelHeight = raiCIP.spacing(1);
-		int nDim = raiCIP.numDimensions();
-		if( nDim>=3 )
-			cal.pixelDepth = raiCIP.spacing(2);
-		if( nDim==4 )
-			cal.frameInterval = raiCIP.spacing(3);
 		
-		// could use View to reorder dimension and make sure that  X,Y,C,Z,T match IJ order
-		// if nDIm > 2 
+		int nDim = raiCIP.numDimensions();
+		if( nDim > 5) {
+			System.err.println("toImagePlus : input should have 5 dimensions maximum ("+ nDim +")");
+			return null;
+		}
+		
+		
+		ImagePlus imagePlus = ImageJFunctions.wrap( raiCIP, raiCIP.name );
+		
+		
+		// check if axes contain only czt in that order (strict match to xyczt dimensionnality of IJ1)
+		String[] refNames = new String[] {"X","Y","C","Z","T"};
+		int matchingDimCount = 0;
+		boolean matchingOrder = true;
+		int prevIdx=-1;
+		int[] dimsIJ1 = new int[5];
+		double[] spacingIJ1 = new double[5];
+		String[] unitIJ1 = new String[5];
+		
+		int count=0;
+		for( String axisName : refNames) {
+			int idx = raiCIP.axesIndex(axisName);
+			if ( idx>=0 ) {
+				matchingDimCount++;
+				if( idx<=prevIdx )
+					matchingOrder=false;
+				prevIdx=idx;
+				dimsIJ1[count] = (int)raiCIP.dimension(axisName);
+				spacingIJ1[count] = raiCIP.spacing(axisName);
+				unitIJ1[count] = raiCIP.unit(axisName);
+			}
+			else {
+				dimsIJ1[count] = 1;
+				spacingIJ1[count] = 1;
+				unitIJ1[count] = "";
+			}
+			count++;
+		}
+		
+		
+		boolean matchingIJ1 = matchingDimCount==nDim && matchingOrder ;
+		if( matchingIJ1 ) { // takes to keep order and singleton dimensions properly
+			Calibration cal = imagePlus.getCalibration();
+			cal.pixelWidth = spacingIJ1[0];
+			cal.pixelHeight = spacingIJ1[1];
+			cal.pixelDepth = spacingIJ1[3];
+			cal.frameInterval = spacingIJ1[4];
+			cal.setXUnit( unitIJ1[0] );
+			cal.setTimeUnit( unitIJ1[4] );
+			if( nDim>2 )
+				imagePlus = HyperStackConverter.toHyperStack(imagePlus, dimsIJ1[2], dimsIJ1[3], dimsIJ1[4]);
+			imagePlus.setOpenAsHyperStack(true);
+			imagePlus.setDimensions(dimsIJ1[2], dimsIJ1[3], dimsIJ1[4]);
+		}
+		else { // associate dimension with data structure as they come, // information can be lost
+			Calibration cal = imagePlus.getCalibration();
+			if(nDim>=2) {
+				cal.pixelWidth = raiCIP.spacing(0);
+				cal.setXUnit( raiCIP.unit(0) );
+				cal.pixelHeight = raiCIP.spacing(1);
+			}
+			if(nDim>=4) {
+				cal.pixelDepth = raiCIP.spacing(3);
+			}
+			if(nDim>=5) {
+				cal.frameInterval = raiCIP.spacing(4);
+				cal.setTimeUnit( raiCIP.unit(4) );
+			}
+			if ( nDim==4 ) {
+				imagePlus.setOpenAsHyperStack(true);
+				imagePlus.setDimensions((int)raiCIP.dimension(2), (int)raiCIP.dimension(3), 1 );
+			}
+			if ( nDim==5 ) {
+				imagePlus.setOpenAsHyperStack(true);
+				imagePlus.setDimensions( (int)raiCIP.dimension(2), (int)raiCIP.dimension(3), (int)raiCIP.dimension(4) );
+			}
+		}
+		
 		return imagePlus;
 	}
 
-	
+	@Deprecated
 	public <T extends RealType<T> & NativeType<T>> ImagePlus toImagegPlus( Object image )
 	{
 		

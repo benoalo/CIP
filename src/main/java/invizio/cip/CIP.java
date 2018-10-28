@@ -17,6 +17,7 @@ import org.scijava.ui.UIService;
 import fiji.plugin.trackmate.Model;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.plugin.Duplicator;
 import invizio.cip.measure.MeasureCIP;
 import invizio.cip.misc.ShowCIPService;
 import invizio.cip.parameters.DefaultParameter2;
@@ -1263,8 +1264,8 @@ public class CIP extends AbstractNamespace
     	
     }
     
-    
-    public Object toIJ1(Object ... args) {
+    @Deprecated // rely on cipService.toImagegPlus(...) which has a memory leak
+    public Object toIJ1_(Object ... args) {
     	
     	Object result = null;
     	
@@ -1288,7 +1289,7 @@ public class CIP extends AbstractNamespace
     }
     
     
-    public Object toIJ1_(Object ... args) {
+    public Object toIJ1(Object ... args) {
     	
     	Object result = null;
     	
@@ -1417,7 +1418,10 @@ public class CIP extends AbstractNamespace
 		
 		
 		//ImagePlus imp = IJ.openImage("F:\\projects\\blobs32.tif");
-		ImagePlus imp0 = IJ.openImage("C:/Users/Ben/workspace/testImages/sampleNoise_std50_blur10.tif"); //blobs32.tif");
+		//ImagePlus imp0 = IJ.openImage("C:/Users/Ben/workspace/testImages/sampleNoise_std50_blur10.tif"); //blobs32.tif");
+		ImagePlus imp0 = IJ.openImage("C:/Users/Ben/workspace/testImages/blobs32.tif");
+		//ImagePlus imp0 = IJ.openImage("C:/Users/Ben/workspace/testImages/mitosis.tif"); //blobs32.tif");
+		//imp0 = new Duplicator().run(imp0, 1, 1, 1, 5, 1, 51);
 		//ij.ui().show(imp);
 //		Img<FloatType> img = ImageJFunctions.wrap(imp);
 //		float threshold = 100;
@@ -1457,11 +1461,15 @@ public class CIP extends AbstractNamespace
 		
 		float threshold=0.4f;
 		float hMin=0.4f;
-		Object impMax = cip.maxima(imp0, threshold, hMin);
-		Object impWS  = cip.watershed(imp0, impMax, threshold); 
-		cip.show( impMax ,"color","spectrum");
-		cip.show( impWS ,"color","spectrum");
-		cip.show(imp0);
+		Object img = cip.duplicate(imp0);
+		//Object impWS  = cip.watershed(imp0, impMax, threshold); 
+		//cip.show( impMax ,"color","spectrum");
+		//cip.show( impWS ,"color","spectrum");
+		
+		Object imp = cip.toIJ1_(img);
+		Object imp2 = cip.toIJ1(img);
+		((ImagePlus)imp).show();
+		((ImagePlus)imp2).show();
 		
 		// max is ok, hMax corrected, seeded watershed corrected , hWatershed seems ok
 	}
