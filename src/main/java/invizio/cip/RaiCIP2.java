@@ -130,6 +130,14 @@ public class RaiCIP2<T> implements RandomAccessibleInterval<T> , Metadata {
 	}
 	
 	
+	public double dimension(String axisName) {
+		if(metadata.axesDim.containsKey(axisName)) {
+			int d = metadata.axesDim.get(axisName);
+			return dimension(d);
+		}
+		return -1;
+	}
+	
 	// Metadata methods
 	
 	@Override
@@ -178,6 +186,11 @@ public class RaiCIP2<T> implements RandomAccessibleInterval<T> , Metadata {
 	@Override
 	public String unit(int d) {
 		return metadata.unit(d);
+	}
+	
+	@Override
+	public String unit(String axisName) {
+		return metadata.unit(axisName);
 	}
 
 	@Override

@@ -15,5 +15,6 @@ public interface Metadata {
 	
 	public List<String> unit();
 	public String unit(int d);
+	public String unit(String axisName);
 	
 }

@@ -157,7 +157,14 @@ public class RegionCIP<B extends BooleanType<B>> implements IterableRegion<B>, M
 	public long dimension(int d) {
 		return region.dimension(d);
 	}
-
+	
+	public double dimension(String axisName) {
+		if(metadata.axesDim.containsKey(axisName)) {
+			int d = metadata.axesDim.get(axisName);
+			return dimension(d);
+		}
+		return -1;
+	}
 
 	@Override
 	public RandomAccess<B> randomAccess() {
@@ -229,6 +236,11 @@ public class RegionCIP<B extends BooleanType<B>> implements IterableRegion<B>, M
 	@Override
 	public String unit(int d) {
 		return metadata.unit(d);
+	}
+	
+	@Override
+	public String unit(String axisName) {
+		return metadata.unit(axisName);
 	}
 	
 	@Override

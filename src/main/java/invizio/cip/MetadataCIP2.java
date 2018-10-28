@@ -73,8 +73,10 @@ public class MetadataCIP2 extends ArrayList<AxisCIP> implements Metadata{
 	
 	
 	
-	public int axesIndex(String name) {
-		return axesDim.get(name);
+	public int axesIndex(String axisName) {
+		if(axesDim.containsKey(axisName))
+			return axesDim.get(axisName);
+		return -1;
 	}
 	
 	
@@ -108,8 +110,11 @@ public class MetadataCIP2 extends ArrayList<AxisCIP> implements Metadata{
 	}
 
 	public double spacing(String axisName) {
-		int d = axesDim.get(axisName);
-		return spacing(d);
+		if(axesDim.containsKey(axisName)) {
+			int d = axesDim.get(axisName);
+			return spacing(d);
+		}
+		return -1;
 	}
 	
 
@@ -125,7 +130,13 @@ public class MetadataCIP2 extends ArrayList<AxisCIP> implements Metadata{
 		return units;
 	}
 	
-	
+	public String unit(String axisName) {
+		if(axesDim.containsKey(axisName)) {
+			int d = axesDim.get(axisName);
+			return unit(d);
+		}
+		return null;
+	}
 	
 	public void dropDimensions( Integer[] dimensions ) {
 		
